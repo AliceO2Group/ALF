@@ -1,0 +1,8 @@
+build
+.idea
+.project
+.cproject
+cmake-build-*
+*.swp
+*.swo
+*.pyc
