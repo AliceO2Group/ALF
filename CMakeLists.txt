@@ -22,7 +22,7 @@ project(ALF
 # add_subdirectory(doc)
 
 # Add compiler flags for warnings and debug symbols
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra")
 
 # Set fPIC for all targets
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -49,6 +49,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 find_package(Common REQUIRED)
 find_package(InfoLogger REQUIRED)
 find_package(ReadoutCard REQUIRED)
+find_package(DIM REQUIRED)
 
 ####################################
 # Module, library and executable definition
@@ -56,6 +57,11 @@ find_package(ReadoutCard REQUIRED)
 
 add_library(ALF OBJECT
   src/Alf.cxx
+  src/DimServices/DimServices.cxx
+  src/DimServices/ServiceNames.cxx
+  src/Sca/Sca.cxx
+  src/Swt/Swt.cxx
+  src/Swt/SwtWord.cxx
 )
 
 target_include_directories(ALF
@@ -73,10 +79,7 @@ target_link_libraries(ALF
     AliceO2::Common
     AliceO2::InfoLogger
     AliceO2::ReadoutCard
-#  PRIVATE
-#    Boost::filesystem
-#    Boost::system
-#    pthread
+    dim::dim
 )
 
 # Use C++17
@@ -143,8 +146,8 @@ write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/cmake/ALFConfigVer
   COMPATIBILITY AnyNewerVersion
 )
 
-# Install headers
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ALF DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+# Install headers # NO PUBLIC HEADERS
+# install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ALF DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 
 # Export targets
 install(EXPORT ALFTargets
