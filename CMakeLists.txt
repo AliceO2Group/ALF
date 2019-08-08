@@ -22,7 +22,7 @@ project(ALF
 # add_subdirectory(doc)
 
 # Add compiler flags for warnings and debug symbols
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra")
 
 # Set fPIC for all targets
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -56,7 +56,8 @@ find_package(DIM REQUIRED)
 ####################################
 
 add_library(ALF OBJECT
-  src/Alf.cxx
+  src/AlfServer.cxx
+  src/AlfClient.cxx
   src/DimServices/DimServices.cxx
   src/DimServices/ServiceNames.cxx
   src/Sca/Sca.cxx
@@ -92,10 +93,12 @@ target_compile_features(ALF PUBLIC cxx_std_17)
 
 set(EXE_SRCS
   ProgramAlf.cxx
+  ProgramAlfClient.cxx
 )
 
 set(EXE_NAMES
   o2-alf
+  o2-alf-client
 )
 
 list(LENGTH EXE_SRCS count)

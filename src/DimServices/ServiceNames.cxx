@@ -36,21 +36,20 @@ std::string ServiceNames::format(std::string name) const
     return ((boost::format("ALF/serial_%1%/link_%2%/%3%") % mSerial % mLink % name)).str();
 }
 
-std::string ServiceNames::publishRegistersSubdir(std::string name) const
+std::string ServiceNames::publishRegisters(std::string name) const
 {
   return ServiceNames::format("PUBLISH_REGISTERS/") + name;
 }
 
-std::string ServiceNames::publishScaSequenceSubdir(std::string name) const
+std::string ServiceNames::publishScaSequence(std::string name) const
 {
   return ServiceNames::format("PUBLISH_SCA_SEQUENCE/") + name;
 }
 
-std::string ServiceNames::publishSwtSequenceSubdir(std::string name) const
+std::string ServiceNames::publishSwtSequence(std::string name) const
 {
   return ServiceNames::format("PUBLISH_SWT_SEQUENCE/") + name;
 }
-
 
 } // namespace Alf
 } // namespace AliceO2

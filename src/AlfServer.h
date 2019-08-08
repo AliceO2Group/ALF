@@ -1,5 +1,5 @@
-#ifndef ALICEO2_ALF_ALF_H_
-#define ALICEO2_ALF_ALF_H_
+#ifndef ALICEO2_ALF_ALFSERVER_H_
+#define ALICEO2_ALF_ALFSERVER_H_
 
 #include <chrono>
 #include <iomanip>
@@ -11,7 +11,6 @@
 
 #include "folly/ProducerConsumerQueue.h"
 #include "InfoLogger/InfoLogger.hxx"
-#include "ReadoutCard/BarInterface.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 
@@ -53,9 +52,6 @@ class CommandQueue
    folly::ProducerConsumerQueue<std::unique_ptr<Command>> mQueue {512};
 };
 
-/// Length of the success/failure prefix that's returned in RPC calls
-constexpr size_t PREFIX_LENGTH(8);
-
 //constexpr std::string_view ARGUMENT_SEPARATOR("\n");
 //constexpr std::string_view SCA_PAIR_SEPARATOR(",");
 
@@ -71,7 +67,8 @@ class AlfServer
         std::vector<AlfLink> links,
         std::shared_ptr<CommandQueue> commandQueue,
         std::map<int, std::map<int, std::vector<std::unique_ptr<StringRpcServer>>>> &rpcServers);*/
-    void makeRpcServers(std::shared_ptr<roc::BarInterface> bar2, std::vector<AlfLink> links);
+    //void makeRpcServers(std::shared_ptr<roc::BarInterface> bar2, std::vector<AlfLink> links);
+    void makeRpcServers(std::vector<AlfLink> links);
 
 
     void addRemoveUpdateServices();
@@ -109,7 +106,7 @@ class AlfServer
                                               std::shared_ptr<CommandQueue> commandQueue,
                                             AlfLink link);
 
-    static std::string scaPairSeparator();
+    //static std::string scaPairSeparator();
     static Sca::CommandData stringToScaPair(std::string stringPair);
     static SwtWord stringToSwtWord(const std::string& hexString);
     static std::vector<Sca::CommandData> parseStringScaCommands(std::vector<std::string> stringPairs);
@@ -131,4 +128,4 @@ class AlfServer
 } // namespace Alf
 } // namespace AliceO2
 
-#endif // ALICEO2_ALF_ALF_H_
+#endif // ALICEO2_ALF_ALFSERVER_H_

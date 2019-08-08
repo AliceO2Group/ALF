@@ -24,7 +24,6 @@ class ServiceNames
 
     std::string registerRead() const;
     std::string registerWrite() const;
-    std::string scaWrite() const;
     std::string scaSequence() const;
     std::string swtSequence() const;
     std::string publishRegistersStart() const;
@@ -34,9 +33,11 @@ class ServiceNames
     std::string publishSwtSequenceStart() const;
     std::string publishSwtSequenceStop() const;
     
-    std::string publishRegistersSubdir(std::string name) const;
-    std::string publishScaSequenceSubdir(std::string name) const;
-    std::string publishSwtSequenceSubdir(std::string name) const;
+    std::string publishRegisters(std::string name) const;
+    std::string publishScaSequence(std::string name) const;
+    std::string publishSwtSequence(std::string name) const;
+
+    static std::string getTail(std::string name);
 
   private:
     std::string format(std::string name) const;

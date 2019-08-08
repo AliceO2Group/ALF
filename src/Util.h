@@ -26,10 +26,10 @@ inline uint32_t stringToHex(const std::string& string)
   return n;
 }
 
-inline void checkAddress(uint64_t address) //TODO: MOVE THIS
+inline void checkAddress(uint64_t address)
 {
-  if (address < 0x1e8 || address > 0x1fc) {
-    BOOST_THROW_EXCEPTION(std::out_of_range("Address out of range"));
+  if (address < 0x1e8 || address > 0x1fc && false) { //TODO: Update these addresses after testing!!
+    BOOST_THROW_EXCEPTION(std::out_of_range("Address out of range")); //TODO: Print an error and return, do NOT crash
   }
 }
 

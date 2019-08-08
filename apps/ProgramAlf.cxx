@@ -1,7 +1,7 @@
 #include <cstdlib>
 #include <iostream>
 
-#include "Alf.h"
+#include "AlfServer.h"
 #include "Common/Program.h"
 #include "DimServices/ServiceNames.h"
 #include "ReadoutCard/CardDescriptor.h"
@@ -66,7 +66,9 @@ class ProgramAlf : public AliceO2::Common::Program
      }
 
      getLogger() << "Starting the DIM Server" << endm;
+     DimServer::setDnsNode("localhost", 2505); //TODO: Move to AlfServer
      //DimServer::start(alfId == -1 ? "ALF" : ("ALF" + std::to_string(alfId)).c_str());
+     DimServer::start("test");
      
      AlfServer alfServer = AlfServer();
 
@@ -81,7 +83,7 @@ class ProgramAlf : public AliceO2::Common::Program
        if (card.cardType == roc::CardType::Cru) { //TODO: To be deprecated when findCards supports types 
                                                   //TODO: What about CRORC ????????
 
-         auto serialMaybe = card.serialNumber.get();
+         //auto serialMaybe = card.serialNumber.get();
          //int serial = serialMaybe ? serialMaybe : fakeSerial++;
          int serial = fakeSerial++;
 
@@ -89,7 +91,7 @@ class ProgramAlf : public AliceO2::Common::Program
          bar2 = roc::ChannelFactory().getBar(card.pciAddress, 2);
          //mBars[serial][2] = bar2; // All links pass through this for the CRU
          for (int linkId = 0; linkId < CRU_NUM_LINKS; linkId++) {
-           links.push_back({alfId, serial, linkId});
+           links.push_back({alfId, serial, linkId, bar2});
          }
 
        } else {
@@ -102,53 +104,13 @@ class ProgramAlf : public AliceO2::Common::Program
          }
        }
 
-       alfServer.makeRpcServers(bar2, links);
+       alfServer.makeRpcServers(links);
      }
-
-     /*if (isVerbose()) {
-       for(auto const& card : mBars) {
-         getLogger() << "Serial: " << card.first << endm;
-         for (auto const& bar : card.second) {
-           getLogger() << "BAR #" << bar.first << endm;
-         }
-       }
-     }*/
-
-
-     //makeServers(mBars, links, mCommandQueue, mRpcServers);
-
 
      // Add/Remove/Update services
      while (!isSigInt()) {
-       
        alfServer.addRemoveUpdateServices();
-
-       // Take care of publishing commands from the queue
-       //alf.addRemoveServices(); //TODO: Mine
-       /*std::unique_ptr<CommandQueue::Command> command;
-       while (mCommandQueue->read(command)) {
-         if (command->start) {
-           serviceAdd(command->description);
-         } else {
-           serviceRemove(command->description.dnsName);
-         }
-       }*/
-
-       // Update service(s) and sleep until next update is needed
-       //alf.updateServices(); //TODO: mine
-       /*auto now = std::chrono::steady_clock::now();
-       std::chrono::steady_clock::time_point next = now + std::chrono::seconds(1); // We wait a max of 1 second
-       for (auto& kv: mServices) {
-         auto& service = *kv.second;
-         if (service.nextUpdate < now) {
-           serviceUpdate(service);
-           service.advanceUpdateTime();
-           next = std::min(next, service.nextUpdate);
-         }
-       }
-       std::this_thread::sleep_until(next);*/
      }
-
    }
 
  private:

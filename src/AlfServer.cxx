@@ -1,10 +1,12 @@
 #include <chrono>
 #include <iomanip>
+#include <iostream>
 #include <thread>
 
-#include "Alf.h"
+#include "AlfServer.h"
 #include "DimServices/ServiceNames.h"
 #include "Swt/Swt.h"
+#include "Visitor.h"
 #include "Util.h"
 
 namespace AliceO2
@@ -19,7 +21,7 @@ AlfServer::AlfServer() : mCommandQueue(std::make_shared<CommandQueue>()), mRpcSe
 std::string AlfServer::registerRead(const std::string& parameter, std::shared_ptr<roc::BarInterface> bar2)
 {
   uint32_t address = Util::stringToHex(parameter);
-  Util::checkAddress(address);
+  Util::checkAddress(address); //TODO: This function will 
   
   uint32_t value = bar2->readRegister(address / 4);
   return Util::formatValue(value);
@@ -36,7 +38,8 @@ std::string AlfServer::registerWrite(const std::string& parameter, std::shared_p
   uint32_t address = Util::stringToHex(params[0]);
   Util::checkAddress(address);
   uint32_t value = Util::stringToHex(params[1]);
-  
+ 
+  std::cout << "registerWrite RPC, addr=" << Util::formatValue(address) << ", value=" << Util::formatValue(value) << std::endl;
   bar2->writeRegister(address / 4, value);
   return ""; // ??
 }
@@ -80,11 +83,13 @@ std::string AlfServer::publishRegistersStart(const std::string parameter,
   auto command = std::make_unique<CommandQueue::Command>();
   command->start = true;
   command->description.type = ServiceDescription::Register{std::move(registers)};
-  command->description.dnsName = ServiceNames(link).publishRegistersSubdir(dnsName); //TODO: Can this be a bit cleaner?
+  command->description.dnsName = ServiceNames(link).publishRegisters(dnsName); //TODO: Can this be a bit cleaner?
+  std::cout << "dns name=" << dnsName << "and command desc=" << command->description.dnsName << std::endl;
   command->description.interval = std::chrono::milliseconds(int64_t(boost::lexical_cast<double>(interval) * 1000.0)); //TODO: ?
   command->description.link = link;
 
   tryAddToQueue(*commandQueue, std::move(command));
+//  return command->description.dnsName; //TODO: ??
   return ""; //TODO: ??
 }
 
@@ -95,7 +100,7 @@ std::string AlfServer::publishRegistersStop(const std::string parameter,
   auto command = std::make_unique<CommandQueue::Command>();
   command->start = false;
   command->description.type = ServiceDescription::Register();
-  command->description.dnsName = ServiceNames(link).publishRegistersSubdir(parameter); //TODO: Can this be a bit cleaner?
+  command->description.dnsName = ServiceNames(link).publishRegisters(parameter); //TODO: Can this be a bit cleaner?
   command->description.interval = std::chrono::milliseconds(0); //TODO: ?
   command->description.link = link;
 
@@ -123,7 +128,7 @@ std::string AlfServer::publishScaSequenceStart(const std::string parameter,
   auto command = std::make_unique<CommandQueue::Command>();
   command->start = true;
   command->description.type = ServiceDescription::Register();
-  command->description.dnsName = ServiceNames(link).publishScaSequenceSubdir(dnsName); //TODO: Can this be a bit cleaner?
+  command->description.dnsName = ServiceNames(link).publishScaSequence(dnsName); //TODO: Can this be a bit cleaner?
   command->description.interval = std::chrono::milliseconds(int64_t(boost::lexical_cast<double>(interval) * 1000.0)); //TODO: ?
   command->description.link = link;
 
@@ -138,7 +143,7 @@ std::string AlfServer::publishScaSequenceStop(const std::string parameter,
   auto command = std::make_unique<CommandQueue::Command>();
   command->start = false;
   command->description.type = ServiceDescription::Register();
-  command->description.dnsName = ServiceNames(link).publishScaSequenceSubdir(parameter); //TODO: Can this be a bit cleaner?
+  command->description.dnsName = ServiceNames(link).publishScaSequence(parameter); //TODO: Can this be a bit cleaner?
   command->description.interval = std::chrono::milliseconds(0); //TODO: ?
   command->description.link = link;
 
@@ -166,7 +171,7 @@ std::string AlfServer::publishSwtSequenceStart(const std::string parameter,
   auto command = std::make_unique<CommandQueue::Command>();
   command->start = true;
   command->description.type = std::move(swtSequence);
-  command->description.dnsName = ServiceNames(link).publishSwtSequenceSubdir(dnsName); //TODO: Can this be a bit cleaner?
+  command->description.dnsName = ServiceNames(link).publishSwtSequence(dnsName); //TODO: Can this be a bit cleaner?
   command->description.interval = std::chrono::milliseconds(int64_t(boost::lexical_cast<double>(interval) * 1000.0)); //TODO: ?
   command->description.link = link;
 
@@ -182,7 +187,7 @@ std::string AlfServer::publishSwtSequenceStop(const std::string parameter,
   auto command = std::make_unique<CommandQueue::Command>();
   command->start = false;
   command->description.type = ServiceDescription::Register();
-  command->description.dnsName = ServiceNames(link).publishSwtSequenceSubdir(parameter); //TODO: Can this be a bit cleaner?
+  command->description.dnsName = ServiceNames(link).publishSwtSequence(parameter); //TODO: Can this be a bit cleaner?
   command->description.interval = std::chrono::milliseconds(0); //TODO: ?
   command->description.link = link;
 
@@ -190,13 +195,13 @@ std::string AlfServer::publishSwtSequenceStop(const std::string parameter,
   return ""; //TODO: ??
 }
 
-std::string AlfServer::scaPairSeparator()
+/*std::string AlfServer::scaPairSeparator()
 {
   return ",";
-}
+}*/
 
 Sca::CommandData AlfServer::stringToScaPair(std::string stringPair) {
-  std::vector<std::string> scaPair = Util::split(stringPair, scaPairSeparator());
+  std::vector<std::string> scaPair = Util::split(stringPair, Sca::pairSeparator());
   if (stringPair.size() != 2) {
     BOOST_THROW_EXCEPTION(
         AlfException() << ErrorInfo::Message("SCA command-data pair not formatted correctly"));
@@ -281,7 +286,8 @@ std::string stripPrefix(const std::string& string)
                  std::vector<AlfLink> links,
                  std::shared_ptr<CommandQueue> commandQueue,
                  std::map<int, std::map<int, std::vector<std::unique_ptr<StringRpcServer>>>> &rpcServers)*/
-void AlfServer::makeRpcServers(std::shared_ptr<roc::BarInterface> bar2, std::vector<AlfLink> links)
+//void AlfServer::makeRpcServers(std::shared_ptr<roc::BarInterface> bar2, std::vector<AlfLink> links)
+void AlfServer::makeRpcServers(std::vector<AlfLink> links)
 {
   for (const auto& link : links) {
 
@@ -295,6 +301,7 @@ void AlfServer::makeRpcServers(std::shared_ptr<roc::BarInterface> bar2, std::vec
 
     // Start the RPC Servers
     auto &servers = mRpcServers[link.serial][link.linkId];
+    std::shared_ptr<roc::BarInterface> bar2 = link.bar2; 
     auto commandQueue = mCommandQueue; // copy for lambda
  
     // Register Read
@@ -306,7 +313,7 @@ void AlfServer::makeRpcServers(std::shared_ptr<roc::BarInterface> bar2, std::vec
           [bar2](auto parameter){
           return registerWrite(parameter, bar2);}));
 
-    // SCA Sequence
+/*    // SCA Sequence
     servers.push_back(makeServer(names.scaSequence(),
           [bar2, link](auto parameter){
           return scaBlobWrite(parameter, bar2, link);}));
@@ -314,7 +321,7 @@ void AlfServer::makeRpcServers(std::shared_ptr<roc::BarInterface> bar2, std::vec
     servers.push_back(makeServer(names.swtSequence(),
           [bar2, link](auto parameter){
           return swtBlobWrite(parameter, bar2, link);}));
-
+*/
     // Publish Registers
     servers.push_back(makeServer(names.publishRegistersStart(),
           [commandQueue, link](auto parameter){
@@ -322,7 +329,7 @@ void AlfServer::makeRpcServers(std::shared_ptr<roc::BarInterface> bar2, std::vec
     servers.push_back(makeServer(names.publishRegistersStop(),
           [commandQueue, link](auto parameter){
           return publishRegistersStop(parameter, commandQueue, link);}));
-
+/*
     // Publish SCA sequence
     servers.push_back(makeServer(names.publishScaSequenceStart(),
           [commandQueue, link](auto parameter){
@@ -338,7 +345,7 @@ void AlfServer::makeRpcServers(std::shared_ptr<roc::BarInterface> bar2, std::vec
     servers.push_back(makeServer(names.publishSwtSequenceStop(),
           [commandQueue, link](auto parameter){
           return publishSwtSequenceStop(parameter, commandQueue, link);}));
-
+*/
   }
 }
 
@@ -362,6 +369,7 @@ void AlfServer::addRemoveServices()
 
 void AlfServer::addService(const ServiceDescription& serviceDescription)
 {
+  std::cout << "In add service for : " << serviceDescription.dnsName << std::endl;
   if (mServices.count(serviceDescription.dnsName)) {
     removeService(serviceDescription.dnsName);
   }
@@ -370,21 +378,47 @@ void AlfServer::addService(const ServiceDescription& serviceDescription)
   service->description = serviceDescription;
   service->nextUpdate = std::chrono::steady_clock::now();
 
-  // VISITOR APPLY !!
+  Visitor::apply(service->description.type,
+      [&](const ServiceDescription::Register& type) {
+      // Estimate max needed size. I'm not sure DIM can handle reallocations of this buffer, so we avoid that...
+      service->buffer.resize(type.addresses.size()*20 + 512);
+      //if (verbose) getLogger() << "Starting SCA publisher '" << service->description.dnsName << "' with "
+      //  << type.addresses.size() << " address(es) at interval "
+      //  << service->description.interval.count() << "ms" << endm;
+      },
+      [&](const ServiceDescription::ScaSequence& type) {
+      // Estimate max needed size. I'm not sure DIM can handle reallocations of this buffer, so we avoid that...
+      service->buffer.resize(type.commandDataPairs.size()*20 + 512);
+      //if (verbose) getLogger() << "Starting SCA publisher '" << service->description.dnsName << "' with "
+      //  << type.commandDataPairs.size() << " command(s) at interval "
+      //  << service->description.interval.count() << "ms" << endm;
+      },
+      [&](const ServiceDescription::SwtSequence& type) {
+      // Estimate max needed size. I'm not sure DIM can handle reallocations of this buffer, so we avoid that...
+      service->buffer.resize(type.swtWords.size()*20 + 512);
+      //if (verbose) getLogger() << "Starting SCA publisher '" << service->description.dnsName << "' with "
+      //  << type.swtWords.size() << " SWT word(s) at interval "
+      //  << service->description.interval.count() << "ms" << endm;
+      }
+  );
   
   std::fill(service->buffer.begin(), service->buffer.end(), '\0');
-  service->dimService = std::make_unique<DimService>(service->description.dnsName.c_str(), "C",
-      service->buffer.data(), Util::strlenMax(service->buffer.data(), service->buffer.size()));
+  service->dimService = std::make_unique<DimService>(service->description.dnsName.c_str(),
+      "C", //"C" means 8bit character
+      service->buffer.data(),
+      Util::strlenMax(service->buffer.data(), service->buffer.size()));
   mServices.insert(std::make_pair(serviceDescription.dnsName, std::move(service)));
 }
 
 void AlfServer::removeService(const std::string& dnsName)
 {
+  std::cout << "In remove service" << std::endl;
   mServices.erase(dnsName);
 }
 
 void AlfServer::updateServices()
 {
+  std::cout << "In update services" << std::endl;
   auto now = std::chrono::steady_clock::now();
   std::chrono::steady_clock::time_point next = now + std::chrono::seconds(1);
 
@@ -404,8 +438,28 @@ void AlfServer::updateService(Service& service)
 {
   std::string result;
 
-  // VISITOR APPLY !!
-  
+  Visitor::apply(service.description.type,
+      [&](const ServiceDescription::Register& type) {
+        std::stringstream ss;
+        auto bar2 = service.description.link.bar2.get();
+        for (size_t i = 0; i < type.addresses.size(); i++) {
+        auto value = bar2->readRegister(type.addresses[i] / 4);
+        ss << Util::formatValue(value) << "\n";
+        }
+        result = ss.str();
+      },
+      [&](const ServiceDescription::ScaSequence& type) {
+        auto bar2 = service.description.link.bar2.get();
+        auto sca = Sca(*bar2, service.description.link);
+        result = sca.writeSequence(type.commandDataPairs);
+      },
+      [&](const ServiceDescription::SwtSequence& type) {
+        auto bar2 = service.description.link.bar2.get();
+        auto swt = Swt(*bar2, service.description.link);
+        result = swt.writeSequence(type.swtWords);
+      }
+  );
+
   // Reset and copy into the persistent buffer because I don't trust DIM with the non-persistent std::string
   std::fill(service.buffer.begin(), service.buffer.end(), '\0');
   std::copy(result.begin(), result.end(), service.buffer.begin());

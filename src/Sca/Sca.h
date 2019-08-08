@@ -49,6 +49,8 @@ class Sca
 
     std::string writeSequence(const std::vector<CommandData>& commands);
 
+    static std::string pairSeparator();
+
   private:
     uint32_t barRead(uint32_t index);
     void barWrite(uint32_t index, uint32_t data);

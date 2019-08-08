@@ -2,6 +2,7 @@
 #define ALICEO2_ALF_COMMON_H_
 
 #include <chrono>
+#include "ReadoutCard/BarInterface.h"
 
 namespace AliceO2
 {
@@ -18,6 +19,7 @@ struct AlfLink {
   int alfId;
   int serial;
   int linkId;
+  std::shared_ptr<roc::BarInterface> bar2; 
 };
 
 } // namespace AliceO2

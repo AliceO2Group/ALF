@@ -226,5 +226,10 @@ std::string Sca::writeSequence(const std::vector<CommandData>& commands)
   return resultBuffer.str();
 }
 
+std::string Sca::pairSeparator()
+{
+  return ",";
+}
+
 } // namespace Alf
 } // namespace AliceO2
