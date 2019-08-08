@@ -10,17 +10,8 @@
 #include "Common.h"
 
 #include "folly/ProducerConsumerQueue.h"
-#include "InfoLogger/InfoLogger.hxx"
 
 #include <boost/algorithm/string/predicate.hpp>
-
-constexpr auto endm = AliceO2::InfoLogger::InfoLogger::endm;
-
-static AliceO2::InfoLogger::InfoLogger& getLogger()
-{
-  static AliceO2::InfoLogger::InfoLogger logger;
-  return logger;
-}
 
 namespace roc = AliceO2::roc;
 

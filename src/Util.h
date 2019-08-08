@@ -28,7 +28,7 @@ inline uint32_t stringToHex(const std::string& string)
 
 inline void checkAddress(uint64_t address)
 {
-  if (address < 0x1e8 || address > 0x1fc && false) { //TODO: Update these addresses after testing!!
+  if (address < 0x1e8 || address > 0x1fc) { //TODO: Update these addresses (Checkers for SWT, SCA and BAR2 regs)
     BOOST_THROW_EXCEPTION(std::out_of_range("Address out of range")); //TODO: Print an error and return, do NOT crash
   }
 }

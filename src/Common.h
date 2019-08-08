@@ -2,6 +2,7 @@
 #define ALICEO2_ALF_COMMON_H_
 
 #include <chrono>
+#include "InfoLogger/InfoLogger.hxx"
 #include "ReadoutCard/BarInterface.h"
 
 namespace AliceO2
@@ -21,6 +22,15 @@ struct AlfLink {
   int linkId;
   std::shared_ptr<roc::BarInterface> bar2; 
 };
+
+constexpr auto endm = AliceO2::InfoLogger::InfoLogger::endm;
+
+static AliceO2::InfoLogger::InfoLogger& getLogger()
+{
+  static AliceO2::InfoLogger::InfoLogger logger;
+  return logger;
+}
+
 
 } // namespace AliceO2
 } // namespace Alf

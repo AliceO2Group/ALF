@@ -9,7 +9,6 @@
 
 #include <boost/exception/diagnostic_information.hpp> 
 #include <boost/variant.hpp>
-#include <iostream>
 #include <string>
 
 #include "AlfException.h"
@@ -172,8 +171,8 @@ class DimInfoWrapper : public DimInfo
     }
 
     void infoHandler() { //TODO: Requirements?
-      std::cout << "Published value(s) from " << mServiceName << std::endl;
-      std::cout << getString() << std::endl;
+      getLogger() << "Published value(s) from " << mServiceName << endm;
+      getLogger() << getString() << endm;
     }
 
   private:

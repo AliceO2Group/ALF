@@ -1,6 +1,5 @@
 #include <chrono>
 #include <iomanip>
-#include <iostream>
 #include <thread>
 
 #include "AlfServer.h"
@@ -21,7 +20,7 @@ AlfServer::AlfServer() : mCommandQueue(std::make_shared<CommandQueue>()), mRpcSe
 std::string AlfServer::registerRead(const std::string& parameter, std::shared_ptr<roc::BarInterface> bar2)
 {
   uint32_t address = Util::stringToHex(parameter);
-  Util::checkAddress(address); //TODO: This function will 
+  //Util::checkAddress(address);
   
   uint32_t value = bar2->readRegister(address / 4);
   return Util::formatValue(value);
@@ -36,12 +35,12 @@ std::string AlfServer::registerWrite(const std::string& parameter, std::shared_p
   }
 
   uint32_t address = Util::stringToHex(params[0]);
-  Util::checkAddress(address);
+  //Util::checkAddress(address);
   uint32_t value = Util::stringToHex(params[1]);
  
-  std::cout << "registerWrite RPC, addr=" << Util::formatValue(address) << ", value=" << Util::formatValue(value) << std::endl;
+  getLogger() << "registerWrite RPC, addr=" << Util::formatValue(address) << ", value=" << Util::formatValue(value) << endm;
   bar2->writeRegister(address / 4, value);
-  return ""; // ??
+  return "";
 }
 
 std::string AlfServer::scaBlobWrite(const std::string& parameter, std::shared_ptr<roc::BarInterface> bar2, AlfLink link)
@@ -84,13 +83,16 @@ std::string AlfServer::publishRegistersStart(const std::string parameter,
   command->start = true;
   command->description.type = ServiceDescription::Register{std::move(registers)};
   command->description.dnsName = ServiceNames(link).publishRegisters(dnsName); //TODO: Can this be a bit cleaner?
-  std::cout << "dns name=" << dnsName << "and command desc=" << command->description.dnsName << std::endl;
+  getLogger() << "dns name=" << dnsName << "and command desc=" << command->description.dnsName << endm;
   command->description.interval = std::chrono::milliseconds(int64_t(boost::lexical_cast<double>(interval) * 1000.0)); //TODO: ?
   command->description.link = link;
 
+  getLogger() << "before tryaddtoqueue" << endm;
+  //TODO: TO BE DEFINED IN REQS
+  //std::string retDnsName(command->description.dnsName); //Copy the data before moving the pointer...
   tryAddToQueue(*commandQueue, std::move(command));
-//  return command->description.dnsName; //TODO: ??
-  return ""; //TODO: ??
+  //return retDnsName; // Return the dns name so that the publish caller can know which service to sub to
+  return "";
 }
 
 std::string AlfServer::publishRegistersStop(const std::string parameter, 
@@ -256,37 +258,12 @@ std::vector<SwtWord> AlfServer::parseStringSwtWords(std::vector<std::string> str
 bool AlfServer::tryAddToQueue(CommandQueue& commandQueue, std::unique_ptr<CommandQueue::Command> command)
 {
   if (!commandQueue.write(std::move(command))) {
-    //getLogger() << InfoLogger::InfoLogger::Error << " command queue was full!" << endm;
+    getLogger() << InfoLogger::InfoLogger::Error << " command queue was full!" << endm;
     return false;
   }
   return true;
 }
 
-
-/*bool isSuccess(const std::string& string)
-{
-  return boost::starts_with(string, successPrefix());
-}
-
-bool isFail(const std::string& string)
-{
-  return boost::starts_with(string, failPrefix());
-}
-
-std::string stripPrefix(const std::string& string)
-{
-  if (string.length() < PREFIX_LENGTH) {
-    printf("len=%lu  str=%s\n", string.length(), string.c_str());
-    BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("string too short to contain prefix"));
-  }
-  return string.substr(PREFIX_LENGTH);
-}*/
-
-/*void AlfServer::makeServers(std::map<int, std::map<int, std::shared_ptr<roc::BarInterface>>> bars,
-                 std::vector<AlfLink> links,
-                 std::shared_ptr<CommandQueue> commandQueue,
-                 std::map<int, std::map<int, std::vector<std::unique_ptr<StringRpcServer>>>> &rpcServers)*/
-//void AlfServer::makeRpcServers(std::shared_ptr<roc::BarInterface> bar2, std::vector<AlfLink> links)
 void AlfServer::makeRpcServers(std::vector<AlfLink> links)
 {
   for (const auto& link : links) {
@@ -369,7 +346,7 @@ void AlfServer::addRemoveServices()
 
 void AlfServer::addService(const ServiceDescription& serviceDescription)
 {
-  std::cout << "In add service for : " << serviceDescription.dnsName << std::endl;
+  getLogger() << "In add service for : " << serviceDescription.dnsName << endm;
   if (mServices.count(serviceDescription.dnsName)) {
     removeService(serviceDescription.dnsName);
   }
@@ -412,13 +389,13 @@ void AlfServer::addService(const ServiceDescription& serviceDescription)
 
 void AlfServer::removeService(const std::string& dnsName)
 {
-  std::cout << "In remove service" << std::endl;
+  getLogger() << "In remove service" << endm;
   mServices.erase(dnsName);
 }
 
 void AlfServer::updateServices()
 {
-  std::cout << "In update services" << std::endl;
+  getLogger() << "In update services" << endm;
   auto now = std::chrono::steady_clock::now();
   std::chrono::steady_clock::time_point next = now + std::chrono::seconds(1);
 

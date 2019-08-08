@@ -1,5 +1,4 @@
 #include <cstdlib>
-#include <iostream>
 
 #include "AlfServer.h"
 #include "Common/Program.h"

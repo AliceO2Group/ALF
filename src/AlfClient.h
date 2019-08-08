@@ -111,7 +111,7 @@ class PublishRegistersStartRpc : DimRpcInfoWrapper
       for (size_t i = 0; i < addresses.size(); ++i) {
         stream << sep << addresses[i];
       }
-      printf("Publish: %s\n", stream.str().c_str());
+      //printf("Publish: %s\n", stream.str().c_str());
       setString(stream.str());
       return getString();
     }

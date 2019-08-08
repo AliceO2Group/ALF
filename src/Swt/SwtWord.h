@@ -16,8 +16,6 @@
 #ifndef ALICEO2_ALF_SRC_SWT_SWTWORD_H
 #define ALICEO2_ALF_SRC_SWT_SWTWORD_H
 
-#include <iostream>
-
 namespace AliceO2
 {
 namespace Alf

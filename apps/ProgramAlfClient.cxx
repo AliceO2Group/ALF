@@ -1,12 +1,12 @@
 #include <chrono>
 #include <cstdlib>
-#include <iostream>
 #include <thread>
 
 #include "AlfClient.h"
 #include "AlfServer.h" // For the logger for now
 //#include "Common.h"
 #include "Common/Program.h"
+#include "Common/GuardFunction.h"
 #include "DimServices/ServiceNames.h"
 
 namespace po = boost::program_options;
@@ -67,27 +67,32 @@ class ProgramAlfClient : public AliceO2::Common::Program
      Alf::PublishRegistersStartRpc publishRegistersStartRpc(names.publishRegistersStart());
      Alf::PublishRegistersStopRpc publishRegistersStopRpc(names.publishRegistersStop());
 
+     AliceO2::Common::GuardFunction publishStopper {
+       [&]() {
+         publishRegistersStopRpc.stop("TEST_PUB_REGS_SINGLE");
+         publishRegistersStopRpc.stop("TEST_PUB_REGS_MULTI");
+       }
+     };
+
      // Test register write and read
      uint32_t wAddress = 0x00f00078;
      uint32_t wValue = 0x4;
      uint32_t rAddress = 0x00f0005c;
      registerWriteRpc.writeRegister(wAddress, wValue);
      uint32_t rValue = registerReadRpc.readRegister(rAddress);
-     std::cout << "Wrote: " << Util::formatValue(wValue) << " Read: " << Util::formatValue(rValue) << std::endl;
+     getLogger() << "Wrote: " << Util::formatValue(wValue) << " Read: " << Util::formatValue(rValue) << endm;
 
 
      // Test register publishing
-     std::cout << "Publishing" << std::endl;
-     std::cout << publishRegistersStartRpc.publish("TEST_PUB_REGS_SINGLE", 1.0, {rAddress}) << std::endl;
-     std::cout << publishRegistersStartRpc.publish("TEST_PUB_REGS_MULTI", 2.0, {rAddress, rAddress+4, rAddress+8}) << std::endl;
+     getLogger() << "Register publishing services RPC" << endm;
+     publishRegistersStartRpc.publish("TEST_PUB_REGS_SINGLE", 1.0, {rAddress});
+     publishRegistersStartRpc.publish("TEST_PUB_REGS_MULTI", 2.0, {rAddress, rAddress+4, rAddress+8});
      
+     getLogger() << "Register publishing services subscription" << endm;
      Alf::PublishInfo publishRegistersInfoSingle(names.publishRegisters("TEST_PUB_REGS_SINGLE"));
      Alf::PublishInfo publishRegistersInfoMulti(names.publishRegisters("TEST_PUB_REGS_MULTI"));
 
      std::this_thread::sleep_for(std::chrono::seconds(6));
-
-     publishRegistersStopRpc.stop("TEST_PUB_REGS_SINGLE");
-     publishRegistersStopRpc.stop("TEST_PUB_REGS_MULTI");
 
    }
 
