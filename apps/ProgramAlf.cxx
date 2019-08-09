@@ -26,7 +26,7 @@
 
 namespace po = boost::program_options;
 
-namespace AliceO2 
+namespace AliceO2
 {
 namespace Alf
 {
@@ -36,110 +36,108 @@ AliceO2::InfoLogger::InfoLogger logger;
 class ProgramAlf : public AliceO2::Common::Program
 {
  public:
-   ProgramAlf()
-   {
-   }
+  ProgramAlf()
+  {
+  }
 
-   virtual Description getDescription() override
-   {
-     return {"ALF", "ALICE Low-level Front-end DIM server", "o2-alf"};
-   }
+  virtual Description getDescription() override
+  {
+    return { "ALF", "ALICE Low-level Front-end DIM server", "o2-alf" };
+  }
 
-   virtual void addOptions(po::options_description& options) override
-   {
-     options.add_options()
-       ("dim-dns-node",
-        po::value<std::string>(&mOptions.dimDnsNode)->default_value(""),
-        "The DIM DNS node to set the env var if not already set")
-       ("alf-id",
-        po::value<int>(&mOptions.alfId)->default_value(-1),
-        "The ALF ID");
-   }
+  virtual void addOptions(po::options_description& options) override
+  {
+    options.add_options()("dim-dns-node",
+                          po::value<std::string>(&mOptions.dimDnsNode)->default_value(""),
+                          "The DIM DNS node to set the env var if not already set")("alf-id",
+                                                                                    po::value<int>(&mOptions.alfId)->default_value(-1),
+                                                                                    "The ALF ID");
+  }
 
-   virtual void run(const po::variables_map&) override {
-     //verbose = isVerbose();
+  virtual void run(const po::variables_map&) override
+  {
+    //verbose = isVerbose();
 
-     getLogger() << "ALF server initializations..." << endm;
+    getLogger() << "ALF server initializations..." << endm;
 
-     if (const char* dimDnsNode = std::getenv("DIM_DNS_NODE")) {
-       getLogger() << "DIM_DNS_NODE=" << dimDnsNode << endm;
-     } else if (mOptions.dimDnsNode != "") {
-       getLogger() << "DIM_DNS_NODE env variable not set. Setting it from argument." << endm;
-       setenv("DIM_DNS_NODE", mOptions.dimDnsNode.c_str(), 1); // Don't be afraid to overwrite since we ended up here
-       getLogger() << "DIM_DNS_NODE=" << std::getenv("DIM_DNS_NODE") << endm;
-     } else {
-       BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("DIM_DNS_NODE env variable not set, and no relevant argument provided.")); // InfoLogger and errors?
-     }
+    if (const char* dimDnsNode = std::getenv("DIM_DNS_NODE")) {
+      getLogger() << "DIM_DNS_NODE=" << dimDnsNode << endm;
+    } else if (mOptions.dimDnsNode != "") {
+      getLogger() << "DIM_DNS_NODE env variable not set. Setting it from argument." << endm;
+      setenv("DIM_DNS_NODE", mOptions.dimDnsNode.c_str(), 1); // Don't be afraid to overwrite since we ended up here
+      getLogger() << "DIM_DNS_NODE=" << std::getenv("DIM_DNS_NODE") << endm;
+    } else {
+      BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("DIM_DNS_NODE env variable not set, and no relevant argument provided.")); // InfoLogger and errors?
+    }
 
-     int alfId;
+    int alfId;
 
-     if (const char* alfIdString = std::getenv("ALF_ID")) {
-       getLogger() << "ALF_ID=" << alfIdString << endm;
-       alfId = atoi(alfIdString);
-     } else {
-       getLogger() << "ALF_ID env variable not set. Setting it from argument." << endm;
-       alfId = mOptions.alfId;
-       getLogger() << "ALF_ID=" << alfId << endm;
-       /* Do I need to set the env var for ALF_ID? */
-     }
+    if (const char* alfIdString = std::getenv("ALF_ID")) {
+      getLogger() << "ALF_ID=" << alfIdString << endm;
+      alfId = atoi(alfIdString);
+    } else {
+      getLogger() << "ALF_ID env variable not set. Setting it from argument." << endm;
+      alfId = mOptions.alfId;
+      getLogger() << "ALF_ID=" << alfId << endm;
+      /* Do I need to set the env var for ALF_ID? */
+    }
 
-     getLogger() << "Starting the DIM Server" << endm;
-     DimServer::setDnsNode("localhost", 2505);
-     DimServer::start(alfId == -1 ? "ALF" : ("ALF" + std::to_string(alfId)).c_str());
-     
-     AlfServer alfServer = AlfServer();
+    getLogger() << "Starting the DIM Server" << endm;
+    DimServer::setDnsNode("localhost", 2505);
+    DimServer::start(alfId == -1 ? "ALF" : ("ALF" + std::to_string(alfId)).c_str());
 
-     std::vector<roc::CardDescriptor> cardsFound = roc::findCards();
-     int fakeSerial = 0;
-     for(auto const& card : cardsFound) {
-       std::vector<AlfLink> links;
+    AlfServer alfServer = AlfServer();
 
-       std::shared_ptr<roc::BarInterface> bar2;
+    std::vector<roc::CardDescriptor> cardsFound = roc::findCards();
+    int fakeSerial = 0;
+    for (auto const& card : cardsFound) {
+      std::vector<AlfLink> links;
 
-       // Make the RPC services for every card & link
-       if (card.cardType == roc::CardType::Cru) { //TODO: To be deprecated when findCards supports types 
-                                                  //TODO: What about CRORC ????????
+      std::shared_ptr<roc::BarInterface> bar2;
 
-         //auto serialMaybe = card.serialNumber.get();
-         //int serial = serialMaybe ? serialMaybe : fakeSerial++;
-         int serial = fakeSerial++;
+      // Make the RPC services for every card & link
+      if (card.cardType == roc::CardType::Cru) { //TODO: To be deprecated when findCards supports types
+                                                 //TODO: What about CRORC ????????
 
-         getLogger() << "Card #" << serial << " : " << card.pciAddress << endm;
-         bar2 = roc::ChannelFactory().getBar(card.pciAddress, 2);
-         //mBars[serial][2] = bar2; // All links pass through this for the CRU
-         for (int linkId = 0; linkId < CRU_NUM_LINKS; linkId++) {
-           links.push_back({alfId, serial, linkId, bar2});
-         }
+        //auto serialMaybe = card.serialNumber.get();
+        //int serial = serialMaybe ? serialMaybe : fakeSerial++;
+        int serial = fakeSerial++;
 
-       } else {
-         getLogger() << InfoLogger::InfoLogger::Severity::Warning << card.pciAddress << " is not a CRU. Skipping..." << endm;
-       }
+        getLogger() << "Card #" << serial << " : " << card.pciAddress << endm;
+        bar2 = roc::ChannelFactory().getBar(card.pciAddress, 2);
+        //mBars[serial][2] = bar2; // All links pass through this for the CRU
+        for (int linkId = 0; linkId < CRU_NUM_LINKS; linkId++) {
+          links.push_back({ alfId, serial, linkId, bar2 });
+        }
 
-       if (isVerbose()) {
-         for (auto const& link : links) {
-           getLogger() << link.alfId << " " << link.serial << " " << link.linkId << endm;
-         }
-       }
+      } else {
+        getLogger() << InfoLogger::InfoLogger::Severity::Warning << card.pciAddress << " is not a CRU. Skipping..." << endm;
+      }
 
-       alfServer.makeRpcServers(links);
-     }
+      if (isVerbose()) {
+        for (auto const& link : links) {
+          getLogger() << link.alfId << " " << link.serial << " " << link.linkId << endm;
+        }
+      }
 
-     // Add/Remove/Update services
-     while (!isSigInt()) {
-       alfServer.addRemoveUpdateServices();
-     }
-   }
+      alfServer.makeRpcServers(links);
+    }
+
+    // Add/Remove/Update services
+    while (!isSigInt()) {
+      alfServer.addRemoveUpdateServices();
+    }
+  }
 
  private:
-   struct OptionsStruct {
-     std::string dimDnsNode = "";
-     int alfId = -1;
-   } mOptions;
-
+  struct OptionsStruct {
+    std::string dimDnsNode = "";
+    int alfId = -1;
+  } mOptions;
 };
 
-} // namespace AliceO2
 } // namespace Alf
+} // namespace AliceO2
 
 int main(int argc, char** argv)
 {

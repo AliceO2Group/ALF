@@ -13,7 +13,6 @@
 ///
 /// \author Kostas Alexopoulos (kostas.alexopoulos@cern.ch)
 
-
 #ifndef ALICEO2_ALF_LOGGER_H_
 #define ALICEO2_ALF_LOGGER_H_
 
@@ -44,7 +43,7 @@ inline AliceO2::InfoLogger::InfoLogger& getErrorLogger()
   return logger << AliceO2::InfoLogger::InfoLogger::Severity::Error;
 }
 
-} // namespace AliceO2
 } // namespace Alf
+} // namespace AliceO2
 
 #endif // ALICEO2_ALF_COMMON_H_

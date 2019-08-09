@@ -14,7 +14,6 @@
 /// \author Pascal Boeschoten (pascal.boeschoten@cern.ch)
 /// \author Kostas Alexopoulos (kostas.alexopoulos@cern.ch)
 
-
 #ifndef ALICEO2_ALF_COMMON_H_
 #define ALICEO2_ALF_COMMON_H_
 
@@ -36,10 +35,10 @@ struct AlfLink {
   int alfId;
   int serial;
   int linkId;
-  std::shared_ptr<roc::BarInterface> bar2; 
+  std::shared_ptr<roc::BarInterface> bar2;
 };
 
-} // namespace AliceO2
 } // namespace Alf
+} // namespace AliceO2
 
 #endif // ALICEO2_ALF_COMMON_H_

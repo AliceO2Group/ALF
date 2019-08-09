@@ -218,12 +218,12 @@ void Sca::waitOnBusyClear()
 std::string Sca::writeSequence(const std::vector<CommandData>& commands)
 {
   std::stringstream resultBuffer;
-  for(const auto& commandData : commands) {
+  for (const auto& commandData : commands) {
     try {
       write(commandData);
       ReadResult result = read();
       resultBuffer << Util::formatValue(commandData.command) << "," << Util::formatValue(result.data) << "\n";
-    } catch (const ScaException &e) {
+    } catch (const ScaException& e) {
       // If an SCA error occurs, we stop executing the sequence of commands and return the results as far as we got
       // them, plus the error message.
       //TODO: Print error

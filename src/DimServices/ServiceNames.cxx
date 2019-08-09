@@ -13,19 +13,20 @@
 ///
 /// \author Pascal Boeschoten (pascal.boeschoten@cern.ch)
 
-#include "DimServices/ServiceNames.h"
 #include <boost/format.hpp>
+
+#include "DimServices/ServiceNames.h"
 
 namespace AliceO2
 {
 namespace Alf
 {
 
-#define DEFSERVICENAME(_function, _name) \
-std::string ServiceNames::_function() const \
-{ \
-  return format(_name); \
-}
+#define DEFSERVICENAME(_function, _name)      \
+  std::string ServiceNames::_function() const \
+  {                                           \
+    return format(_name);                     \
+  }
 
 DEFSERVICENAME(registerRead, "REGISTER_READ")
 DEFSERVICENAME(registerWrite, "REGISTER_WRITE")

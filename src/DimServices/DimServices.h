@@ -17,8 +17,11 @@
 #ifndef ALICEO2_ALF_SRC_DIMSERVICES_DIMSERVICES_H
 #define ALICEO2_ALF_SRC_DIMSERVICES_DIMSERVICES_H
 
-#include <boost/exception/diagnostic_information.hpp> 
+#include <boost/exception/diagnostic_information.hpp>
 #include <boost/variant.hpp>
+#include <dim/dic.hxx>
+#include <dim/dim.hxx>
+#include <dim/dis.hxx>
 #include <string>
 
 #include "AlfException.h"
@@ -27,10 +30,6 @@
 #include "ReadoutCard/Register.h"
 #include "Sca/Sca.h"
 #include "Swt/SwtWord.h"
-
-#include <dim/dic.hxx>
-#include <dim/dim.hxx>
-#include <dim/dis.hxx>
 
 namespace AliceO2
 {
@@ -64,44 +63,40 @@ bool isSuccess(const std::string& str);
 bool isFailure(const std::string& str);
 std::string stripPrefix(const std::string& str);
 
-class StringRpcServer: public DimRpc
+class StringRpcServer : public DimRpc
 {
-  public:
-    using Callback = std::function<std::string(const std::string&)>;
+ public:
+  using Callback = std::function<std::string(const std::string&)>;
 
-    StringRpcServer(const std::string& serviceName, Callback callback)
-      : DimRpc(serviceName.c_str(), "C", "C"), mCallback(callback), mServiceName(serviceName)
-    {
-    }
+  StringRpcServer(const std::string& serviceName, Callback callback)
+    : DimRpc(serviceName.c_str(), "C", "C"), mCallback(callback), mServiceName(serviceName)
+  {
+  }
 
-    StringRpcServer(const StringRpcServer& b) = delete;
-    StringRpcServer(StringRpcServer&& b) = delete;
+  StringRpcServer(const StringRpcServer& b) = delete;
+  StringRpcServer(StringRpcServer&& b) = delete;
 
-  private:
-    void rpcHandler() override;
+ private:
+  void rpcHandler() override;
 
-    Callback mCallback;
-    std::string mServiceName;
+  Callback mCallback;
+  std::string mServiceName;
 };
 
 /// Struct describing a DIM publishing(!) service
-struct ServiceDescription
-{
+struct ServiceDescription {
   /// Struct for register read service
-  struct Register
-  {
+  struct Register {
     std::vector<uintptr_t> addresses;
   };
 
   /// Struct for SCA sequence service
-  struct ScaSequence
-  {
+  struct ScaSequence {
     std::vector<Sca::CommandData> commandDataPairs;
   };
 
   /// Struct for SWT sequence service
-  struct SwtSequence
-  {
+  struct SwtSequence {
     std::vector<SwtWord> swtWords;
   };
 
@@ -112,80 +107,80 @@ struct ServiceDescription
 };
 
 /// Struct for DIM publishing service data
-struct Service
-{
+struct Service {
  public:
-   void advanceUpdateTime()
-   {
-     nextUpdate = nextUpdate + description.interval;
-   }
+  void advanceUpdateTime()
+  {
+    nextUpdate = nextUpdate + description.interval;
+  }
 
-   ServiceDescription description;
-   std::chrono::steady_clock::time_point nextUpdate;
-   std::unique_ptr<DimService> dimService;
-   std::vector<char> buffer; ///< Needed for DIM
+  ServiceDescription description;
+  std::chrono::steady_clock::time_point nextUpdate;
+  std::unique_ptr<DimService> dimService;
+  std::vector<char> buffer; ///< Needed for DIM
 };
 
 class DimRpcInfoWrapper
 {
  public:
-   DimRpcInfoWrapper(const std::string& serviceName)
-     : mRpcInfo(std::make_unique<DimRpcInfo>(serviceName.c_str(), toCharBuffer("").data()))
-   {
-   }
+  DimRpcInfoWrapper(const std::string& serviceName)
+    : mRpcInfo(std::make_unique<DimRpcInfo>(serviceName.c_str(), toCharBuffer("").data()))
+  {
+  }
 
-   void setString(const std::string& str)
-   {
-     setDataString(str, getDimRpcInfo());
-   }
+  void setString(const std::string& str)
+  {
+    setDataString(str, getDimRpcInfo());
+  }
 
-   std::string getString()
-   {
-     auto str = std::string(mRpcInfo->getString());
-     if (isFailure(str)) {
-       BOOST_THROW_EXCEPTION(
-           AlfException() << ErrorInfo::Message("ALF server failure: " + str)); //TODO: Handle exceptions
-     }
-     return str;
-   }
+  std::string getString()
+  {
+    auto str = std::string(mRpcInfo->getString());
+    if (isFailure(str)) {
+      BOOST_THROW_EXCEPTION(
+        AlfException() << ErrorInfo::Message("ALF server failure: " + str)); //TODO: Handle exceptions
+    }
+    return str;
+  }
 
-   template <typename T>
-   std::vector<T> getBlob()
-   {
-     auto data = reinterpret_cast<T*>(mRpcInfo->getData());
-     auto size = mRpcInfo->getSize();
-     std::vector<T> buffer(data, data + (size / sizeof(T)));
-     return buffer;
-   }
+  template <typename T>
+  std::vector<T> getBlob()
+  {
+    auto data = reinterpret_cast<T*>(mRpcInfo->getData());
+    auto size = mRpcInfo->getSize();
+    std::vector<T> buffer(data, data + (size / sizeof(T)));
+    return buffer;
+  }
 
-   DimRpcInfo& getDimRpcInfo() const
-   {
-     return *mRpcInfo.get();
-   }
+  DimRpcInfo& getDimRpcInfo() const
+  {
+    return *mRpcInfo.get();
+  }
 
  private:
-   std::unique_ptr<DimRpcInfo> mRpcInfo;
+  std::unique_ptr<DimRpcInfo> mRpcInfo;
 };
 
 /// Client struct for reading DIM publishing service data
 class DimInfoWrapper : public DimInfo
 {
-  public:
-    DimInfoWrapper(const std::string &serviceName)
-      : DimInfo(serviceName.c_str(), toCharBuffer("").data()),
-        mServiceName(serviceName)
-    {
-    }
+ public:
+  DimInfoWrapper(const std::string& serviceName)
+    : DimInfo(serviceName.c_str(), toCharBuffer("").data()),
+      mServiceName(serviceName)
+  {
+  }
 
-    void infoHandler() { //TODO: Requirements?
-      getLogger() << "Published value(s) from " << mServiceName << endm;
-      getLogger() << getString() << endm;
-    }
+  void infoHandler()
+  { //TODO: Requirements?
+    getLogger() << "Published value(s) from " << mServiceName << endm;
+    getLogger() << getString() << endm;
+  }
 
-  private:
-    std::string mServiceName;
+ private:
+  std::string mServiceName;
 };
 
-} // namespace AliceO2
 } // namespace Alf
+} // namespace AliceO2
 #endif // ALICEO2_ALF_SRC_DIMSERVICES_DIMSERVICES_H

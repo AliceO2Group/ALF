@@ -14,15 +14,14 @@
 /// \author Pascal Boeschoten (pascal.boeschoten@cern.ch)
 /// \author Kostas Alexopoulos (kostas.alexopoulos@cern.ch)
 
-
 #ifndef ALICEO2_ALF_SRC_UTIL_H
 #define ALICEO2_ALF_SRC_UTIL_H
 
-#include "Common.h"
-#include "Logger.h"
-
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
+
+#include "Common.h"
+#include "Logger.h"
 
 namespace AliceO2
 {
@@ -48,7 +47,7 @@ inline uint32_t stringToHex(const std::string& string)
 
 inline void checkAddress(uint64_t address)
 {
-  if (address < 0x1e8 || address > 0x1fc) { //TODO: Update these addresses (Checkers for SWT, SCA and BAR2 regs)
+  if (address < 0x1e8 || address > 0x1fc) {                           //TODO: Update these addresses (Checkers for SWT, SCA and BAR2 regs)
     BOOST_THROW_EXCEPTION(std::out_of_range("Address out of range")); //TODO: Handle exceptions
   }
 }
@@ -65,7 +64,7 @@ inline std::vector<std::string> split(const std::string& input, std::string sepa
   return output;
 }
 
-inline size_t strlenMax(char * str, size_t max)
+inline size_t strlenMax(char* str, size_t max)
 {
   for (size_t i = 0; i < max; i++) {
     if (str[i] == '\0') {
@@ -75,7 +74,7 @@ inline size_t strlenMax(char * str, size_t max)
   return max;
 }
 
-}
+} // namespace Util
 } // namespace Alf
 } // namespace AliceO2
 

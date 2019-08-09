@@ -88,10 +88,10 @@ void StringRpcServer::rpcHandler()
     setDataString(makeSuccessString(returnValue), *this);
   } catch (const std::exception& e) {
     getLogger() << InfoLogger::InfoLogger::Error << mServiceName << ": " << boost::diagnostic_information(e, true)
-      << endm;
+                << endm;
     setDataString(makeFailureString(e.what()), *this);
   }
 }
 
-} // namespace AliceO2
 } // namespace Alf
+} // namespace AliceO2

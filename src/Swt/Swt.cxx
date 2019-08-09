@@ -23,15 +23,14 @@
 ///
 /// \author Kostas Alexopoulos (kostas.alexopoulos@cern.ch)
 
-#include "boost/format.hpp"
+#include <boost/format.hpp>
 #include <chrono>
 #include <thread>
 
 #include "AlfException.h"
 #include "Logger.h"
-#include "Swt/Swt.h"
-
 #include "ReadoutCard/Cru.h"
+#include "Swt/Swt.h"
 
 namespace AliceO2
 {
@@ -40,7 +39,7 @@ namespace Alf
 
 namespace sc_regs = AliceO2::roc::Cru::ScRegisters;
 
-Swt::Swt(roc::RegisterReadWriteInterface &bar2, AlfLink link) : mBar2(bar2), mLink(link)
+Swt::Swt(roc::RegisterReadWriteInterface& bar2, AlfLink link) : mBar2(bar2), mLink(link)
 {
   reset();
   setChannel(mLink.linkId);
@@ -57,7 +56,7 @@ void Swt::reset()
   barWrite(sc_regs::SC_RESET.index, 0x0); //void cmd to sync clocks
 }
 
-void Swt::read(std::vector<std::pair<SwtWord, uint32_t>> &wordMonPairs, SwtWord::Size wordSize)
+void Swt::read(std::vector<std::pair<SwtWord, uint32_t>>& wordMonPairs, SwtWord::Size wordSize)
 {
   uint32_t numWords = 0x0;
 
@@ -66,20 +65,24 @@ void Swt::read(std::vector<std::pair<SwtWord, uint32_t>> &wordMonPairs, SwtWord:
     numWords = barRead(sc_regs::SWT_MON.index);
   }
 
-  if ((numWords >> 16) < 1) { // #WORDS in READ FIFO
+  if ((numWords >> 16) < 1) {                                                                      // #WORDS in READ FIFO
     BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("Exceeded timeout on busy wait!")); //TODO: Don't crash
   }
 
-  for (int i = 0; i < (int) numWords; i++) {
+  for (int i = 0; i < (int)numWords; i++) {
     SwtWord tempWord;
 
     barWrite(sc_regs::SWT_CMD.index, 0x2);
     barWrite(sc_regs::SWT_CMD.index, 0x0); // void cmd to sync clocks
 
     tempWord.setLow(barRead(sc_regs::SWT_RD_WORD_L.index));
-    if (wordSize == SwtWord::Size::Low) { continue; }
+    if (wordSize == SwtWord::Size::Low) {
+      continue;
+    }
     tempWord.setMed(barRead(sc_regs::SWT_RD_WORD_M.index));
-    if (wordSize == SwtWord::Size::Medium) { continue; }
+    if (wordSize == SwtWord::Size::Medium) {
+      continue;
+    }
     tempWord.setHigh(barRead(sc_regs::SWT_RD_WORD_H.index));
 
     wordMonPairs.push_back(std::make_pair(tempWord, barRead(sc_regs::SWT_MON.index)));
@@ -90,7 +93,7 @@ uint32_t Swt::write(const SwtWord& swtWord)
 {
   // prep the swt word
   barWrite(sc_regs::SWT_WR_WORD_L.index, swtWord.getLow());
-  if (swtWord.getMed()) { 
+  if (swtWord.getMed()) {
     barWrite(sc_regs::SWT_WR_WORD_M.index, swtWord.getMed());
   }
   if (!swtWord.getHigh()) {
@@ -123,7 +126,8 @@ std::string Swt::writeSequence(std::vector<SwtWord> words)
       write(word);
       if (word.getHigh() & 0x80000000) {
         //getLogger() << "data=" << word << endm;
-        resultBuffer << "0" << "\n";
+        resultBuffer << "0"
+                     << "\n";
       } else {
         std::vector<std::pair<SwtWord, uint32_t>> results;
         read(results);
@@ -131,7 +135,7 @@ std::string Swt::writeSequence(std::vector<SwtWord> words)
           resultBuffer << element.first;
         }
       }
-    } catch (const SwtException &e) {
+    } catch (const SwtException& e) {
       // If an SWT error occurs, we stop executing the sequence of commands and return the results as far as we got them, plus
       // the error message. //TODO: Rework this, it doesn't look right (same for SCA)
       getErrorLogger() << AliceO2::InfoLogger::InfoLogger::InfoLogger::Error << "SWT_SEQUENCE data=" << word << (boost::format("serial=%d link=%d, error='%s'") % mLink.serial % mLink.linkId % e.what()).str() << endm;

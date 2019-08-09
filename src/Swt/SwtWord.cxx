@@ -26,6 +26,7 @@
 #include <cstdint>
 #include <cstddef>
 #include <iomanip>
+
 #include "Swt/SwtWord.h"
 
 namespace AliceO2
@@ -34,14 +35,14 @@ namespace Alf
 {
 
 SwtWord::SwtWord() : mLow(0),
-  mMed(0),
-  mHigh(0)
+                     mMed(0),
+                     mHigh(0)
 {
 }
 
 SwtWord::SwtWord(uint32_t low, uint32_t med, uint16_t high) : mLow(low),
-  mMed(med),
-  mHigh(high)
+                                                              mMed(med),
+                                                              mHigh(high)
 {
 }
 
@@ -95,7 +96,7 @@ uint16_t SwtWord::getHigh() const
 std::ostream& operator<<(std::ostream& output, const SwtWord& swtWord)
 {
   output << "0x" << std::setfill('0') << std::hex << std::setw(4) << swtWord.getHigh()
-    << std::setfill('0') << std::setw(8) << swtWord.getMed() << std::setfill('0') << std::setw(8) << swtWord.getLow();
+         << std::setfill('0') << std::setw(8) << swtWord.getMed() << std::setfill('0') << std::setw(8) << swtWord.getLow();
   return output;
 }
 

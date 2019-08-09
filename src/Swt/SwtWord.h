@@ -47,8 +47,7 @@ class SwtWord
   uint64_t getMed() const;
   uint16_t getHigh() const;
 
-  enum Size
-  {
+  enum Size {
     High,
     Medium,
     Low

@@ -33,10 +33,10 @@ namespace Visitor
 /// \tparam ReturnType Return type of the visitor.
 /// \tparam Types of the lambda functions.
 /// \param functions Functions. One for each type that can be visited.
-template<typename ReturnType, typename ... Functions>
-Implementation::Visitor<ReturnType, Functions...> make(Functions ... functions)
+template <typename ReturnType, typename... Functions>
+Implementation::Visitor<ReturnType, Functions...> make(Functions... functions)
 {
-  return {functions...};
+  return { functions... };
 }
 
 /// Convenience function to create a boost::variant visitor with functions and immediately apply it.
@@ -46,8 +46,8 @@ Implementation::Visitor<ReturnType, Functions...> make(Functions ... functions)
 /// \tparam Functions Types of the lambda functions.
 /// \param variant The variant to apply the visitor to.
 /// \param functions Functions. One for each type that can be visited.
-template<typename ReturnType = void, typename Variant, typename ... Functions>
-ReturnType apply(const Variant& variant, Functions ... functions)
+template <typename ReturnType = void, typename Variant, typename... Functions>
+ReturnType apply(const Variant& variant, Functions... functions)
 {
   return boost::apply_visitor(Visitor::make<ReturnType>(functions...), variant);
 }

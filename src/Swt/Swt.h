@@ -27,6 +27,7 @@
 #define ALICEO2_ALF_SRC_SWT_SWT_H
 
 #include <string>
+
 #include "Common.h"
 #include "ReadoutCard/RegisterReadWriteInterface.h"
 #include "Swt/SwtWord.h"
@@ -46,7 +47,7 @@ class Swt
 
   void reset();
   uint32_t write(const SwtWord& swtWord);
-  void read(std::vector<std::pair<SwtWord, uint32_t>> &wordMonPairs, SwtWord::Size wordSize = SwtWord::Size::High);
+  void read(std::vector<std::pair<SwtWord, uint32_t>>& wordMonPairs, SwtWord::Size wordSize = SwtWord::Size::High);
 
   std::string writeSequence(std::vector<SwtWord> words);
 
