@@ -12,7 +12,7 @@
 /// \brief Definition of the command line tool to run an ALF client
 ///
 /// \author Pascal Boeschoten (pascal.boeschoten@cern.ch)
-/// \author Kostas Alexopoulos (kostas.alexopoulos@cern.ch))
+/// \author Kostas Alexopoulos (kostas.alexopoulos@cern.ch)
 
 #include <chrono>
 #include <cstdlib>
@@ -24,6 +24,7 @@
 #include "Common/Program.h"
 #include "Common/GuardFunction.h"
 #include "DimServices/ServiceNames.h"
+#include "Logger.h"
 
 namespace po = boost::program_options;
 
@@ -31,6 +32,8 @@ namespace AliceO2
 {
 namespace Alf
 {
+
+AliceO2::InfoLogger::InfoLogger logger;
 
 class ProgramAlfClient : public AliceO2::Common::Program
 {

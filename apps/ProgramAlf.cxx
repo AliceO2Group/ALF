@@ -12,13 +12,14 @@
 /// \brief Definition of the command line tool to run the ALF server
 ///
 /// \author Pascal Boeschoten (pascal.boeschoten@cern.ch)
-/// \author Kostas Alexopoulos (kostas.alexopoulos@cern.ch))
+/// \author Kostas Alexopoulos (kostas.alexopoulos@cern.ch)
 
 #include <cstdlib>
 
 #include "AlfServer.h"
 #include "Common/Program.h"
 #include "DimServices/ServiceNames.h"
+#include "Logger.h"
 #include "ReadoutCard/CardDescriptor.h"
 #include "ReadoutCard/CardFinder.h"
 #include "ReadoutCard/ChannelFactory.h"
@@ -29,6 +30,8 @@ namespace AliceO2
 {
 namespace Alf
 {
+
+AliceO2::InfoLogger::InfoLogger logger;
 
 class ProgramAlf : public AliceO2::Common::Program
 {
@@ -81,9 +84,8 @@ class ProgramAlf : public AliceO2::Common::Program
      }
 
      getLogger() << "Starting the DIM Server" << endm;
-     DimServer::setDnsNode("localhost", 2505); //TODO: Move to AlfServer
-     //DimServer::start(alfId == -1 ? "ALF" : ("ALF" + std::to_string(alfId)).c_str());
-     DimServer::start("test");
+     DimServer::setDnsNode("localhost", 2505);
+     DimServer::start(alfId == -1 ? "ALF" : ("ALF" + std::to_string(alfId)).c_str());
      
      AlfServer alfServer = AlfServer();
 

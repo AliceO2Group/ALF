@@ -12,7 +12,7 @@
 /// \brief Implementation of ALF server related classes & functions
 ///
 /// \author Pascal Boeschoten (pascal.boeschoten@cern.ch)
-/// \author Kostas Alexopoulos (kostas.alexopoulos@cern.ch))
+/// \author Kostas Alexopoulos (kostas.alexopoulos@cern.ch)
 
 #include <chrono>
 #include <iomanip>
@@ -20,6 +20,7 @@
 
 #include "AlfServer.h"
 #include "DimServices/ServiceNames.h"
+#include "Logger.h"
 #include "Swt/Swt.h"
 #include "Visitor.h"
 #include "Util.h"
@@ -47,14 +48,13 @@ std::string AlfServer::registerWrite(const std::string& parameter, std::shared_p
   std::vector<std::string> params = Util::split(parameter, argumentSeparator());
 
   if (params.size() != 2) {
-    BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("Wrong number of parameters for RPC write call"));
+    BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("Wrong number of parameters for RPC write call")); //TODO: Handle
   }
 
   uint32_t address = Util::stringToHex(params[0]);
   //Util::checkAddress(address);
   uint32_t value = Util::stringToHex(params[1]);
  
-  getLogger() << "registerWrite RPC, addr=" << Util::formatValue(address) << ", value=" << Util::formatValue(value) << endm;
   bar2->writeRegister(address / 4, value);
   return "";
 }
@@ -83,7 +83,7 @@ std::string AlfServer::publishRegistersStart(const std::string parameter,
   auto params = Util::split(parameter, argumentSeparator());
 
   if (params.size() < 3) {
-    BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("Not enough parameters given"));
+    BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("Not enough parameters given")); //TODO: Handle
   }
 
   std::string dnsName = params[0];
@@ -98,12 +98,11 @@ std::string AlfServer::publishRegistersStart(const std::string parameter,
   auto command = std::make_unique<CommandQueue::Command>();
   command->start = true;
   command->description.type = ServiceDescription::Register{std::move(registers)};
-  command->description.dnsName = ServiceNames(link).publishRegisters(dnsName); //TODO: Can this be a bit cleaner?
+  command->description.dnsName = ServiceNames(link).publishRegisters(dnsName);
   getLogger() << "dns name=" << dnsName << "and command desc=" << command->description.dnsName << endm;
-  command->description.interval = std::chrono::milliseconds(int64_t(boost::lexical_cast<double>(interval) * 1000.0)); //TODO: ?
+  command->description.interval = std::chrono::milliseconds(int64_t(boost::lexical_cast<double>(interval) * 1000.0));
   command->description.link = link;
 
-  getLogger() << "before tryaddtoqueue" << endm;
   //TODO: TO BE DEFINED IN REQS
   //std::string retDnsName(command->description.dnsName); //Copy the data before moving the pointer...
   tryAddToQueue(*commandQueue, std::move(command));
@@ -118,12 +117,12 @@ std::string AlfServer::publishRegistersStop(const std::string parameter,
   auto command = std::make_unique<CommandQueue::Command>();
   command->start = false;
   command->description.type = ServiceDescription::Register();
-  command->description.dnsName = ServiceNames(link).publishRegisters(parameter); //TODO: Can this be a bit cleaner?
-  command->description.interval = std::chrono::milliseconds(0); //TODO: ?
+  command->description.dnsName = ServiceNames(link).publishRegisters(parameter);
+  command->description.interval = std::chrono::milliseconds(0);
   command->description.link = link;
 
   tryAddToQueue(*commandQueue, std::move(command));
-  return ""; //TODO: ??
+  return "";
 }
 
 std::string AlfServer::publishScaSequenceStart(const std::string parameter, 
@@ -146,12 +145,12 @@ std::string AlfServer::publishScaSequenceStart(const std::string parameter,
   auto command = std::make_unique<CommandQueue::Command>();
   command->start = true;
   command->description.type = ServiceDescription::Register();
-  command->description.dnsName = ServiceNames(link).publishScaSequence(dnsName); //TODO: Can this be a bit cleaner?
-  command->description.interval = std::chrono::milliseconds(int64_t(boost::lexical_cast<double>(interval) * 1000.0)); //TODO: ?
+  command->description.dnsName = ServiceNames(link).publishScaSequence(dnsName);
+  command->description.interval = std::chrono::milliseconds(int64_t(boost::lexical_cast<double>(interval) * 1000.0));
   command->description.link = link;
 
   tryAddToQueue(*commandQueue, std::move(command));
-  return ""; //TODO: ??
+  return "";
 }
 
 std::string AlfServer::publishScaSequenceStop(const std::string parameter, 
@@ -161,12 +160,12 @@ std::string AlfServer::publishScaSequenceStop(const std::string parameter,
   auto command = std::make_unique<CommandQueue::Command>();
   command->start = false;
   command->description.type = ServiceDescription::Register();
-  command->description.dnsName = ServiceNames(link).publishScaSequence(parameter); //TODO: Can this be a bit cleaner?
-  command->description.interval = std::chrono::milliseconds(0); //TODO: ?
+  command->description.dnsName = ServiceNames(link).publishScaSequence(parameter);
+  command->description.interval = std::chrono::milliseconds(0);
   command->description.link = link;
 
   tryAddToQueue(*commandQueue, std::move(command));
-  return ""; //TODO: ??
+  return "";
 }
 
 std::string AlfServer::publishSwtSequenceStart(const std::string parameter, 
@@ -189,12 +188,12 @@ std::string AlfServer::publishSwtSequenceStart(const std::string parameter,
   auto command = std::make_unique<CommandQueue::Command>();
   command->start = true;
   command->description.type = std::move(swtSequence);
-  command->description.dnsName = ServiceNames(link).publishSwtSequence(dnsName); //TODO: Can this be a bit cleaner?
-  command->description.interval = std::chrono::milliseconds(int64_t(boost::lexical_cast<double>(interval) * 1000.0)); //TODO: ?
+  command->description.dnsName = ServiceNames(link).publishSwtSequence(dnsName);
+  command->description.interval = std::chrono::milliseconds(int64_t(boost::lexical_cast<double>(interval) * 1000.0));
   command->description.link = link;
 
   tryAddToQueue(*commandQueue, std::move(command));
-  return ""; //TODO: ??
+  return "";
 
 }
 
@@ -205,24 +204,19 @@ std::string AlfServer::publishSwtSequenceStop(const std::string parameter,
   auto command = std::make_unique<CommandQueue::Command>();
   command->start = false;
   command->description.type = ServiceDescription::Register();
-  command->description.dnsName = ServiceNames(link).publishSwtSequence(parameter); //TODO: Can this be a bit cleaner?
-  command->description.interval = std::chrono::milliseconds(0); //TODO: ?
+  command->description.dnsName = ServiceNames(link).publishSwtSequence(parameter);
+  command->description.interval = std::chrono::milliseconds(0);
   command->description.link = link;
 
   tryAddToQueue(*commandQueue, std::move(command));
-  return ""; //TODO: ??
+  return "";
 }
-
-/*std::string AlfServer::scaPairSeparator()
-{
-  return ",";
-}*/
 
 Sca::CommandData AlfServer::stringToScaPair(std::string stringPair) {
   std::vector<std::string> scaPair = Util::split(stringPair, Sca::pairSeparator());
   if (stringPair.size() != 2) {
     BOOST_THROW_EXCEPTION(
-        AlfException() << ErrorInfo::Message("SCA command-data pair not formatted correctly"));
+        AlfException() << ErrorInfo::Message("SCA command-data pair not formatted correctly")); //TODO: Handle
   }
   Sca::CommandData commandData;
   commandData.command = Util::stringToHex(scaPair[0]); 
@@ -234,7 +228,7 @@ Sca::CommandData AlfServer::stringToScaPair(std::string stringPair) {
 SwtWord AlfServer::stringToSwtWord(const std::string& hexString)
 {
   if (hexString.length() > 24) {
-    BOOST_THROW_EXCEPTION(std::out_of_range("Parameter does not fit in 96-bit unsigned int"));
+    BOOST_THROW_EXCEPTION(std::out_of_range("Parameter does not fit in 96-bit unsigned int")); //TODO: Handle
   }
 
   std::stringstream ss;
@@ -252,7 +246,7 @@ std::vector<Sca::CommandData> AlfServer::parseStringScaCommands(std::vector<std:
 {
   std::vector<Sca::CommandData> pairs;
   for(const auto& stringPair : stringPairs) {
-    if (stringPair.find('#') == 0) { // Isn't a comment
+    if (stringPair.find('#') == 0) { // =isn't a comment
       pairs.push_back(stringToScaPair(stringPair));
     }
   }
@@ -274,7 +268,7 @@ std::vector<SwtWord> AlfServer::parseStringSwtWords(std::vector<std::string> str
 bool AlfServer::tryAddToQueue(CommandQueue& commandQueue, std::unique_ptr<CommandQueue::Command> command)
 {
   if (!commandQueue.write(std::move(command))) {
-    getLogger() << InfoLogger::InfoLogger::Error << " command queue was full!" << endm;
+    getErrorLogger() << " command queue was full!" << endm;
     return false;
   }
   return true;
@@ -362,7 +356,7 @@ void AlfServer::addRemoveServices()
 
 void AlfServer::addService(const ServiceDescription& serviceDescription)
 {
-  getLogger() << "In add service for : " << serviceDescription.dnsName << endm;
+  //getLogger() << "In add service for : " << serviceDescription.dnsName << endm;
   if (mServices.count(serviceDescription.dnsName)) {
     removeService(serviceDescription.dnsName);
   }
@@ -405,13 +399,12 @@ void AlfServer::addService(const ServiceDescription& serviceDescription)
 
 void AlfServer::removeService(const std::string& dnsName)
 {
-  getLogger() << "In remove service" << endm;
+  //getLogger() << "In remove service" << endm;
   mServices.erase(dnsName);
 }
 
 void AlfServer::updateServices()
 {
-  getLogger() << "In update services" << endm;
   auto now = std::chrono::steady_clock::now();
   std::chrono::steady_clock::time_point next = now + std::chrono::seconds(1);
 

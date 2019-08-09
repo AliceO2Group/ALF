@@ -12,11 +12,14 @@
 /// \brief Convenience functions for the need of the project
 ///
 /// \author Pascal Boeschoten (pascal.boeschoten@cern.ch)
-/// \author Kostas Alexopoulos (kostas.alexopoulos@cern.ch))
+/// \author Kostas Alexopoulos (kostas.alexopoulos@cern.ch)
 
 
 #ifndef ALICEO2_ALF_SRC_UTIL_H
 #define ALICEO2_ALF_SRC_UTIL_H
+
+#include "Common.h"
+#include "Logger.h"
 
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
@@ -46,7 +49,7 @@ inline uint32_t stringToHex(const std::string& string)
 inline void checkAddress(uint64_t address)
 {
   if (address < 0x1e8 || address > 0x1fc) { //TODO: Update these addresses (Checkers for SWT, SCA and BAR2 regs)
-    BOOST_THROW_EXCEPTION(std::out_of_range("Address out of range")); //TODO: Print an error and return, do NOT crash
+    BOOST_THROW_EXCEPTION(std::out_of_range("Address out of range")); //TODO: Handle exceptions
   }
 }
 

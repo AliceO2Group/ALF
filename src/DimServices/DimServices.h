@@ -23,6 +23,7 @@
 
 #include "AlfException.h"
 #include "Common.h"
+#include "Logger.h"
 #include "ReadoutCard/Register.h"
 #include "Sca/Sca.h"
 #include "Swt/SwtWord.h"
@@ -39,7 +40,6 @@ namespace Alf
 /// Length of the success/failure prefix that's returned in RPC calls
 constexpr size_t PREFIX_LENGTH(8);
 
-/// We use this in a few places because DIM insists on non-const char*
 std::vector<char> toCharBuffer(const std::string& string, bool addTerminator = true);
 
 template <typename DimObject>
@@ -55,10 +55,6 @@ void setDataBuffer(std::vector<char>& buffer, DimObject& dimObject)
   dimObject.setData(buffer.data(), buffer.size());
 }
 
-/*template <typename DimObject>
-void setDataString(const std::string& str, DimObject& dimObject, bool addTerminator = true);
-template <typename DimObject>
-void setDataBuffer(std::vector<char>& buffer, DimObject& dimObject);*/
 std::string argumentSeparator();
 std::string successPrefix();
 std::string failurePrefix();
@@ -88,8 +84,8 @@ class StringRpcServer: public DimRpc
     std::string mServiceName;
 };
 
-/// Struct describing a DIM publishing service
-struct ServiceDescription //Should this be further abstracted?
+/// Struct describing a DIM publishing(!) service
+struct ServiceDescription
 {
   /// Struct for register read service
   struct Register
@@ -148,7 +144,7 @@ class DimRpcInfoWrapper
      auto str = std::string(mRpcInfo->getString());
      if (isFailure(str)) {
        BOOST_THROW_EXCEPTION(
-           AlfException() << ErrorInfo::Message("ALF server failure: " + str));
+           AlfException() << ErrorInfo::Message("ALF server failure: " + str)); //TODO: Handle exceptions
      }
      return str;
    }
@@ -171,6 +167,7 @@ class DimRpcInfoWrapper
    std::unique_ptr<DimRpcInfo> mRpcInfo;
 };
 
+/// Client struct for reading DIM publishing service data
 class DimInfoWrapper : public DimInfo
 {
   public:
@@ -191,5 +188,4 @@ class DimInfoWrapper : public DimInfo
 
 } // namespace AliceO2
 } // namespace Alf
-
 #endif // ALICEO2_ALF_SRC_DIMSERVICES_DIMSERVICES_H

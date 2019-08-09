@@ -12,7 +12,7 @@
 /// \brief Definition of ALF server related classes & functions
 ///
 /// \author Pascal Boeschoten (pascal.boeschoten@cern.ch)
-/// \author Kostas Alexopoulos (kostas.alexopoulos@cern.ch))
+/// \author Kostas Alexopoulos (kostas.alexopoulos@cern.ch)
 
 #ifndef ALICEO2_ALF_ALFSERVER_H_
 #define ALICEO2_ALF_ALFSERVER_H_
@@ -59,22 +59,10 @@ class CommandQueue
    folly::ProducerConsumerQueue<std::unique_ptr<Command>> mQueue {512};
 };
 
-//constexpr std::string_view ARGUMENT_SEPARATOR("\n");
-//constexpr std::string_view SCA_PAIR_SEPARATOR(",");
-
-//bool isSuccess(const std::string& string);
-//bool isFail(const std::string& string);
-//std::string stripPrefix(const std::string& string);
-
 class AlfServer
 {
   public:
     AlfServer();
-    /*void makeServers(std::map<int, std::map<int, std::shared_ptr<roc::BarInterface>>> bars,
-        std::vector<AlfLink> links,
-        std::shared_ptr<CommandQueue> commandQueue,
-        std::map<int, std::map<int, std::vector<std::unique_ptr<StringRpcServer>>>> &rpcServers);*/
-    //void makeRpcServers(std::shared_ptr<roc::BarInterface> bar2, std::vector<AlfLink> links);
     void makeRpcServers(std::vector<AlfLink> links);
 
 
@@ -113,7 +101,6 @@ class AlfServer
                                               std::shared_ptr<CommandQueue> commandQueue,
                                             AlfLink link);
 
-    //static std::string scaPairSeparator();
     static Sca::CommandData stringToScaPair(std::string stringPair);
     static SwtWord stringToSwtWord(const std::string& hexString);
     static std::vector<Sca::CommandData> parseStringScaCommands(std::vector<std::string> stringPairs);

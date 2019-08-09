@@ -12,36 +12,18 @@
 /// \brief Definition of ALF client related classes
 ///
 /// \author Pascal Boeschoten (pascal.boeschoten@cern.ch)
-/// \author Kostas Alexopoulos (kostas.alexopoulos@cern.ch))
+/// \author Kostas Alexopoulos (kostas.alexopoulos@cern.ch)
 
 
 #ifndef ALICEO2_ALF_ALFCLIENT_H_
 #define ALICEO2_ALF_ALFCLIENT_H_
 
-//include <chrono>
-//include <iomanip>
-//include <thread>
 #include <string>
 
-//include "AlfException.h"
 #include "DimServices/DimServices.h"
-//include "Common.h"
 #include "Util.h"
 
-//include "folly/ProducerConsumerQueue.h"
-//include "InfoLogger/InfoLogger.hxx"
-//include "ReadoutCard/BarInterface.h"
-
 #include <boost/format.hpp>
-//include <boost/algorithm/string/predicate.hpp>
-
-/*constexpr auto endm = AliceO2::InfoLogger::InfoLogger::endm;
-
-static AliceO2::InfoLogger::InfoLogger& getLogger()
-{
-  static AliceO2::InfoLogger::InfoLogger logger;
-  return logger;
-}*/
 
 namespace roc = AliceO2::roc;
 
@@ -61,7 +43,15 @@ class RegisterReadRpc: DimRpcInfoWrapper
     uint32_t readRegister(uint64_t registerAddress)
     {
       setString((boost::format("0x%x") % registerAddress).str());
-      return Util::stringToHex(stripPrefix(getString()));
+      std::string toConvert;
+      try {
+        toConvert = stripPrefix(getString());
+      } catch (const AlfException &e){
+        getErrorLogger() << "RegisterReadRpc: " << boost::diagnostic_information(e, true) << endm;
+        return 0xffffffff; //TODO: Better value here?
+      }
+      
+      return Util::stringToHex(toConvert);
     }
 };
 
@@ -80,7 +70,7 @@ class RegisterWriteRpc: DimRpcInfoWrapper
     }
 };
 
-class ScaWriteSequence: DimRpcInfoWrapper //TODO: ??
+class ScaWriteSequence: DimRpcInfoWrapper
 {
   public:
     ScaWriteSequence(const std::string& serviceName)
@@ -128,7 +118,7 @@ class PublishRegistersStartRpc : DimRpcInfoWrapper
       for (size_t i = 0; i < addresses.size(); ++i) {
         stream << sep << addresses[i];
       }
-      //printf("Publish: %s\n", stream.str().c_str());
+      //getLogger() << stream.str() << endm;
       setString(stream.str());
       return getString();
     }
@@ -174,7 +164,7 @@ class PublishScaSequenceStartRpc : DimRpcInfoWrapper
       for (size_t i = 0; i < commandDataPairs.size(); ++i) {
         stream << sep << commandDataPairs[i].command << Sca::pairSeparator() << commandDataPairs[i].data;
       }
-      printf("Publish SCA: %s\n", stream.str().c_str());
+      //printf("Publish SCA: %s\n", stream.str().c_str());
       setString(stream.str());
       getString();
     }
@@ -203,7 +193,7 @@ class PublishSwtSequenceStopRpc : DimRpcInfoWrapper
 {
 };
 
-/*class ScaReadRpc: DimRpcInfoWrapper //TODO: ??
+/*class ScaReadRpc: DimRpcInfoWrapper //TODO: Does this stay??
 {
   public:
     ScaReadRpc(const std::string& serviceName)
@@ -216,23 +206,7 @@ class PublishSwtSequenceStopRpc : DimRpcInfoWrapper
       setString("");
       return stripPrefix(getString());
     }
-};
-
-class ScaWriteRpc: DimRpcInfoWrapper //TODO: ??
-{
-  public:
-    ScaWriteRpc(const std::string& serviceName)
-      : DimRpcInfoWrapper(serviceName)
-    {
-    }
-
-    std::string write(uint32_t command, uint32_t data)
-    {
-      setString((boost::format("0x%x%s0x%x") % command % Sca::pairSeparator() % data).str());
-      return stripPrefix(getString());
-    }
 };*/
-
 
 } // namespace Alf
 } // namespace AliceO2

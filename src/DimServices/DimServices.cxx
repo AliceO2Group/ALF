@@ -19,12 +19,14 @@
 #include "AlfException.h"
 #include "boost/algorithm/string/predicate.hpp"
 #include "DimServices/DimServices.h"
+#include "Logger.h"
 
 namespace AliceO2
 {
 namespace Alf
 {
 
+/// We use this in a few places because DIM insists on non-const char*
 std::vector<char> toCharBuffer(const std::string& str, bool addTerminator)
 {
   std::vector<char> buffer(str.begin(), str.end());
@@ -33,19 +35,6 @@ std::vector<char> toCharBuffer(const std::string& str, bool addTerminator)
   }
   return buffer;
 }
-
-/*template <typename DimObject>
-void setDataString(const std::string& str, DimObject& dimObject, bool addTerminator)
-{
-  auto buffer = toCharBuffer(str, addTerminator);
-  dimObject.setData(buffer.data(), buffer.size());
-}
-
-template <typename DimObject>
-void setDataBuffer(std::vector<char>& buffer, DimObject& dimObject)
-{
-  dimObject.setData(buffer.data(), buffer.size());
-}*/
 
 std::string argumentSeparator()
 {
@@ -85,7 +74,8 @@ bool isFailure(const std::string& str)
 std::string stripPrefix(const std::string& str)
 {
   if (str.length() < PREFIX_LENGTH) {
-    //printf("len=%lu str=%s\n", str.length(), str.c_str());
+    //printf("len=%lu str=%s\n", str.length(), str.c_str()); //TODO: Meaningful message
+    getErrorLogger() << "string=" << str << " too short to contain prefix!" << endm;
     BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("string too short to contain prefix!"));
   }
   return str.substr(PREFIX_LENGTH);

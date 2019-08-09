@@ -23,10 +23,12 @@
 ///
 /// \author Kostas Alexopoulos (kostas.alexopoulos@cern.ch)
 
+#include "boost/format.hpp"
 #include <chrono>
 #include <thread>
 
 #include "AlfException.h"
+#include "Logger.h"
 #include "Swt/Swt.h"
 
 #include "ReadoutCard/Cru.h"
@@ -41,7 +43,7 @@ namespace sc_regs = AliceO2::roc::Cru::ScRegisters;
 Swt::Swt(roc::RegisterReadWriteInterface &bar2, AlfLink link) : mBar2(bar2), mLink(link)
 {
   reset();
-  setChannel(mLink.linkId); //TODO: gbtChannel -> link ??
+  setChannel(mLink.linkId);
 }
 
 void Swt::setChannel(int gbtChannel)
@@ -65,7 +67,7 @@ void Swt::read(std::vector<std::pair<SwtWord, uint32_t>> &wordMonPairs, SwtWord:
   }
 
   if ((numWords >> 16) < 1) { // #WORDS in READ FIFO
-    BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("Exceeded timeout on busy wait!"));
+    BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("Exceeded timeout on busy wait!")); //TODO: Don't crash
   }
 
   for (int i = 0; i < (int) numWords; i++) {
@@ -132,7 +134,7 @@ std::string Swt::writeSequence(std::vector<SwtWord> words)
     } catch (const SwtException &e) {
       // If an SWT error occurs, we stop executing the sequence of commands and return the results as far as we got them, plus
       // the error message. //TODO: Rework this, it doesn't look right (same for SCA)
-      //getLogger() << InfoLogger::InfoLogger::Error << "SWT_SEQUENCE data=" << word << (boost::format("serial=%d link=%d, error='%s'") % linkInfo.serial % linkInfo.link % e.what()).str() << endm;
+      getErrorLogger() << AliceO2::InfoLogger::InfoLogger::InfoLogger::Error << "SWT_SEQUENCE data=" << word << (boost::format("serial=%d link=%d, error='%s'") % mLink.serial % mLink.linkId % e.what()).str() << endm;
       resultBuffer << e.what();
       break;
     }

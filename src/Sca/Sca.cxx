@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "AlfException.h"
+#include "Logger.h"
 #include "ReadoutCard/Cru.h"
 #include "Sca/Sca.h"
 #include "Util.h"
