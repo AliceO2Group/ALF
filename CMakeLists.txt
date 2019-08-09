@@ -57,7 +57,6 @@ find_package(DIM REQUIRED)
 
 add_library(ALF OBJECT
   src/AlfServer.cxx
-  src/AlfClient.cxx
   src/DimServices/DimServices.cxx
   src/DimServices/ServiceNames.cxx
   src/Sca/Sca.cxx
