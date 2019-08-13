@@ -279,7 +279,7 @@ std::vector<Sca::CommandData> AlfServer::parseStringToScaCommands(std::vector<st
 
 std::vector<std::pair<SwtWord, Swt::Operation>> AlfServer::parseStringToSwtPairs(std::vector<std::string> stringPairs)
 {
- 
+
   std::vector<std::pair<SwtWord, Swt::Operation>> pairs;
   for (const auto& stringPair : stringPairs) {
     if (stringPair.find('#') == std::string::npos) {
@@ -324,12 +324,10 @@ void AlfServer::makeRpcServers(std::vector<AlfLink> links)
 
     // SCA Sequence
     servers.push_back(makeServer(names.scaSequence(),
-          [link](auto parameter){
-          return scaBlobWrite(parameter, link);}));
+                                 [link](auto parameter) { return scaBlobWrite(parameter, link); }));
     // SWT Sequence
     servers.push_back(makeServer(names.swtSequence(),
-          [link](auto parameter){
-          return swtBlobWrite(parameter, link);}));
+                                 [link](auto parameter) { return swtBlobWrite(parameter, link); }));
 
     // Publish Registers
     /*servers.push_back(makeServer(names.publishRegistersStart(),

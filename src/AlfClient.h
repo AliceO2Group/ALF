@@ -23,7 +23,6 @@
 #include "DimServices/DimServices.h"
 #include "Util.h"
 
-
 namespace roc = AliceO2::roc;
 
 namespace AliceO2
@@ -32,7 +31,7 @@ namespace Alf
 {
 
 constexpr const uint32_t errHex = 0xffffffff;
-constexpr const char * errString = "";
+constexpr const char* errString = "";
 
 class RegisterReadRpc : DimRpcInfoWrapper
 {
@@ -91,7 +90,7 @@ class ScaSequence : DimRpcInfoWrapper
     setString(buffer);
     std::string ret;
     try {
-    ret = getString();
+      ret = getString();
     } catch (const AlfException& e) {
       getErrorLogger() << "ScaSequence: " << boost::diagnostic_information(e, true) << endm;
       return errString;
@@ -146,7 +145,6 @@ class SwtSequence : DimRpcInfoWrapper
     return write(buffer.str());
   }
 };
-
 
 /* UNUSED FROM NOW ON */
 

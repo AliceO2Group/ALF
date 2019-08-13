@@ -28,7 +28,6 @@
 
 #include "folly/ProducerConsumerQueue.h"
 
-
 namespace roc = AliceO2::roc;
 
 namespace AliceO2

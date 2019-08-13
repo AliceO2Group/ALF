@@ -65,7 +65,7 @@ void Swt::read(std::vector<SwtWord>& words, SwtWord::Size wordSize)
     numWords = (barRead(sc_regs::SWT_MON.index) >> 16);
   }
 
-  if (numWords < 1) {                                                                      // #WORDS in READ FIFO
+  if (numWords < 1) { // #WORDS in READ FIFO
     BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("Not enough words in SWT READ FIFO"));
   }
 

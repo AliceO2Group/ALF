@@ -91,14 +91,14 @@ Sca::ReadResult Sca::read()
   auto endTime = std::chrono::steady_clock::now() + CHANNEL_BUSY_TIMEOUT;
   while (std::chrono::steady_clock::now() < endTime) {
     if (!isChannelBusy(barRead(sc_regs::SCA_RD_CMD.index))) {
-    checkError(command);
+      checkError(command);
     }
   }
 
   std::stringstream ss;
   ss << "command: " << command << " data: " << data;
   BOOST_THROW_EXCEPTION(ScaException() << ErrorInfo::Message(
-        "Exceeded timeout on channel busy wait" + ss.str()));
+                          "Exceeded timeout on channel busy wait" + ss.str()));
 }
 
 bool Sca::isChannelBusy(uint32_t command)
@@ -152,7 +152,7 @@ void Sca::checkError(uint32_t command)
     }
 
     BOOST_THROW_EXCEPTION(ScaException() << ErrorInfo::Message(
-          stream.str()));
+                            stream.str()));
   }
 }
 
@@ -239,8 +239,7 @@ std::string Sca::writeSequence(const std::vector<CommandData>& commands)
     } catch (const ScaException& e) {
       // If an SCA error occurs, we stop executing the sequence of commands and return the results as far as we got
       // them, plus the error message.
-      getErrorLogger() << (boost::format("SCA_SEQUENCE cmd=0x%08x data=0x%08x serial=%d link=%d error='%s'")
-          % commandData.command % commandData.data % mLink.serial % mLink.linkId % e.what()).str() << endm;
+      getErrorLogger() << (boost::format("SCA_SEQUENCE cmd=0x%08x data=0x%08x serial=%d link=%d error='%s'") % commandData.command % commandData.data % mLink.serial % mLink.linkId % e.what()).str() << endm;
       resultBuffer << e.what();
       break;
     }
