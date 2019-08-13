@@ -43,8 +43,8 @@ class SwtWord
   void setLow(uint32_t low);
   void setMed(uint32_t med);
   void setHigh(uint16_t high);
-  uint64_t getLow() const;
-  uint64_t getMed() const;
+  uint32_t getLow() const;
+  uint32_t getMed() const;
   uint16_t getHigh() const;
 
   enum Size {
@@ -54,8 +54,8 @@ class SwtWord
   };
 
  private:
-  uint64_t mLow;
-  uint64_t mMed;
+  uint32_t mLow;
+  uint32_t mMed;
   uint16_t mHigh;
 };
 

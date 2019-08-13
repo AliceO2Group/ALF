@@ -47,12 +47,14 @@ Sca::Sca(AlfLink link)
   barWrite(sc_regs::SC_LINK.index, mLink.linkId);
 }
 
+// UNUSED
 void Sca::initialize()
 {
   init(); //TODO: handle error??
   gpioEnable();
 }
 
+// UNUSED
 void Sca::init()
 {
   barWrite(sc_regs::SCA_WR_CTRL.index, 0x1);
@@ -93,8 +95,10 @@ Sca::ReadResult Sca::read()
     }
   }
 
+  std::stringstream ss;
+  ss << "command: " << command << " data: " << data;
   BOOST_THROW_EXCEPTION(ScaException() << ErrorInfo::Message(
-                          "Exceeded timeout on channel busy wait"));
+        "Exceeded timeout on channel busy wait" + ss.str()));
 }
 
 bool Sca::isChannelBusy(uint32_t command)
@@ -152,6 +156,7 @@ void Sca::checkError(uint32_t command)
   }
 }
 
+// UNUSED
 void Sca::gpioEnable()
 {
   // Enable GPIO

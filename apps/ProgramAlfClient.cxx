@@ -81,6 +81,8 @@ class ProgramAlfClient : public AliceO2::Common::Program
     ServiceNames names(link);
     Alf::RegisterReadRpc registerReadRpc(names.registerRead());
     Alf::RegisterWriteRpc registerWriteRpc(names.registerWrite());
+    Alf::SwtSequence swtSequence(names.swtSequence());
+    Alf::ScaSequence scaSequence(names.scaSequence());
     
     /*Alf::PublishRegistersStartRpc publishRegistersStartRpc(names.publishRegistersStart());
     Alf::PublishRegistersStopRpc publishRegistersStopRpc(names.publishRegistersStop());
@@ -98,7 +100,11 @@ class ProgramAlfClient : public AliceO2::Common::Program
     uint32_t rAddress = 0x00f0005c;
     registerWriteRpc.writeRegister(wAddress, wValue);
     uint32_t rValue = registerReadRpc.readRegister(rAddress);
-    getLogger() << "Wrote: " << Util::formatValue(wValue) << " Read: " << Util::formatValue(rValue) << endm;
+    getWarningLogger() << "Wrote: " << Util::formatValue(wValue) << " Read: " << Util::formatValue(rValue) << endm;
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    auto out = swtSequence.write({std::make_pair("0x00000000000000000000", "write"), std::make_pair("0x000000001234", "write"), std::make_pair("0x0", "read")});
+    getWarningLogger() << "swtSequence output: " << out << endm;
 
     // Test register publishing
     /*getLogger() << "Register publishing services RPC" << endm;
@@ -109,8 +115,7 @@ class ProgramAlfClient : public AliceO2::Common::Program
     Alf::PublishInfo publishRegistersInfoSingle(names.publishRegisters("TEST_PUB_REGS_SINGLE"));
     Alf::PublishInfo publishRegistersInfoMulti(names.publishRegisters("TEST_PUB_REGS_MULTI"));*/
 
-    std::this_thread::sleep_for(std::chrono::seconds(6));
-    std::cout << "See ya!" << std::endl;
+    getWarningLogger() << "See ya!" << endm;
   }
 
  private:

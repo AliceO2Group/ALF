@@ -78,12 +78,12 @@ void SwtWord::setHigh(uint16_t high)
   mHigh = high;
 }
 
-uint64_t SwtWord::getLow() const
+uint32_t SwtWord::getLow() const
 {
   return mLow;
 }
 
-uint64_t SwtWord::getMed() const
+uint32_t SwtWord::getMed() const
 {
   return mMed;
 }

@@ -37,7 +37,7 @@ AlfServer::AlfServer() : mCommandQueue(std::make_shared<CommandQueue>()), mRpcSe
 std::string AlfServer::registerRead(const std::string& parameter, std::shared_ptr<roc::BarInterface> bar2)
 {
   uint32_t address = Util::stringToHex(parameter); // Error from here will get picked up by the StringRpcServer try clause
-  Util::checkAddress(address);
+  //Util::checkAddress(address);
 
   uint32_t value = bar2->readRegister(address / 4);
   return Util::formatValue(value);
@@ -52,7 +52,7 @@ std::string AlfServer::registerWrite(const std::string& parameter, std::shared_p
   }
 
   uint32_t address = Util::stringToHex(params[0]);
-  Util::checkAddress(address);
+  //Util::checkAddress(address);
   uint32_t value = Util::stringToHex(params[1]);
 
   bar2->writeRegister(address / 4, value);
@@ -228,7 +228,7 @@ Sca::CommandData AlfServer::stringToScaPair(std::string stringPair)
 std::pair<SwtWord, Swt::Operation> AlfServer::stringToSwtPair(const std::string stringPair)
 {
   std::vector<std::string> swtPair = Util::split(stringPair, pairSeparator());
-  if (stringPair.size() != 2) {
+  if (swtPair.size() != 2) {
     BOOST_THROW_EXCEPTION(
       AlfException() << ErrorInfo::Message("SWT word pair not formatted correctly"));
   }
@@ -241,17 +241,17 @@ std::pair<SwtWord, Swt::Operation> AlfServer::stringToSwtPair(const std::string 
     hexString.erase(i, leadingHex.size());
   }
 
-  if (hexString.length() > 24) {
+  if (hexString.length() > 20) {
     BOOST_THROW_EXCEPTION(std::out_of_range("Parameter does not fit in 96-bit unsigned int"));
   }
 
   std::stringstream ss;
-  ss << std::setw(24) << std::setfill('0') << hexString;
+  ss << std::setw(20) << std::setfill('0') << hexString;
 
   SwtWord word;
-  word.setLow(std::stoul(ss.str().substr(0, 8), NULL, 16));
-  word.setMed(std::stoul(ss.str().substr(8, 8), NULL, 16));
-  word.setHigh(std::stoul(ss.str().substr(16, 8), NULL, 16));
+  word.setHigh(std::stoul(ss.str().substr(0, 4), NULL, 16));
+  word.setMed(std::stoul(ss.str().substr(4, 8), NULL, 16));
+  word.setLow(std::stoul(ss.str().substr(12, 8), NULL, 16));
 
   Swt::Operation operation;
 
@@ -279,9 +279,10 @@ std::vector<Sca::CommandData> AlfServer::parseStringToScaCommands(std::vector<st
 
 std::vector<std::pair<SwtWord, Swt::Operation>> AlfServer::parseStringToSwtPairs(std::vector<std::string> stringPairs)
 {
+ 
   std::vector<std::pair<SwtWord, Swt::Operation>> pairs;
   for (const auto& stringPair : stringPairs) {
-    if (stringPair.find('#') == 0) {
+    if (stringPair.find('#') == std::string::npos) {
       pairs.push_back(stringToSwtPair(stringPair));
     }
   }

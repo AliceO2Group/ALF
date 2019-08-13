@@ -78,10 +78,10 @@ class RegisterWriteRpc : DimRpcInfoWrapper
   }
 };
 
-class ScaWriteSequence : DimRpcInfoWrapper
+class ScaSequence : DimRpcInfoWrapper
 {
  public:
-  ScaWriteSequence(const std::string& serviceName)
+  ScaSequence(const std::string& serviceName)
     : DimRpcInfoWrapper(serviceName)
   {
   }
@@ -93,13 +93,13 @@ class ScaWriteSequence : DimRpcInfoWrapper
     try {
     ret = getString();
     } catch (const AlfException& e) {
-      getErrorLogger() << "ScaWriteSequence: " << boost::diagnostic_information(e, true) << endm;
+      getErrorLogger() << "ScaSequence: " << boost::diagnostic_information(e, true) << endm;
       return errString;
     }
     return ret;
   }
 
-  std::string write(const std::vector<std::pair<uint32_t, uint32_t>>& sequence)
+  std::string write(const std::vector<std::pair<std::string, std::string>>& sequence)
   {
     std::stringstream buffer;
     for (size_t i = 0; i < sequence.size(); ++i) {
@@ -112,28 +112,29 @@ class ScaWriteSequence : DimRpcInfoWrapper
   }
 };
 
-class SwtWriteSequence : DimRpcInfoWrapper
+class SwtSequence : DimRpcInfoWrapper
 {
  public:
-  SwtWriteSequence(const std::string& serviceName)
+  SwtSequence(const std::string& serviceName)
     : DimRpcInfoWrapper(serviceName)
   {
   }
 
   std::string write(const std::string& buffer)
   {
+    getWarningLogger() << "BUFFER: " << buffer << endm;
     setString(buffer);
     std::string ret;
     try {
       ret = getString();
     } catch (const AlfException& e) {
-      getErrorLogger() << "SwtWriteSequence: " << boost::diagnostic_information(e, true) << endm;
+      getErrorLogger() << "SwtSequence: " << boost::diagnostic_information(e, true) << endm;
       return errString;
     }
     return ret;
   }
 
-  std::string write(const std::vector<std::pair<uint32_t, uint32_t>>& sequence)
+  std::string write(const std::vector<std::pair<std::string, std::string>>& sequence)
   {
     std::stringstream buffer;
     for (size_t i = 0; i < sequence.size(); ++i) {
@@ -149,6 +150,7 @@ class SwtWriteSequence : DimRpcInfoWrapper
 
 /* UNUSED FROM NOW ON */
 
+// UNUSED
 class PublishRegistersStartRpc : DimRpcInfoWrapper
 {
  public:
@@ -170,6 +172,7 @@ class PublishRegistersStartRpc : DimRpcInfoWrapper
   }
 };
 
+// UNUSED
 class PublishRegistersStopRpc : DimRpcInfoWrapper
 {
  public:
@@ -185,6 +188,7 @@ class PublishRegistersStopRpc : DimRpcInfoWrapper
   }
 };
 
+// UNUSED
 class PublishInfo : DimInfoWrapper //TODO: To be extended with overriden handler for REGS, SCA & SWT ?
 {
  public:
@@ -194,6 +198,7 @@ class PublishInfo : DimInfoWrapper //TODO: To be extended with overriden handler
   }
 };
 
+// UNUSED
 class PublishScaSequenceStartRpc : DimRpcInfoWrapper
 {
  public:
@@ -215,6 +220,7 @@ class PublishScaSequenceStartRpc : DimRpcInfoWrapper
   }
 };
 
+// UNUSED
 class PublishScaSequenceStopRpc : DimRpcInfoWrapper
 {
  public:
@@ -230,14 +236,17 @@ class PublishScaSequenceStopRpc : DimRpcInfoWrapper
   }
 };
 
+// UNUSED
 class PublishSwtSequenceStartRpc : DimRpcInfoWrapper
 {
 };
 
+// UNUSED
 class PublishSwtSequenceStopRpc : DimRpcInfoWrapper
 {
 };
 
+// UNUSED
 /*class ScaReadRpc: DimRpcInfoWrapper //TODO: Does this stay??
 {
   public:

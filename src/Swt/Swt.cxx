@@ -62,11 +62,11 @@ void Swt::read(std::vector<SwtWord>& words, SwtWord::Size wordSize)
 
   auto endTime = std::chrono::steady_clock::now() + std::chrono::milliseconds(10);
   while (std::chrono::steady_clock::now() <= endTime) {
-    numWords = barRead(sc_regs::SWT_MON.index);
+    numWords = (barRead(sc_regs::SWT_MON.index) >> 16);
   }
 
-  if ((numWords >> 16) < 1) {                                                                      // #WORDS in READ FIFO
-    BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("Exceeded timeout on busy wait!"));
+  if (numWords < 1) {                                                                      // #WORDS in READ FIFO
+    BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("Not enough words in SWT READ FIFO"));
   }
 
   for (int i = 0; i < (int)numWords; i++) {
@@ -94,10 +94,10 @@ uint32_t Swt::write(const SwtWord& swtWord)
 {
   // prep the swt word
   barWrite(sc_regs::SWT_WR_WORD_L.index, swtWord.getLow());
-  if (swtWord.getMed()) {
+  if (swtWord.getMed() || swtWord.getHigh()) {
     barWrite(sc_regs::SWT_WR_WORD_M.index, swtWord.getMed());
   }
-  if (!swtWord.getHigh()) {
+  if (swtWord.getHigh()) {
     barWrite(sc_regs::SWT_WR_WORD_H.index, swtWord.getHigh());
   }
 
@@ -129,11 +129,11 @@ std::string Swt::writeSequence(std::vector<std::pair<SwtWord, Operation>> words)
         std::vector<SwtWord> results;
         read(results);
         for (const auto& word : results) {
-          resultBuffer << word;
+          resultBuffer << word << "\n";
         }
       } else if (it.second == Operation::Write) {
         write(word);
-        resultBuffer << word;
+        resultBuffer << word << "\n";
       } else {
         BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("SWT operation type unknown"));
       }

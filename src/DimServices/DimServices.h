@@ -121,6 +121,7 @@ struct Service {
   std::vector<char> buffer; ///< Needed for DIM
 };
 
+// UNUSED
 class DimRpcInfoWrapper
 {
  public:
@@ -162,6 +163,7 @@ class DimRpcInfoWrapper
   std::unique_ptr<DimRpcInfo> mRpcInfo;
 };
 
+// UNUSED
 /// Client struct for reading DIM publishing service data
 class DimInfoWrapper : public DimInfo
 {
