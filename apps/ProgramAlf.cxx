@@ -110,6 +110,12 @@ class ProgramAlf : public AliceO2::Common::Program
           links.push_back({ alfId, serial, linkId, bar2 });
         }
 
+        /* TEST */
+/*        Sca sca = Sca(*bar2, links.back());
+        sca.read(); */
+
+        /* TEST */
+
       } else {
         getLogger() << InfoLogger::InfoLogger::Severity::Warning << card.pciAddress << " is not a CRU. Skipping..." << endm;
       }

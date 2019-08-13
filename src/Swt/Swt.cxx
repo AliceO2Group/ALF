@@ -39,7 +39,7 @@ namespace Alf
 
 namespace sc_regs = AliceO2::roc::Cru::ScRegisters;
 
-Swt::Swt(roc::RegisterReadWriteInterface& bar2, AlfLink link) : mBar2(bar2), mLink(link)
+Swt::Swt(AlfLink link) : mBar2(*link.bar2), mLink(link)
 {
   reset();
   setChannel(mLink.linkId);
@@ -56,7 +56,7 @@ void Swt::reset()
   barWrite(sc_regs::SC_RESET.index, 0x0); //void cmd to sync clocks
 }
 
-void Swt::read(std::vector<std::pair<SwtWord, uint32_t>>& wordMonPairs, SwtWord::Size wordSize)
+void Swt::read(std::vector<SwtWord>& words, SwtWord::Size wordSize)
 {
   uint32_t numWords = 0x0;
 
@@ -66,7 +66,7 @@ void Swt::read(std::vector<std::pair<SwtWord, uint32_t>>& wordMonPairs, SwtWord:
   }
 
   if ((numWords >> 16) < 1) {                                                                      // #WORDS in READ FIFO
-    BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("Exceeded timeout on busy wait!")); //TODO: Don't crash
+    BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("Exceeded timeout on busy wait!"));
   }
 
   for (int i = 0; i < (int)numWords; i++) {
@@ -85,7 +85,8 @@ void Swt::read(std::vector<std::pair<SwtWord, uint32_t>>& wordMonPairs, SwtWord:
     }
     tempWord.setHigh(barRead(sc_regs::SWT_RD_WORD_H.index));
 
-    wordMonPairs.push_back(std::make_pair(tempWord, barRead(sc_regs::SWT_MON.index)));
+    //wordMonPairs.push_back(std::make_pair(tempWord, barRead(sc_regs::SWT_MON.index)));
+    words.push_back(tempWord);
   }
 }
 
@@ -118,26 +119,27 @@ uint32_t Swt::barRead(uint32_t index)
   return read;
 }
 
-std::string Swt::writeSequence(std::vector<SwtWord> words)
+std::string Swt::writeSequence(std::vector<std::pair<SwtWord, Operation>> words)
 {
   std::stringstream resultBuffer;
-  for (const auto& word : words) {
+  for (const auto& it : words) {
+    SwtWord word = it.first;
     try {
-      write(word);
-      if (word.getHigh() & 0x80000000) {
-        //getLogger() << "data=" << word << endm;
-        resultBuffer << "0"
-                     << "\n";
-      } else {
-        std::vector<std::pair<SwtWord, uint32_t>> results;
+      if (it.second == Operation::Read) {
+        std::vector<SwtWord> results;
         read(results);
-        for (const auto& element : results) {
-          resultBuffer << element.first;
+        for (const auto& word : results) {
+          resultBuffer << word;
         }
+      } else if (it.second == Operation::Write) {
+        write(word);
+        resultBuffer << word;
+      } else {
+        BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("SWT operation type unknown"));
       }
     } catch (const SwtException& e) {
       // If an SWT error occurs, we stop executing the sequence of commands and return the results as far as we got them, plus
-      // the error message. //TODO: Rework this, it doesn't look right (same for SCA)
+      // the error message.
       getErrorLogger() << AliceO2::InfoLogger::InfoLogger::InfoLogger::Error << "SWT_SEQUENCE data=" << word << (boost::format("serial=%d link=%d, error='%s'") % mLink.serial % mLink.linkId % e.what()).str() << endm;
       resultBuffer << e.what();
       break;

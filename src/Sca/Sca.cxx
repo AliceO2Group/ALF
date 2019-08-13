@@ -34,8 +34,8 @@ namespace Alf
 
 // std::map<std::string, uint32_t> Sca::registers;
 
-Sca::Sca(roc::RegisterReadWriteInterface& bar2, AlfLink link)
-  : mBar2(bar2), mLink(link)
+Sca::Sca(AlfLink link)
+  : mBar2(*link.bar2), mLink(link)
 {
   if (mLink.linkId >= CRU_NUM_LINKS) {
     BOOST_THROW_EXCEPTION(
@@ -49,7 +49,7 @@ Sca::Sca(roc::RegisterReadWriteInterface& bar2, AlfLink link)
 
 void Sca::initialize()
 {
-  init();
+  init(); //TODO: handle error??
   gpioEnable();
 }
 
@@ -71,7 +71,12 @@ void Sca::write(uint32_t command, uint32_t data)
     BOOST_THROW_EXCEPTION(ScaException()
                           << ErrorInfo::Message("Invalid transaction ID"));
   }
-  executeCommand();
+
+  try {
+    executeCommand();
+  } catch (const ScaException& e) {
+    throw;
+  }
 }
 
 Sca::ReadResult Sca::read()
@@ -84,10 +89,10 @@ Sca::ReadResult Sca::read()
   auto endTime = std::chrono::steady_clock::now() + CHANNEL_BUSY_TIMEOUT;
   while (std::chrono::steady_clock::now() < endTime) {
     if (!isChannelBusy(barRead(sc_regs::SCA_RD_CMD.index))) {
-      checkError(command);
-      return { command, data };
+    checkError(command);
     }
   }
+
   BOOST_THROW_EXCEPTION(ScaException() << ErrorInfo::Message(
                           "Exceeded timeout on channel busy wait"));
 }
@@ -142,7 +147,8 @@ void Sca::checkError(uint32_t command)
       }
     }
 
-    BOOST_THROW_EXCEPTION(ScaException() << ErrorInfo::Message(stream.str()));
+    BOOST_THROW_EXCEPTION(ScaException() << ErrorInfo::Message(
+          stream.str()));
   }
 }
 
@@ -163,6 +169,7 @@ void Sca::gpioEnable()
   read();
 }
 
+// UNUSED
 Sca::ReadResult Sca::gpioWrite(uint32_t data)
 {
   //  printf("Sca::gpioWrite DATA=0x%x\n", data);
@@ -177,6 +184,7 @@ Sca::ReadResult Sca::gpioWrite(uint32_t data)
   return read();
 }
 
+// UNUSED
 Sca::ReadResult Sca::gpioRead()
 {
   // printf("Sca::gpioRead\n", data);
@@ -226,21 +234,14 @@ std::string Sca::writeSequence(const std::vector<CommandData>& commands)
     } catch (const ScaException& e) {
       // If an SCA error occurs, we stop executing the sequence of commands and return the results as far as we got
       // them, plus the error message.
-      //TODO: Print error
-      /*getLogger() << InfoLogger::InfoLogger::Error
-        << (boost::format("SCA_SEQUENCE cmd=0x%08x data=0x%08x serial=%d link=%d error='%s'") % commandData.commandG
-            % commandData.data % mLink.serial % mLink.linkId % e.what()).str() << endm;*/
+      getErrorLogger() << (boost::format("SCA_SEQUENCE cmd=0x%08x data=0x%08x serial=%d link=%d error='%s'")
+          % commandData.command % commandData.data % mLink.serial % mLink.linkId % e.what()).str() << endm;
       resultBuffer << e.what();
       break;
     }
   }
 
   return resultBuffer.str();
-}
-
-std::string Sca::pairSeparator()
-{
-  return ",";
 }
 
 } // namespace Alf

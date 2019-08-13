@@ -47,7 +47,7 @@ class Sca
 
   /// \param bar2 SCA is on BAR 2
   /// \param link Needed to get offset for SCA registers
-  Sca(roc::RegisterReadWriteInterface& bar2, AlfLink link);
+  Sca(AlfLink link);
 
   void initialize();
   ReadResult gpioRead();
@@ -60,8 +60,6 @@ class Sca
   };
 
   std::string writeSequence(const std::vector<CommandData>& commands);
-
-  static std::string pairSeparator();
 
  private:
   uint32_t barRead(uint32_t index);

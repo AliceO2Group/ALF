@@ -41,6 +41,11 @@ std::string argumentSeparator()
   return "\n";
 }
 
+std::string pairSeparator()
+{
+  return ",";
+}
+
 std::string successPrefix()
 {
   return "success" + argumentSeparator();
@@ -74,9 +79,9 @@ bool isFailure(const std::string& str)
 std::string stripPrefix(const std::string& str)
 {
   if (str.length() < PREFIX_LENGTH) {
-    //printf("len=%lu str=%s\n", str.length(), str.c_str()); //TODO: Meaningful message
-    getErrorLogger() << "string=" << str << " too short to contain prefix!" << endm;
-    BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("string too short to contain prefix!"));
+    std::stringstream ss;
+    ss << "string=" << str << " of size " << str.length() << " too short to contain prefix!" << endm;
+    BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("string too short to contain prefix! " + ss.str()));
   }
   return str.substr(PREFIX_LENGTH);
 }

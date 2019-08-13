@@ -81,7 +81,8 @@ class ProgramAlfClient : public AliceO2::Common::Program
     ServiceNames names(link);
     Alf::RegisterReadRpc registerReadRpc(names.registerRead());
     Alf::RegisterWriteRpc registerWriteRpc(names.registerWrite());
-    Alf::PublishRegistersStartRpc publishRegistersStartRpc(names.publishRegistersStart());
+    
+    /*Alf::PublishRegistersStartRpc publishRegistersStartRpc(names.publishRegistersStart());
     Alf::PublishRegistersStopRpc publishRegistersStopRpc(names.publishRegistersStop());
 
     AliceO2::Common::GuardFunction publishStopper{
@@ -89,7 +90,7 @@ class ProgramAlfClient : public AliceO2::Common::Program
         publishRegistersStopRpc.stop("TEST_PUB_REGS_SINGLE");
         publishRegistersStopRpc.stop("TEST_PUB_REGS_MULTI");
       }
-    };
+    };*/
 
     // Test register write and read
     uint32_t wAddress = 0x00f00078;
@@ -100,15 +101,16 @@ class ProgramAlfClient : public AliceO2::Common::Program
     getLogger() << "Wrote: " << Util::formatValue(wValue) << " Read: " << Util::formatValue(rValue) << endm;
 
     // Test register publishing
-    getLogger() << "Register publishing services RPC" << endm;
+    /*getLogger() << "Register publishing services RPC" << endm;
     publishRegistersStartRpc.publish("TEST_PUB_REGS_SINGLE", 1.0, { rAddress });
     publishRegistersStartRpc.publish("TEST_PUB_REGS_MULTI", 2.0, { rAddress, rAddress + 4, rAddress + 8 });
 
     getLogger() << "Register publishing services subscription" << endm;
     Alf::PublishInfo publishRegistersInfoSingle(names.publishRegisters("TEST_PUB_REGS_SINGLE"));
-    Alf::PublishInfo publishRegistersInfoMulti(names.publishRegisters("TEST_PUB_REGS_MULTI"));
+    Alf::PublishInfo publishRegistersInfoMulti(names.publishRegisters("TEST_PUB_REGS_MULTI"));*/
 
     std::this_thread::sleep_for(std::chrono::seconds(6));
+    std::cout << "See ya!" << std::endl;
   }
 
  private:

@@ -48,7 +48,7 @@ inline uint32_t stringToHex(const std::string& string)
 inline void checkAddress(uint64_t address)
 {
   if (address < 0x1e8 || address > 0x1fc) {                           //TODO: Update these addresses (Checkers for SWT, SCA and BAR2 regs)
-    BOOST_THROW_EXCEPTION(std::out_of_range("Address out of range")); //TODO: Handle exceptions
+    BOOST_THROW_EXCEPTION(std::out_of_range("Address out of range"));
   }
 }
 
@@ -57,7 +57,7 @@ inline std::string formatValue(uint32_t value)
   return (boost::format("0x%08x") % value).str();
 }
 
-inline std::vector<std::string> split(const std::string& input, std::string separators)
+inline std::vector<std::string> split(const std::string& input, std::string separators) //TODO: Does split throw?
 {
   std::vector<std::string> output;
   boost::split(output, input, boost::is_any_of(separators.c_str()));

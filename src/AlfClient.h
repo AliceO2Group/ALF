@@ -31,6 +31,9 @@ namespace AliceO2
 namespace Alf
 {
 
+constexpr const uint32_t errHex = 0xffffffff;
+constexpr const char * errString = "";
+
 class RegisterReadRpc : DimRpcInfoWrapper
 {
  public:
@@ -43,14 +46,16 @@ class RegisterReadRpc : DimRpcInfoWrapper
   {
     setString((boost::format("0x%x") % registerAddress).str());
     std::string toConvert;
+    uint32_t converted;
     try {
       toConvert = stripPrefix(getString());
+      converted = Util::stringToHex(toConvert);
     } catch (const AlfException& e) {
       getErrorLogger() << "RegisterReadRpc: " << boost::diagnostic_information(e, true) << endm;
-      return 0xffffffff; //TODO: Better value here?
+      return errHex;
     }
 
-    return Util::stringToHex(toConvert);
+    return converted;
   }
 };
 
@@ -65,7 +70,11 @@ class RegisterWriteRpc : DimRpcInfoWrapper
   void writeRegister(uint64_t registerAddress, uint32_t registerValue)
   {
     setString((boost::format("0x%x%s0x%x") % registerAddress % argumentSeparator() % registerValue).str());
-    getString();
+    try {
+      getString();
+    } catch (const AlfException& e) {
+      getErrorLogger() << "RegisterWriteRpc: " << boost::diagnostic_information(e, true) << endm;
+    }
   }
 };
 
@@ -80,14 +89,21 @@ class ScaWriteSequence : DimRpcInfoWrapper
   std::string write(const std::string& buffer)
   {
     setString(buffer);
-    return getString();
+    std::string ret;
+    try {
+    ret = getString();
+    } catch (const AlfException& e) {
+      getErrorLogger() << "ScaWriteSequence: " << boost::diagnostic_information(e, true) << endm;
+      return errString;
+    }
+    return ret;
   }
 
   std::string write(const std::vector<std::pair<uint32_t, uint32_t>>& sequence)
   {
     std::stringstream buffer;
     for (size_t i = 0; i < sequence.size(); ++i) {
-      buffer << sequence[i].first << Sca::pairSeparator() << sequence[i].second;
+      buffer << sequence[i].first << argumentSeparator() << sequence[i].second;
       if (i + 1 < sequence.size()) {
         buffer << argumentSeparator();
       }
@@ -98,7 +114,40 @@ class ScaWriteSequence : DimRpcInfoWrapper
 
 class SwtWriteSequence : DimRpcInfoWrapper
 {
+ public:
+  SwtWriteSequence(const std::string& serviceName)
+    : DimRpcInfoWrapper(serviceName)
+  {
+  }
+
+  std::string write(const std::string& buffer)
+  {
+    setString(buffer);
+    std::string ret;
+    try {
+      ret = getString();
+    } catch (const AlfException& e) {
+      getErrorLogger() << "SwtWriteSequence: " << boost::diagnostic_information(e, true) << endm;
+      return errString;
+    }
+    return ret;
+  }
+
+  std::string write(const std::vector<std::pair<uint32_t, uint32_t>>& sequence)
+  {
+    std::stringstream buffer;
+    for (size_t i = 0; i < sequence.size(); ++i) {
+      buffer << sequence[i].first << pairSeparator() << sequence[i].second;
+      if (i + 1 < sequence.size()) {
+        buffer << argumentSeparator();
+      }
+    }
+    return write(buffer.str());
+  }
 };
+
+
+/* UNUSED FROM NOW ON */
 
 class PublishRegistersStartRpc : DimRpcInfoWrapper
 {
@@ -111,10 +160,9 @@ class PublishRegistersStartRpc : DimRpcInfoWrapper
   std::string publish(std::string dnsName, double interval, std::vector<size_t> addresses)
   {
     std::ostringstream stream;
-    auto sep = argumentSeparator();
-    stream << dnsName << sep << interval;
+    stream << dnsName << argumentSeparator() << interval;
     for (size_t i = 0; i < addresses.size(); ++i) {
-      stream << sep << addresses[i];
+      stream << argumentSeparator() << addresses[i];
     }
     //getLogger() << stream.str() << endm;
     setString(stream.str());
@@ -157,10 +205,9 @@ class PublishScaSequenceStartRpc : DimRpcInfoWrapper
   void publish(std::string dnsName, double interval, const std::vector<Sca::CommandData>& commandDataPairs)
   {
     std::ostringstream stream;
-    auto sep = argumentSeparator();
-    stream << dnsName << sep << interval;
+    stream << dnsName << argumentSeparator() << interval;
     for (size_t i = 0; i < commandDataPairs.size(); ++i) {
-      stream << sep << commandDataPairs[i].command << Sca::pairSeparator() << commandDataPairs[i].data;
+      stream << argumentSeparator() << commandDataPairs[i].command << pairSeparator() << commandDataPairs[i].data;
     }
     //printf("Publish SCA: %s\n", stream.str().c_str());
     setString(stream.str());

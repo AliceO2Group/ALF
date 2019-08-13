@@ -36,8 +36,8 @@ AlfServer::AlfServer() : mCommandQueue(std::make_shared<CommandQueue>()), mRpcSe
 
 std::string AlfServer::registerRead(const std::string& parameter, std::shared_ptr<roc::BarInterface> bar2)
 {
-  uint32_t address = Util::stringToHex(parameter);
-  //Util::checkAddress(address);
+  uint32_t address = Util::stringToHex(parameter); // Error from here will get picked up by the StringRpcServer try clause
+  Util::checkAddress(address);
 
   uint32_t value = bar2->readRegister(address / 4);
   return Util::formatValue(value);
@@ -48,32 +48,32 @@ std::string AlfServer::registerWrite(const std::string& parameter, std::shared_p
   std::vector<std::string> params = Util::split(parameter, argumentSeparator());
 
   if (params.size() != 2) {
-    BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("Wrong number of parameters for RPC write call")); //TODO: Handle
+    BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("Wrong number of parameters for RPC write call"));
   }
 
   uint32_t address = Util::stringToHex(params[0]);
-  //Util::checkAddress(address);
+  Util::checkAddress(address);
   uint32_t value = Util::stringToHex(params[1]);
 
   bar2->writeRegister(address / 4, value);
   return "";
 }
 
-std::string AlfServer::scaBlobWrite(const std::string& parameter, std::shared_ptr<roc::BarInterface> bar2, AlfLink link)
+std::string AlfServer::scaBlobWrite(const std::string& parameter, AlfLink link)
 {
   std::vector<std::string> stringPairs = Util::split(parameter, argumentSeparator());
-  std::vector<Sca::CommandData> commands = parseStringScaCommands(stringPairs);
-  Sca sca = Sca(*bar2, link);
+  std::vector<Sca::CommandData> commands = parseStringToScaCommands(stringPairs);
+  Sca sca = Sca(link);
   return sca.writeSequence(commands);
 }
 
-std::string AlfServer::swtBlobWrite(const std::string& parameter, std::shared_ptr<roc::BarInterface> bar2, AlfLink link)
+std::string AlfServer::swtBlobWrite(const std::string& parameter, AlfLink link)
 {
 
   std::vector<std::string> stringPairs = Util::split(parameter, argumentSeparator());
-  std::vector<SwtWord> swtWords = parseStringSwtWords(stringPairs);
-  Swt swt = Swt(*bar2, link);
-  return swt.writeSequence(swtWords);
+  std::vector<std::pair<SwtWord, Swt::Operation>> swtPairs = parseStringToSwtPairs(stringPairs);
+  Swt swt = Swt(link);
+  return swt.writeSequence(swtPairs);
 }
 
 std::string AlfServer::publishRegistersStart(const std::string parameter,
@@ -83,7 +83,7 @@ std::string AlfServer::publishRegistersStart(const std::string parameter,
   auto params = Util::split(parameter, argumentSeparator());
 
   if (params.size() < 3) {
-    BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("Not enough parameters given")); //TODO: Handle
+    BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("Not enough parameters given"));
   }
 
   std::string dnsName = params[0];
@@ -140,7 +140,7 @@ std::string AlfServer::publishScaSequenceStart(const std::string parameter,
 
   std::vector<std::string> stringPairs = Util::split(parameter, argumentSeparator());
   ServiceDescription::ScaSequence scaSequence;
-  scaSequence.commandDataPairs = parseStringScaCommands(stringPairs);
+  scaSequence.commandDataPairs = parseStringToScaCommands(stringPairs);
 
   auto command = std::make_unique<CommandQueue::Command>();
   command->start = true;
@@ -183,7 +183,7 @@ std::string AlfServer::publishSwtSequenceStart(const std::string parameter,
 
   std::vector<std::string> stringPairs = Util::split(parameter, argumentSeparator());
   ServiceDescription::SwtSequence swtSequence;
-  swtSequence.swtWords = parseStringSwtWords(stringPairs);
+  swtSequence.swtPairs = parseStringToSwtPairs(stringPairs);
 
   auto command = std::make_unique<CommandQueue::Command>();
   command->start = true;
@@ -213,10 +213,10 @@ std::string AlfServer::publishSwtSequenceStop(const std::string parameter,
 
 Sca::CommandData AlfServer::stringToScaPair(std::string stringPair)
 {
-  std::vector<std::string> scaPair = Util::split(stringPair, Sca::pairSeparator());
+  std::vector<std::string> scaPair = Util::split(stringPair, pairSeparator());
   if (stringPair.size() != 2) {
     BOOST_THROW_EXCEPTION(
-      AlfException() << ErrorInfo::Message("SCA command-data pair not formatted correctly")); //TODO: Handle
+      AlfException() << ErrorInfo::Message("SCA command-data pair not formatted correctly"));
   }
   Sca::CommandData commandData;
   commandData.command = Util::stringToHex(scaPair[0]);
@@ -225,24 +225,48 @@ Sca::CommandData AlfServer::stringToScaPair(std::string stringPair)
 }
 
 /// Converts a 96-bit hex number string
-SwtWord AlfServer::stringToSwtWord(const std::string& hexString)
+std::pair<SwtWord, Swt::Operation> AlfServer::stringToSwtPair(const std::string stringPair)
 {
+  std::vector<std::string> swtPair = Util::split(stringPair, pairSeparator());
+  if (stringPair.size() != 2) {
+    BOOST_THROW_EXCEPTION(
+      AlfException() << ErrorInfo::Message("SWT word pair not formatted correctly"));
+  }
+
+  std::string hexString = swtPair[0];
+  std::string leadingHex = "0x";
+
+  std::string::size_type i = hexString.find(leadingHex);
+  if (i != std::string::npos) {
+    hexString.erase(i, leadingHex.size());
+  }
+
   if (hexString.length() > 24) {
-    BOOST_THROW_EXCEPTION(std::out_of_range("Parameter does not fit in 96-bit unsigned int")); //TODO: Handle
+    BOOST_THROW_EXCEPTION(std::out_of_range("Parameter does not fit in 96-bit unsigned int"));
   }
 
   std::stringstream ss;
   ss << std::setw(24) << std::setfill('0') << hexString;
 
-  SwtWord ret;
-  ret.setLow(std::stoul(ss.str().substr(0, 8), NULL, 16));
-  ret.setMed(std::stoul(ss.str().substr(8, 8), NULL, 16));
-  ret.setHigh(std::stoul(ss.str().substr(16, 8), NULL, 16));
+  SwtWord word;
+  word.setLow(std::stoul(ss.str().substr(0, 8), NULL, 16));
+  word.setMed(std::stoul(ss.str().substr(8, 8), NULL, 16));
+  word.setHigh(std::stoul(ss.str().substr(16, 8), NULL, 16));
 
-  return ret;
+  Swt::Operation operation;
+
+  if (swtPair[1] == "read") {
+    operation = Swt::Operation::Read;
+  } else if (swtPair[1] == "write") {
+    operation = Swt::Operation::Write;
+  } else {
+    BOOST_THROW_EXCEPTION(std::out_of_range("Parameter for SWT operation unkown"));
+  }
+
+  return std::make_pair(word, operation);
 }
 
-std::vector<Sca::CommandData> AlfServer::parseStringScaCommands(std::vector<std::string> stringPairs)
+std::vector<Sca::CommandData> AlfServer::parseStringToScaCommands(std::vector<std::string> stringPairs)
 {
   std::vector<Sca::CommandData> pairs;
   for (const auto& stringPair : stringPairs) {
@@ -253,12 +277,12 @@ std::vector<Sca::CommandData> AlfServer::parseStringScaCommands(std::vector<std:
   return pairs;
 }
 
-std::vector<SwtWord> AlfServer::parseStringSwtWords(std::vector<std::string> stringPairs)
+std::vector<std::pair<SwtWord, Swt::Operation>> AlfServer::parseStringToSwtPairs(std::vector<std::string> stringPairs)
 {
-  std::vector<SwtWord> pairs;
+  std::vector<std::pair<SwtWord, Swt::Operation>> pairs;
   for (const auto& stringPair : stringPairs) {
     if (stringPair.find('#') == 0) {
-      pairs.push_back(stringToSwtWord(stringPair));
+      pairs.push_back(stringToSwtPair(stringPair));
     }
   }
   return pairs;
@@ -297,21 +321,21 @@ void AlfServer::makeRpcServers(std::vector<AlfLink> links)
     servers.push_back(makeServer(names.registerWrite(),
                                  [bar2](auto parameter) { return registerWrite(parameter, bar2); }));
 
-    /*    // SCA Sequence
+    // SCA Sequence
     servers.push_back(makeServer(names.scaSequence(),
-          [bar2, link](auto parameter){
-          return scaBlobWrite(parameter, bar2, link);}));
+          [link](auto parameter){
+          return scaBlobWrite(parameter, link);}));
     // SWT Sequence
     servers.push_back(makeServer(names.swtSequence(),
-          [bar2, link](auto parameter){
-          return swtBlobWrite(parameter, bar2, link);}));
-*/
+          [link](auto parameter){
+          return swtBlobWrite(parameter, link);}));
+
     // Publish Registers
-    servers.push_back(makeServer(names.publishRegistersStart(),
+    /*servers.push_back(makeServer(names.publishRegistersStart(),
                                  [commandQueue, link](auto parameter) { return publishRegistersStart(parameter, commandQueue, link); }));
     servers.push_back(makeServer(names.publishRegistersStop(),
                                  [commandQueue, link](auto parameter) { return publishRegistersStop(parameter, commandQueue, link); }));
-    /*
+    
     // Publish SCA sequence
     servers.push_back(makeServer(names.publishScaSequenceStart(),
           [commandQueue, link](auto parameter){
@@ -331,6 +355,7 @@ void AlfServer::makeRpcServers(std::vector<AlfLink> links)
   }
 }
 
+/*** FROM NOW ON UNUSED ***/
 void AlfServer::addRemoveUpdateServices()
 {
   addRemoveServices();
@@ -376,8 +401,8 @@ void AlfServer::addService(const ServiceDescription& serviceDescription)
                    //  << service->description.interval.count() << "ms" << endm;
                  },
                  [&](const ServiceDescription::SwtSequence& type) {
-                   // Estimate max needed size. I'm not sure DIM can handle reallocations of this buffer, so we avoid that...
-                   service->buffer.resize(type.swtWords.size() * 20 + 512);
+                   // Estimate max needed size. I'm not sure DIM can handle reallocations of thiWords buffer, so we avoid that...
+                   service->buffer.resize(type.swtPairs.size() * 20 + 512);
                    //if (verbose) getLogger() << "Starting SCA publisher '" << service->description.dnsName << "' with "
                    //  << type.swtWords.size() << " SWT word(s) at interval "
                    //  << service->description.interval.count() << "ms" << endm;
@@ -429,14 +454,12 @@ void AlfServer::updateService(Service& service)
                    result = ss.str();
                  },
                  [&](const ServiceDescription::ScaSequence& type) {
-                   auto bar2 = service.description.link.bar2.get();
-                   auto sca = Sca(*bar2, service.description.link);
+                   auto sca = Sca(service.description.link);
                    result = sca.writeSequence(type.commandDataPairs);
                  },
                  [&](const ServiceDescription::SwtSequence& type) {
-                   auto bar2 = service.description.link.bar2.get();
-                   auto swt = Swt(*bar2, service.description.link);
-                   result = swt.writeSequence(type.swtWords);
+                   auto swt = Swt(service.description.link);
+                   result = swt.writeSequence(type.swtPairs);
                  });
 
   // Reset and copy into the persistent buffer because I don't trust DIM with the non-persistent std::string

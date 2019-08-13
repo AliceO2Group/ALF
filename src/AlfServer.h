@@ -77,8 +77,8 @@ class AlfServer
 
   static std::string registerRead(const std::string& parameter, std::shared_ptr<roc::BarInterface>);
   static std::string registerWrite(const std::string& parameter, std::shared_ptr<roc::BarInterface>);
-  static std::string scaBlobWrite(const std::string& parameter, std::shared_ptr<roc::BarInterface>, AlfLink link);
-  static std::string swtBlobWrite(const std::string& parameter, std::shared_ptr<roc::BarInterface>, AlfLink link);
+  static std::string scaBlobWrite(const std::string& parameter, AlfLink link);
+  static std::string swtBlobWrite(const std::string& parameter, AlfLink link);
   static std::string publishRegistersStart(const std::string parameter,
                                            std::shared_ptr<CommandQueue> commandQueue,
                                            AlfLink link);
@@ -99,9 +99,9 @@ class AlfServer
                                             AlfLink link);
 
   static Sca::CommandData stringToScaPair(std::string stringPair);
-  static SwtWord stringToSwtWord(const std::string& hexString);
-  static std::vector<Sca::CommandData> parseStringScaCommands(std::vector<std::string> stringPairs);
-  static std::vector<SwtWord> parseStringSwtWords(std::vector<std::string> stringPairs);
+  static std::pair<SwtWord, Swt::Operation> stringToSwtPair(const std::string stringPair);
+  static std::vector<Sca::CommandData> parseStringToScaCommands(std::vector<std::string> stringPairs);
+  static std::vector<std::pair<SwtWord, Swt::Operation>> parseStringToSwtPairs(std::vector<std::string> stringPairs);
 
   /// serial -> BAR number -> BAR Interface
   //std::map<int, std::map<int, std::shared_ptr<roc::BarInterface>>> mBars; //BAR number is necessary here because of CRORC

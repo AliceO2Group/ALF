@@ -29,7 +29,7 @@
 #include "Logger.h"
 #include "ReadoutCard/Register.h"
 #include "Sca/Sca.h"
-#include "Swt/SwtWord.h"
+#include "Swt/Swt.h"
 
 namespace AliceO2
 {
@@ -55,6 +55,7 @@ void setDataBuffer(std::vector<char>& buffer, DimObject& dimObject)
 }
 
 std::string argumentSeparator();
+std::string pairSeparator();
 std::string successPrefix();
 std::string failurePrefix();
 std::string makeSuccessString(const std::string& string);
@@ -97,7 +98,7 @@ struct ServiceDescription {
 
   /// Struct for SWT sequence service
   struct SwtSequence {
-    std::vector<SwtWord> swtWords;
+    std::vector<std::pair<SwtWord, Swt::Operation>> swtPairs;
   };
 
   std::string dnsName;
@@ -138,7 +139,7 @@ class DimRpcInfoWrapper
     auto str = std::string(mRpcInfo->getString());
     if (isFailure(str)) {
       BOOST_THROW_EXCEPTION(
-        AlfException() << ErrorInfo::Message("ALF server failure: " + str)); //TODO: Handle exceptions
+        AlfException() << ErrorInfo::Message("ALF server failure: " + str)); // Needs to be handled by the caller
     }
     return str;
   }
@@ -172,7 +173,7 @@ class DimInfoWrapper : public DimInfo
   }
 
   void infoHandler()
-  { //TODO: Requirements?
+  {
     getLogger() << "Published value(s) from " << mServiceName << endm;
     getLogger() << getString() << endm;
   }

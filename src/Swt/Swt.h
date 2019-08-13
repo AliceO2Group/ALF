@@ -43,13 +43,15 @@ namespace Alf
 class Swt
 {
  public:
-  Swt(roc::RegisterReadWriteInterface& bar2, AlfLink link);
+  Swt(AlfLink link);
 
   void reset();
   uint32_t write(const SwtWord& swtWord);
-  void read(std::vector<std::pair<SwtWord, uint32_t>>& wordMonPairs, SwtWord::Size wordSize = SwtWord::Size::High);
+  void read(std::vector<SwtWord>& words, SwtWord::Size wordSize = SwtWord::Size::High);
 
-  std::string writeSequence(std::vector<SwtWord> words);
+  enum Operation { Read, Write };
+
+  std::string writeSequence(std::vector<std::pair<SwtWord, Operation>> words);
 
  private:
   void setChannel(int gbtChannel);
