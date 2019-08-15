@@ -139,8 +139,7 @@ class DimRpcInfoWrapper
   {
     auto str = std::string(mRpcInfo->getString());
     if (isFailure(str)) {
-      BOOST_THROW_EXCEPTION(
-        AlfException() << ErrorInfo::Message("ALF server failure: " + str)); // Needs to be handled by the caller
+      getErrorLogger() << "ALF server failure: " << str << endm;
     }
     return str;
   }

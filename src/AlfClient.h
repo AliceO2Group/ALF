@@ -102,7 +102,7 @@ class ScaSequence : DimRpcInfoWrapper
   {
     std::stringstream buffer;
     for (size_t i = 0; i < sequence.size(); ++i) {
-      buffer << sequence[i].first << argumentSeparator() << sequence[i].second;
+      buffer << sequence[i].first << pairSeparator() << sequence[i].second;
       if (i + 1 < sequence.size()) {
         buffer << argumentSeparator();
       }
@@ -121,7 +121,6 @@ class SwtSequence : DimRpcInfoWrapper
 
   std::string write(const std::string& buffer)
   {
-    getWarningLogger() << "BUFFER: " << buffer << endm;
     setString(buffer);
     std::string ret;
     try {

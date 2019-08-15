@@ -214,7 +214,7 @@ std::string AlfServer::publishSwtSequenceStop(const std::string parameter,
 Sca::CommandData AlfServer::stringToScaPair(std::string stringPair)
 {
   std::vector<std::string> scaPair = Util::split(stringPair, pairSeparator());
-  if (stringPair.size() != 2) {
+  if (scaPair.size() != 2) {
     BOOST_THROW_EXCEPTION(
       AlfException() << ErrorInfo::Message("SCA command-data pair not formatted correctly"));
   }
@@ -270,7 +270,7 @@ std::vector<Sca::CommandData> AlfServer::parseStringToScaCommands(std::vector<st
 {
   std::vector<Sca::CommandData> pairs;
   for (const auto& stringPair : stringPairs) {
-    if (stringPair.find('#') == 0) { // =isn't a comment
+    if (stringPair.find('#') == std::string::npos) { // =isn't a comment
       pairs.push_back(stringToScaPair(stringPair));
     }
   }

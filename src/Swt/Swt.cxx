@@ -140,9 +140,10 @@ std::string Swt::writeSequence(std::vector<std::pair<SwtWord, Operation>> words)
     } catch (const SwtException& e) {
       // If an SWT error occurs, we stop executing the sequence of commands and return the results as far as we got them, plus
       // the error message.
-      getErrorLogger() << AliceO2::InfoLogger::InfoLogger::InfoLogger::Error << "SWT_SEQUENCE data=" << word << (boost::format("serial=%d link=%d, error='%s'") % mLink.serial % mLink.linkId % e.what()).str() << endm;
-      resultBuffer << e.what();
-      break;
+      std::string meaningfulMessage = (boost::format("SWT_SEQUENCE data=%s serial=%d link=%d, error='%s'") % word % mLink.serial % mLink.linkId % e.what()).str();
+      getErrorLogger() << meaningfulMessage << endm;
+      resultBuffer << meaningfulMessage;
+      BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message(resultBuffer.str()));
     }
   }
   return resultBuffer.str();
