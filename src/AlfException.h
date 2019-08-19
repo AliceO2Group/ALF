@@ -29,6 +29,8 @@ struct ScaException : AliceO2::Common::Exception {
 };
 struct SwtException : AliceO2::Common::Exception {
 };
+struct IcException : AliceO2::Common::Exception {
+};
 
 namespace ErrorInfo
 {
