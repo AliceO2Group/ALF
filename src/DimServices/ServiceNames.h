@@ -37,6 +37,8 @@ class ServiceNames
   std::string registerWrite() const;
   std::string scaSequence() const;
   std::string swtSequence() const;
+  std::string icSequence() const;
+  std::string icGbtI2cWrite() const;
   std::string publishRegistersStart() const;
   std::string publishRegistersStop() const;
   std::string publishScaSequenceStart() const;

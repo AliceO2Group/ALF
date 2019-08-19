@@ -76,6 +76,30 @@ std::string AlfServer::swtBlobWrite(const std::string& parameter, AlfLink link)
   return swt.writeSequence(swtPairs);
 }
 
+std::string AlfServer::icBlobWrite(const std::string& parameter, AlfLink link)
+{
+
+  std::vector<std::string> stringPairs = Util::split(parameter, argumentSeparator());
+  std::vector<std::pair<Ic::IcData, Ic::Operation>> icPairs = parseStringToIcPairs(stringPairs);
+  Ic ic = Ic(link);
+  return ic.writeSequence(icPairs);
+}
+
+std::string AlfServer::icGbtI2cWrite(const std::string& parameter, AlfLink link)
+{
+  std::vector<std::string> params = Util::split(parameter, argumentSeparator());
+
+  if (params.size() != 1) {
+    BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("Wrong number of parameters for RPC IC GBT I2C write call"));
+  }
+
+  uint32_t value = Util::stringToHex(params[0]);
+
+  Ic ic = Ic(link);
+  ic.writeGbtI2c(value);
+  return "";
+}
+
 std::string AlfServer::publishRegistersStart(const std::string parameter,
                                              std::shared_ptr<CommandQueue> commandQueue,
                                              AlfLink link)
@@ -266,6 +290,81 @@ std::pair<SwtWord, Swt::Operation> AlfServer::stringToSwtPair(const std::string 
   return std::make_pair(word, operation);
 }
 
+std::pair<Ic::IcData, Ic::Operation> AlfServer::stringToIcPair(const std::string stringPair)
+{
+  std::vector<std::string> icPair = Util::split(stringPair, pairSeparator());
+  if (icPair.size() != 2 && icPair.size() != 3) {
+    BOOST_THROW_EXCEPTION(
+      AlfException() << ErrorInfo::Message("IC pair not formatted correctly"));
+  }
+
+  Ic::Operation icOperation;
+
+  // Parse IC operation
+  if (icPair[icPair.size() - 1] == "read") {
+    icOperation = Ic::Operation::Read;
+    if (icPair.size() == 3) {
+      BOOST_THROW_EXCEPTION(
+        AlfException() << ErrorInfo::Message("Too many arguments for READ operation"));
+    }
+
+  } else if (icPair[icPair.size() - 1] == "write") {
+    icOperation = Ic::Operation::Write;
+    if (icPair.size() == 2) {
+      BOOST_THROW_EXCEPTION(
+        AlfException() << ErrorInfo::Message("Too few arguments for WRITE operation"));
+    }
+  } else {
+    BOOST_THROW_EXCEPTION(std::out_of_range("Parameter for IC operation unkown"));
+  }
+
+  // Parse IC address
+  std::string hexAddress = icPair[0];
+  std::string hexData;
+
+  std::string leadingHex = "0x";
+
+  // Validate IC address
+  std::string::size_type i = hexAddress.find(leadingHex);
+  if (i != std::string::npos) {
+    hexAddress.erase(i, leadingHex.size());
+  }
+
+  if (hexAddress.length() > 8) {
+    BOOST_THROW_EXCEPTION(std::out_of_range("Address parameter does not fit in 16-bit unsigned int"));
+  }
+
+  if (icPair.size() == 3) {
+    // Parse IC data if present
+    hexData = icPair[1];
+
+    // Validate IC data if present
+    i = hexData.find(leadingHex);
+    if (i != std::string::npos) {
+      hexData.erase(i, leadingHex.size());
+    }
+
+    if (hexData.length() > 4) {
+      BOOST_THROW_EXCEPTION(std::out_of_range("Data parameter does not fit in 8-bit unsigned int"));
+    }
+  }
+
+  Ic::IcData icData;
+
+  std::stringstream ss;
+  ss << std::setw(4) << std::setfill('0') << hexAddress;
+
+  icData.address = std::stoul(ss.str(), NULL, 16);
+
+  ss.str("");
+  ss.clear();
+
+  ss << std::setw(2) << std::setfill('0') << hexData;
+  icData.data = std::stoul(ss.str(), NULL, 16);
+
+  return std::make_pair(icData, icOperation);
+}
+
 std::vector<Sca::CommandData> AlfServer::parseStringToScaCommands(std::vector<std::string> stringPairs)
 {
   std::vector<Sca::CommandData> pairs;
@@ -284,6 +383,18 @@ std::vector<std::pair<SwtWord, Swt::Operation>> AlfServer::parseStringToSwtPairs
   for (const auto& stringPair : stringPairs) {
     if (stringPair.find('#') == std::string::npos) {
       pairs.push_back(stringToSwtPair(stringPair));
+    }
+  }
+  return pairs;
+}
+
+std::vector<std::pair<Ic::IcData, Ic::Operation>> AlfServer::parseStringToIcPairs(std::vector<std::string> stringPairs)
+{
+
+  std::vector<std::pair<Ic::IcData, Ic::Operation>> pairs;
+  for (const auto& stringPair : stringPairs) {
+    if (stringPair.find('#') == std::string::npos) {
+      pairs.push_back(stringToIcPair(stringPair));
     }
   }
   return pairs;
@@ -328,6 +439,13 @@ void AlfServer::makeRpcServers(std::vector<AlfLink> links)
     // SWT Sequence
     servers.push_back(makeServer(names.swtSequence(),
                                  [link](auto parameter) { return swtBlobWrite(parameter, link); }));
+    // IC Sequence
+    servers.push_back(makeServer(names.icSequence(),
+                                 [link](auto parameter) { return icBlobWrite(parameter, link); }));
+
+    // TODO: IC GBT I2C write (this will have a pretty servicename)
+    servers.push_back(makeServer(names.icGbtI2cWrite(),
+                                 [link](auto parameter) { return icGbtI2cWrite(parameter, link); }));
 
     // Publish Registers
     /*servers.push_back(makeServer(names.publishRegistersStart(),

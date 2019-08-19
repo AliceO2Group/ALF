@@ -59,6 +59,7 @@ add_library(ALF OBJECT
   src/AlfServer.cxx
   src/DimServices/DimServices.cxx
   src/DimServices/ServiceNames.cxx
+  src/Ic/Ic.cxx
   src/Sca/Sca.cxx
   src/Swt/Swt.cxx
   src/Swt/SwtWord.cxx

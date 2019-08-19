@@ -96,8 +96,10 @@ class ProgramAlfClient : public AliceO2::Common::Program
     ServiceNames names(link);
     Alf::RegisterReadRpc registerReadRpc(names.registerRead());
     Alf::RegisterWriteRpc registerWriteRpc(names.registerWrite());
-    Alf::SwtSequence swtSequence(names.swtSequence());
-    Alf::ScaSequence scaSequence(names.scaSequence());
+    Alf::SwtSequenceRpc swtSequence(names.swtSequence());
+    Alf::ScaSequenceRpc scaSequence(names.scaSequence());
+    Alf::IcSequenceRpc icSequence(names.icSequence());
+    Alf::IcGbtI2cWriteRpc icGbtI2cWriteRpc(names.icGbtI2cWrite());
 
     /*Alf::PublishRegistersStartRpc publishRegistersStartRpc(names.publishRegistersStart());
     Alf::PublishRegistersStopRpc publishRegistersStopRpc(names.publishRegistersStop());
@@ -117,12 +119,31 @@ class ProgramAlfClient : public AliceO2::Common::Program
     uint32_t rValue = registerReadRpc.readRegister(rAddress);
     getWarningLogger() << "Wrote: " << Util::formatValue(wValue) << " Read: " << Util::formatValue(rValue) << endm;
 
-    auto out = swtSequence.write({ std::make_pair("0x00000000000000000000", "write"), std::make_pair("0x000000001234", "write"), std::make_pair("0x0", "read") });
-    getWarningLogger() << "swtSequence output: " << out << endm;
+    auto swtOut = swtSequence.write({ std::make_pair("0x00000000000000000000", "write"),
+                                      std::make_pair("0x000000001234", "write"),
+                                      std::make_pair("0x0", "read") });
+    getWarningLogger() << "swtSequence output: " << swtOut << endm;
 
-    auto scaOut = scaSequence.write({ std::make_pair("0x00010002", "0xff000000"), std::make_pair("0x00020004", "0xff000000"), std::make_pair("0x00030006", "0xff000000"),
-                                      std::make_pair("0x0B950282", "0x50010000"), std::make_pair("0x0B9601DE", "0x50000000"), std::make_pair("0x0B970471", "0x50000000"), std::make_pair("0x0B980461", "0x50000000") });
+    auto scaOut = scaSequence.write({ std::make_pair("0x00010002", "0xff000000"),
+                                      std::make_pair("0x00020004", "0xff000000"),
+                                      std::make_pair("0x00030006", "0xff000000"),
+                                      std::make_pair("0x0B950282", "0x50010000"),
+                                      std::make_pair("0x0B9601DE", "0x50000000"),
+                                      std::make_pair("0x0B970471", "0x50000000"),
+                                      std::make_pair("0x0B980461", "0x50000000") });
     getWarningLogger() << "scaSequence output: " << scaOut << endm;
+
+    auto icOut = icSequence.write({
+      std::make_pair("0x54,0xff", "write"),
+      std::make_pair("0x54", "read"),
+      std::make_pair("0x55,0xff", "write"),
+      std::make_pair("0x55", "read"),
+      std::make_pair("0x56,0xff", "write"),
+      std::make_pair("0x56", "read"),
+    });
+    getWarningLogger() << "icSequence output: " << icOut << endm;
+
+    icGbtI2cWriteRpc.write(0x3);
 
     // Test register publishing
     /*getLogger() << "Register publishing services RPC" << endm;
