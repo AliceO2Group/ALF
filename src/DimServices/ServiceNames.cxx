@@ -34,12 +34,6 @@ DEFSERVICENAME(scaSequence, "SCA_SEQUENCE")
 DEFSERVICENAME(swtSequence, "SWT_SEQUENCE")
 DEFSERVICENAME(icSequence, "IC_SEQUENCE")
 DEFSERVICENAME(icGbtI2cWrite, "IC_GBT_I2C_write")
-DEFSERVICENAME(publishRegistersStart, "PUBLISH_REGISTERS_START")
-DEFSERVICENAME(publishRegistersStop, "PUBLISH_REGISTERS_STOP")
-DEFSERVICENAME(publishScaSequenceStart, "PUBLISH_SCA_SEQUENCE_START")
-DEFSERVICENAME(publishScaSequenceStop, "PUBLISH_SCA_SEQUENCE_STOP")
-DEFSERVICENAME(publishSwtSequenceStart, "PUBLISH_SWT_SEQUENCE_START")
-DEFSERVICENAME(publishSwtSequenceStop, "PUBLISH_SWT_SEQUENCE_STOP")
 
 std::string ServiceNames::format(std::string name) const
 {
@@ -47,21 +41,6 @@ std::string ServiceNames::format(std::string name) const
     return ((boost::format("ALF%1%/serial_%2%/link_%3%/%4%") % mAlfId % mSerial % mLink % name)).str();
   else
     return ((boost::format("ALF/serial_%1%/link_%2%/%3%") % mSerial % mLink % name)).str();
-}
-
-std::string ServiceNames::publishRegisters(std::string name) const
-{
-  return ServiceNames::format("PUBLISH_REGISTERS/") + name;
-}
-
-std::string ServiceNames::publishScaSequence(std::string name) const
-{
-  return ServiceNames::format("PUBLISH_SCA_SEQUENCE/") + name;
-}
-
-std::string ServiceNames::publishSwtSequence(std::string name) const
-{
-  return ServiceNames::format("PUBLISH_SWT_SEQUENCE/") + name;
 }
 
 } // namespace Alf

@@ -84,44 +84,6 @@ class StringRpcServer : public DimRpc
   std::string mServiceName;
 };
 
-/// Struct describing a DIM publishing(!) service
-struct ServiceDescription {
-  /// Struct for register read service
-  struct Register {
-    std::vector<uintptr_t> addresses;
-  };
-
-  /// Struct for SCA sequence service
-  struct ScaSequence {
-    std::vector<Sca::CommandData> commandDataPairs;
-  };
-
-  /// Struct for SWT sequence service
-  struct SwtSequence {
-    std::vector<std::pair<SwtWord, Swt::Operation>> swtPairs;
-  };
-
-  std::string dnsName;
-  std::chrono::milliseconds interval;
-  boost::variant<Register, ScaSequence, SwtSequence> type;
-  AlfLink link;
-};
-
-/// Struct for DIM publishing service data
-struct Service {
- public:
-  void advanceUpdateTime()
-  {
-    nextUpdate = nextUpdate + description.interval;
-  }
-
-  ServiceDescription description;
-  std::chrono::steady_clock::time_point nextUpdate;
-  std::unique_ptr<DimService> dimService;
-  std::vector<char> buffer; ///< Needed for DIM
-};
-
-// UNUSED
 class DimRpcInfoWrapper
 {
  public:
@@ -160,27 +122,6 @@ class DimRpcInfoWrapper
 
  private:
   std::unique_ptr<DimRpcInfo> mRpcInfo;
-};
-
-// UNUSED
-/// Client struct for reading DIM publishing service data
-class DimInfoWrapper : public DimInfo
-{
- public:
-  DimInfoWrapper(const std::string& serviceName)
-    : DimInfo(serviceName.c_str(), toCharBuffer("").data()),
-      mServiceName(serviceName)
-  {
-  }
-
-  void infoHandler()
-  {
-    getLogger() << "Published value(s) from " << mServiceName << endm;
-    getLogger() << getString() << endm;
-  }
-
- private:
-  std::string mServiceName;
 };
 
 } // namespace Alf
