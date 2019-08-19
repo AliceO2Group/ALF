@@ -39,18 +39,6 @@ class ServiceNames
   std::string swtSequence() const;
   std::string icSequence() const;
   std::string icGbtI2cWrite() const;
-  std::string publishRegistersStart() const;
-  std::string publishRegistersStop() const;
-  std::string publishScaSequenceStart() const;
-  std::string publishScaSequenceStop() const;
-  std::string publishSwtSequenceStart() const;
-  std::string publishSwtSequenceStop() const;
-
-  std::string publishRegisters(std::string name) const;
-  std::string publishScaSequence(std::string name) const;
-  std::string publishSwtSequence(std::string name) const;
-
-  static std::string getTail(std::string name);
 
  private:
   std::string format(std::string name) const;

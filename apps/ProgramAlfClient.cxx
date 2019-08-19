@@ -101,16 +101,6 @@ class ProgramAlfClient : public AliceO2::Common::Program
     Alf::IcSequenceRpc icSequence(names.icSequence());
     Alf::IcGbtI2cWriteRpc icGbtI2cWriteRpc(names.icGbtI2cWrite());
 
-    /*Alf::PublishRegistersStartRpc publishRegistersStartRpc(names.publishRegistersStart());
-    Alf::PublishRegistersStopRpc publishRegistersStopRpc(names.publishRegistersStop());
-
-    AliceO2::Common::GuardFunction publishStopper{
-      [&]() {
-        publishRegistersStopRpc.stop("TEST_PUB_REGS_SINGLE");
-        publishRegistersStopRpc.stop("TEST_PUB_REGS_MULTI");
-      }
-    };*/
-
     // Test register write and read
     uint32_t wAddress = 0x00f00078;
     uint32_t wValue = 0x4;
@@ -144,15 +134,6 @@ class ProgramAlfClient : public AliceO2::Common::Program
     getWarningLogger() << "icSequence output: " << icOut << endm;
 
     icGbtI2cWriteRpc.write(0x3);
-
-    // Test register publishing
-    /*getLogger() << "Register publishing services RPC" << endm;
-    publishRegistersStartRpc.publish("TEST_PUB_REGS_SINGLE", 1.0, { rAddress });
-    publishRegistersStartRpc.publish("TEST_PUB_REGS_MULTI", 2.0, { rAddress, rAddress + 4, rAddress + 8 });
-
-    getLogger() << "Register publishing services subscription" << endm;
-    Alf::PublishInfo publishRegistersInfoSingle(names.publishRegisters("TEST_PUB_REGS_SINGLE"));
-    Alf::PublishInfo publishRegistersInfoMulti(names.publishRegisters("TEST_PUB_REGS_MULTI"));*/
 
     getWarningLogger() << "See ya!" << endm;
   }

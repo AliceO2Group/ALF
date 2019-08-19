@@ -107,7 +107,6 @@ class ProgramAlf : public AliceO2::Common::Program
 
         getLogger() << "Card #" << serial << " : " << card.pciAddress << endm;
         bar2 = roc::ChannelFactory().getBar(card.pciAddress, 2);
-        //mBars[serial][2] = bar2; // All links pass through this for the CRU
         for (int linkId = 0; linkId < CRU_NUM_LINKS; linkId++) {
           links.push_back({ alfId, serial, linkId, bar2 });
         }
@@ -125,9 +124,9 @@ class ProgramAlf : public AliceO2::Common::Program
       alfServer.makeRpcServers(links);
     }
 
-    // main thread | Add/Remove/Update services
+    // main thread
     while (!isSigInt()) {
-      //alfServer.addRemoveUpdateServices();
+      std::this_thread::sleep_for(std::chrono::seconds(1));
     }
   }
 
