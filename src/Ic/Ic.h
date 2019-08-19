@@ -36,29 +36,55 @@ namespace AliceO2
 namespace Alf
 {
 
+/*namespace IcRegisters
+{
+  static constexpr Register IC_BASE(0x0f000000);
+  static constexpr Register IC_WR_DATA(0x0f000020);
+  static constexpr Register IC_WR_CFG(0x0f000024);
+  static constexpr Register IC_WR_CMD(0x0f000028);
+  static constexpr Register IC_RD_DATA(0x0f000030);
+} // namespace IcRegisters*/
+
 /// Class for IC(TODO:?) Transactions with the CRU
 class Ic
 {
  public:
+  struct IcData {
+    uint32_t address;
+    uint32_t data;
+  };
+
   Ic(AlfLink link);
 
   void reset();
-  void write();
-  uint32_t read();
+  uint32_t read(uint32_t address);
+  uint32_t read(IcData icData) {
+    return read(icData.address);
+  }
+  uint32_t write(uint32_t address, uint32_t data);
+  uint32_t write(IcData icData) {
+    return write(icData.address ,icData.data);
+  }
 
-//  enum Operation { Read,
-//                   Write };
+  void writeGbtI2c(uint32_t data);
+  enum Operation { Read,
+                   Write };
 
-//  std::string writeSequence(std::vector<std::pair<SwtWord, Operation>> words);
+  std::string writeSequence(std::vector<std::pair<IcData, Operation>> ops);
 
  private:
-//  void setChannel(int gbtChannel);
   void barWrite(uint32_t offset, uint32_t data);
   uint32_t barRead(uint32_t index);
 
   roc::RegisterReadWriteInterface& mBar2;
 
   AlfLink mLink;
+
+  uint32_t IC_BASE;
+  uint32_t IC_WR_DATA;
+  uint32_t IC_WR_CFG;
+  uint32_t IC_WR_CMD;
+  uint32_t IC_RD_DATA;
 };
 
 } // namespace Alf
