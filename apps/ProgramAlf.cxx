@@ -61,6 +61,7 @@ class ProgramAlf : public AliceO2::Common::Program
     getLogger() << "ALF server initializations..." << endm;
 
     if (const char* dimDnsNode = std::getenv("DIM_DNS_NODE")) {
+      getLogger() << "Picked up DIM_DMS_NODE from the environment." << endm;
       getLogger() << "DIM_DNS_NODE=" << dimDnsNode << endm;
     } else if (mOptions.dimDnsNode != "") {
       getLogger() << "DIM_DNS_NODE env variable not set. Setting it from argument." << endm;
@@ -73,6 +74,7 @@ class ProgramAlf : public AliceO2::Common::Program
     int alfId;
 
     if (const char* alfIdString = std::getenv("ALF_ID")) {
+      getLogger() << "Picked up ALF_ID from the environment." << endm;
       getLogger() << "ALF_ID=" << alfIdString << endm;
       alfId = atoi(alfIdString);
     } else {
