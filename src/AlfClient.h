@@ -77,10 +77,10 @@ class RegisterWriteRpc : DimRpcInfoWrapper
   }
 };
 
-class ScaSequence : DimRpcInfoWrapper
+class ScaSequenceRpc : DimRpcInfoWrapper
 {
  public:
-  ScaSequence(const std::string& serviceName)
+  ScaSequenceRpc(const std::string& serviceName)
     : DimRpcInfoWrapper(serviceName)
   {
   }
@@ -111,10 +111,10 @@ class ScaSequence : DimRpcInfoWrapper
   }
 };
 
-class SwtSequence : DimRpcInfoWrapper
+class SwtSequenceRpc : DimRpcInfoWrapper
 {
  public:
-  SwtSequence(const std::string& serviceName)
+  SwtSequenceRpc(const std::string& serviceName)
     : DimRpcInfoWrapper(serviceName)
   {
   }
@@ -142,6 +142,59 @@ class SwtSequence : DimRpcInfoWrapper
       }
     }
     return write(buffer.str());
+  }
+};
+
+class IcSequenceRpc : DimRpcInfoWrapper
+{
+ public:
+  IcSequenceRpc(const std::string& serviceName)
+    : DimRpcInfoWrapper(serviceName)
+  {
+  }
+
+  std::string write(const std::string& buffer)
+  {
+    setString(buffer);
+    std::string ret;
+    try {
+      ret = getString();
+    } catch (const AlfException& e) {
+      getErrorLogger() << "IcSequence: " << boost::diagnostic_information(e, true) << endm;
+      return errString;
+    }
+    return ret;
+  }
+
+  std::string write(const std::vector<std::pair<std::string, std::string>>& sequence)
+  {
+    std::stringstream buffer;
+    for (size_t i = 0; i < sequence.size(); ++i) {
+      buffer << sequence[i].first << pairSeparator() << sequence[i].second;
+      if (i + 1 < sequence.size()) {
+        buffer << argumentSeparator();
+      }
+    }
+    return write(buffer.str());
+  }
+};
+
+class IcGbtI2cWriteRpc : DimRpcInfoWrapper
+{
+ public:
+  IcGbtI2cWriteRpc(const std::string& serviceName)
+    : DimRpcInfoWrapper(serviceName)
+  {
+  }
+
+  void write(uint32_t value)
+  {
+    setString((boost::format("0x%x") % value).str());
+    try {
+      getString();
+    } catch (const AlfException& e) {
+      getErrorLogger() << "IcGbtI2cWriteRpc: " << boost::diagnostic_information(e, true) << endm;
+    }
   }
 };
 

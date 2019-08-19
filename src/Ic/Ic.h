@@ -56,14 +56,17 @@ class Ic
 
   Ic(AlfLink link);
 
+  void setChannel(int gbtChannel);
   void reset();
   uint32_t read(uint32_t address);
-  uint32_t read(IcData icData) {
+  uint32_t read(IcData icData)
+  {
     return read(icData.address);
   }
   uint32_t write(uint32_t address, uint32_t data);
-  uint32_t write(IcData icData) {
-    return write(icData.address ,icData.data);
+  uint32_t write(IcData icData)
+  {
+    return write(icData.address, icData.data);
   }
 
   void writeGbtI2c(uint32_t data);

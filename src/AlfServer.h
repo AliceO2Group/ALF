@@ -25,6 +25,7 @@
 #include "AlfException.h"
 #include "DimServices/DimServices.h"
 #include "Common.h"
+#include "Ic/Ic.h"
 
 #include "folly/ProducerConsumerQueue.h"
 
@@ -78,6 +79,8 @@ class AlfServer
   static std::string registerWrite(const std::string& parameter, std::shared_ptr<roc::BarInterface>);
   static std::string scaBlobWrite(const std::string& parameter, AlfLink link);
   static std::string swtBlobWrite(const std::string& parameter, AlfLink link);
+  static std::string icBlobWrite(const std::string& parameter, AlfLink link);
+  static std::string icGbtI2cWrite(const std::string& parameter, AlfLink link);
   static std::string publishRegistersStart(const std::string parameter,
                                            std::shared_ptr<CommandQueue> commandQueue,
                                            AlfLink link);
@@ -99,8 +102,10 @@ class AlfServer
 
   static Sca::CommandData stringToScaPair(std::string stringPair);
   static std::pair<SwtWord, Swt::Operation> stringToSwtPair(const std::string stringPair);
+  static std::pair<Ic::IcData, Ic::Operation> stringToIcPair(const std::string stringPair);
   static std::vector<Sca::CommandData> parseStringToScaCommands(std::vector<std::string> stringPairs);
   static std::vector<std::pair<SwtWord, Swt::Operation>> parseStringToSwtPairs(std::vector<std::string> stringPairs);
+  static std::vector<std::pair<Ic::IcData, Ic::Operation>> parseStringToIcPairs(std::vector<std::string> stringPairs);
 
   /// serial -> BAR number -> BAR Interface
   //std::map<int, std::map<int, std::shared_ptr<roc::BarInterface>>> mBars; //BAR number is necessary here because of CRORC
