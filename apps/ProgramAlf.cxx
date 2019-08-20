@@ -14,6 +14,8 @@
 /// \author Pascal Boeschoten (pascal.boeschoten@cern.ch)
 /// \author Kostas Alexopoulos (kostas.alexopoulos@cern.ch)
 
+#include <boost/algorithm/string/case_conv.hpp>
+#include <boost/asio.hpp>
 #include <cstdlib>
 
 #include "AlfServer.h"
@@ -24,6 +26,7 @@
 #include "ReadoutCard/CardFinder.h"
 #include "ReadoutCard/ChannelFactory.h"
 
+namespace ip = boost::asio::ip;
 namespace po = boost::program_options;
 
 namespace AliceO2
@@ -49,9 +52,7 @@ class ProgramAlf : public AliceO2::Common::Program
   {
     options.add_options()("dim-dns-node",
                           po::value<std::string>(&mOptions.dimDnsNode)->default_value(""),
-                          "The DIM DNS node to set the env var if not already set")("alf-id",
-                                                                                    po::value<int>(&mOptions.alfId)->default_value(-1),
-                                                                                    "The ALF ID");
+                          "The DIM DNS node to set the env var if not already set");
   }
 
   virtual void run(const po::variables_map&) override
@@ -71,22 +72,12 @@ class ProgramAlf : public AliceO2::Common::Program
       BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("DIM_DNS_NODE env variable not set, and no relevant argument provided.")); // InfoLogger and errors?
     }
 
-    int alfId;
-
-    if (const char* alfIdString = std::getenv("ALF_ID")) {
-      getLogger() << "Setting ALF_ID from argument." << endm;
-      alfId = mOptions.alfId;
-      getLogger() << "ALF_ID=" << alfId << endm;
-    } else {
-      getLogger() << "Picked up ALF_ID from the environment." << endm;
-      getLogger() << "ALF_ID=" << alfIdString << endm;
-      alfId = atoi(alfIdString);
-    }
-
+    std::string alfId = ip::host_name();
+    boost::to_upper(alfId);
 
     getLogger() << "Starting the DIM Server" << endm;
     DimServer::setDnsNode(mOptions.dimDnsNode.c_str(), 2505);
-    DimServer::start(alfId == -1 ? "ALF" : ("ALF" + std::to_string(alfId)).c_str());
+    DimServer::start(("ALF_" + alfId).c_str());
 
     AlfServer alfServer = AlfServer();
 
@@ -133,7 +124,6 @@ class ProgramAlf : public AliceO2::Common::Program
  private:
   struct OptionsStruct {
     std::string dimDnsNode = "";
-    int alfId = -1;
   } mOptions;
 };
 
