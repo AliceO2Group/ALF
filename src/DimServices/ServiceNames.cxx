@@ -38,9 +38,9 @@ DEFSERVICENAME(icGbtI2cWrite, "IC_GBT_I2C_write")
 std::string ServiceNames::format(std::string name) const
 {
   if (mAlfId != "-1")
-    return ((boost::format("ALF%1%/serial_%2%/link_%3%/%4%") % mAlfId % mSerial % mLink % name)).str();
+    return ((boost::format("ALF%1%/SERIAL_%2%/LINK_%3%/%4%") % mAlfId % mSerial % mLink % name)).str();
   else
-    return ((boost::format("ALF/serial_%1%/link_%2%/%3%") % mSerial % mLink % name)).str();
+    return ((boost::format("ALF/SERIAL_%1%/LINK_%2%/%3%") % mSerial % mLink % name)).str();
 }
 
 } // namespace Alf

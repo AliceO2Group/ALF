@@ -95,7 +95,7 @@ uint16_t SwtWord::getHigh() const
 
 std::ostream& operator<<(std::ostream& output, const SwtWord& swtWord)
 {
-  output << "0x" << std::setfill('0') << std::hex << std::setw(4) << swtWord.getHigh()
+  output << "0x" << std::setfill('0') << std::hex << std::setw(3) << swtWord.getHigh()
          << std::setfill('0') << std::setw(8) << swtWord.getMed() << std::setfill('0') << std::setw(8) << swtWord.getLow();
   return output;
 }

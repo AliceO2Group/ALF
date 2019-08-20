@@ -112,7 +112,7 @@ Sca::CommandData AlfServer::stringToScaPair(std::string stringPair)
   return commandData;
 }
 
-/// Converts a 96-bit hex number string
+/// Converts a 76-bit hex number string
 std::pair<SwtWord, Swt::Operation> AlfServer::stringToSwtPair(const std::string stringPair)
 {
   std::vector<std::string> swtPair = Util::split(stringPair, pairSeparator());
@@ -129,17 +129,17 @@ std::pair<SwtWord, Swt::Operation> AlfServer::stringToSwtPair(const std::string 
     hexString.erase(i, leadingHex.size());
   }
 
-  if (hexString.length() > 20) {
-    BOOST_THROW_EXCEPTION(std::out_of_range("Parameter does not fit in 96-bit unsigned int"));
+  if (hexString.length() > 19) {
+    BOOST_THROW_EXCEPTION(std::out_of_range("Parameter does not fit in 76-bit unsigned int"));
   }
 
   std::stringstream ss;
-  ss << std::setw(20) << std::setfill('0') << hexString;
+  ss << std::setw(19) << std::setfill('0') << hexString;
 
   SwtWord word;
-  word.setHigh(std::stoul(ss.str().substr(0, 4), NULL, 16));
-  word.setMed(std::stoul(ss.str().substr(4, 8), NULL, 16));
-  word.setLow(std::stoul(ss.str().substr(12, 8), NULL, 16));
+  word.setHigh(std::stoul(ss.str().substr(0, 3), NULL, 16));
+  word.setMed(std::stoul(ss.str().substr(3, 8), NULL, 16));
+  word.setLow(std::stoul(ss.str().substr(11, 8), NULL, 16));
 
   Swt::Operation operation;
 

@@ -60,13 +60,13 @@ class ProgramAlf : public AliceO2::Common::Program
 
     getLogger() << "ALF server initializations..." << endm;
 
-    if (const char* dimDnsNode = std::getenv("DIM_DNS_NODE")) {
+    if (mOptions.dimDnsNode != "") {
+      getLogger() << "Setting DIM_DNS_NODE from argument." << endm;
+      getLogger() << "DIM_DNS_NODE=" << mOptions.dimDnsNode << endm;
+    } else if (const char* dimDnsNode = std::getenv("DIM_DNS_NODE")) {
       getLogger() << "Picked up DIM_DMS_NODE from the environment." << endm;
       getLogger() << "DIM_DNS_NODE=" << dimDnsNode << endm;
-    } else if (mOptions.dimDnsNode != "") {
-      getLogger() << "DIM_DNS_NODE env variable not set. Setting it from argument." << endm;
-      setenv("DIM_DNS_NODE", mOptions.dimDnsNode.c_str(), 1); // Don't be afraid to overwrite since we ended up here
-      getLogger() << "DIM_DNS_NODE=" << std::getenv("DIM_DNS_NODE") << endm;
+      mOptions.dimDnsNode = dimDnsNode;
     } else {
       BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("DIM_DNS_NODE env variable not set, and no relevant argument provided.")); // InfoLogger and errors?
     }
@@ -74,18 +74,18 @@ class ProgramAlf : public AliceO2::Common::Program
     int alfId;
 
     if (const char* alfIdString = std::getenv("ALF_ID")) {
+      getLogger() << "Setting ALF_ID from argument." << endm;
+      alfId = mOptions.alfId;
+      getLogger() << "ALF_ID=" << alfId << endm;
+    } else {
       getLogger() << "Picked up ALF_ID from the environment." << endm;
       getLogger() << "ALF_ID=" << alfIdString << endm;
       alfId = atoi(alfIdString);
-    } else {
-      getLogger() << "ALF_ID env variable not set. Setting it from argument." << endm;
-      alfId = mOptions.alfId;
-      getLogger() << "ALF_ID=" << alfId << endm;
-      /* Do I need to set the env var for ALF_ID? */
     }
 
+
     getLogger() << "Starting the DIM Server" << endm;
-    DimServer::setDnsNode("localhost", 2505);
+    DimServer::setDnsNode(mOptions.dimDnsNode.c_str(), 2505);
     DimServer::start(alfId == -1 ? "ALF" : ("ALF" + std::to_string(alfId)).c_str());
 
     AlfServer alfServer = AlfServer();
