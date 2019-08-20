@@ -33,14 +33,11 @@ DEFSERVICENAME(registerWrite, "REGISTER_WRITE")
 DEFSERVICENAME(scaSequence, "SCA_SEQUENCE")
 DEFSERVICENAME(swtSequence, "SWT_SEQUENCE")
 DEFSERVICENAME(icSequence, "IC_SEQUENCE")
-DEFSERVICENAME(icGbtI2cWrite, "IC_GBT_I2C_write")
+DEFSERVICENAME(icGbtI2cWrite, "IC_GBT_I2C_WRITE")
 
 std::string ServiceNames::format(std::string name) const
 {
-  if (mAlfId != "-1")
-    return ((boost::format("ALF%1%/SERIAL_%2%/LINK_%3%/%4%") % mAlfId % mSerial % mLink % name)).str();
-  else
-    return ((boost::format("ALF/SERIAL_%1%/LINK_%2%/%3%") % mSerial % mLink % name)).str();
+  return ((boost::format("ALF_%1%/SERIAL_%2%/LINK_%3%/%4%") % mAlfId % mSerial % mLink % name)).str();
 }
 
 } // namespace Alf

@@ -14,6 +14,8 @@
 /// \author Pascal Boeschoten (pascal.boeschoten@cern.ch)
 /// \author Kostas Alexopoulos (kostas.alexopoulos@cern.ch)
 
+#include <boost/algorithm/string/case_conv.hpp>
+#include <boost/asio.hpp>
 #include <chrono>
 #include <cstdlib>
 #include <thread>
@@ -24,6 +26,7 @@
 #include "DimServices/ServiceNames.h"
 #include "Logger.h"
 
+namespace ip = boost::asio::ip;
 namespace po = boost::program_options;
 
 namespace AliceO2
@@ -47,9 +50,6 @@ class ProgramAlfClient : public AliceO2::Common::Program
 
   virtual void addOptions(po::options_description& options) override
   {
-    options.add_options()("alf-id",
-                          po::value<int>(&mOptions.alfId)->default_value(-1),
-                          "The ID of the ALF server.");
     options.add_options()("dim-dns-node",
                           po::value<std::string>(&mOptions.dimDnsNode)->default_value(""),
                           "The DIM DNS node to connect to if the env var is not set");
@@ -66,32 +66,23 @@ class ProgramAlfClient : public AliceO2::Common::Program
 
     getLogger() << "ALF client initializations..." << endm;
 
-    if (const char* alfIdString = std::getenv("ALF_ID")) {
-      getLogger() << "Picked up ALF_ID from the environment." << endm;
-      getLogger() << "ALF_ID=" << alfIdString << endm;
-      mOptions.alfId = atoi(alfIdString);
-    } else {
-      getLogger() << "ALF_ID env variable not set. Setting it from argument." << endm;
-      //setenv("ALF_ID", std::to_string(mOptions.alfId).c_str(), 1);
-      getLogger() << "ALF_ID=" << mOptions.alfId << endm;
-      /* Do I need to set the env var for ALF_ID? */
-    }
-
-    if (const char* dimDnsNode = std::getenv("DIM_DNS_NODE")) {
+    if (mOptions.dimDnsNode != "") {
+      getLogger() << "DIM_DNS_NODE env variable not set. Setting it from argument." << endm;
+      getLogger() << "DIM_DNS_NODE=" << mOptions.dimDnsNode << endm;
+    } else if (const char* dimDnsNode = std::getenv("DIM_DNS_NODE")) {
       getLogger() << "Picked up DIM_DMS_NODE from the environment." << endm;
       getLogger() << "DIM_DNS_NODE=" << dimDnsNode << endm;
       mOptions.dimDnsNode = dimDnsNode;
-    } else if (mOptions.dimDnsNode != "") {
-      getLogger() << "DIM_DNS_NODE env variable not set. Setting it from argument." << endm;
-      setenv("DIM_DNS_NODE", mOptions.dimDnsNode.c_str(), 1); // Don't be afraid to overwrite since we ended up here
-      getLogger() << "DIM_DNS_NODE=" << mOptions.dimDnsNode << endm;
     } else {
       BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("DIM_DNS_NODE env variable not set, and no relevant argument provided.")); // InfoLogger and errors?
     }
 
-    getLogger() << "Starting the DIM Client using ALF ID=" << mOptions.alfId << ", serial=" << mOptions.serial << " and link=" << mOptions.link << endm;
+    std::string alfId = ip::host_name();
+    boost::to_upper(alfId);
 
-    AlfLink link = AlfLink{ mOptions.alfId, mOptions.serial, mOptions.link, nullptr };
+    getLogger() << "Starting the DIM Client using ALF ID=" << alfId << ", serial=" << mOptions.serial << " and link=" << mOptions.link << endm;
+
+    AlfLink link = AlfLink{ alfId, mOptions.serial, mOptions.link, nullptr };
 
     ServiceNames names(link);
     Alf::RegisterReadRpc registerReadRpc(names.registerRead());
@@ -143,7 +134,6 @@ class ProgramAlfClient : public AliceO2::Common::Program
     std::string dimDnsNode = "";
     int serial = -1;
     int link = -1;
-    int alfId = -1;
   } mOptions;
 };
 

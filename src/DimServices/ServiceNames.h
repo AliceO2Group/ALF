@@ -29,7 +29,7 @@ class ServiceNames
 {
  public:
   ServiceNames(AlfLink link)
-    : mAlfId(std::to_string(link.alfId).c_str()), mSerial(link.serial), mLink(link.linkId)
+    : mAlfId(link.alfId), mSerial(link.serial), mLink(link.linkId)
   {
   }
 
