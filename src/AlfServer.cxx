@@ -116,39 +116,55 @@ Sca::CommandData AlfServer::stringToScaPair(std::string stringPair)
 std::pair<SwtWord, Swt::Operation> AlfServer::stringToSwtPair(const std::string stringPair)
 {
   std::vector<std::string> swtPair = Util::split(stringPair, pairSeparator());
-  if (swtPair.size() != 2) {
+  if (swtPair.size() != 1 && swtPair.size() != 2) {
     BOOST_THROW_EXCEPTION(
       AlfException() << ErrorInfo::Message("SWT word pair not formatted correctly"));
   }
 
-  std::string hexString = swtPair[0];
-  std::string leadingHex = "0x";
-
-  std::string::size_type i = hexString.find(leadingHex);
-  if (i != std::string::npos) {
-    hexString.erase(i, leadingHex.size());
-  }
-
-  if (hexString.length() > 19) {
-    BOOST_THROW_EXCEPTION(std::out_of_range("Parameter does not fit in 76-bit unsigned int"));
-  }
-
-  std::stringstream ss;
-  ss << std::setw(19) << std::setfill('0') << hexString;
-
-  SwtWord word;
-  word.setHigh(std::stoul(ss.str().substr(0, 3), NULL, 16));
-  word.setMed(std::stoul(ss.str().substr(3, 8), NULL, 16));
-  word.setLow(std::stoul(ss.str().substr(11, 8), NULL, 16));
-
   Swt::Operation operation;
 
-  if (swtPair[1] == "read") {
+  if (swtPair[swtPair.size() - 1] == "read") {
     operation = Swt::Operation::Read;
-  } else if (swtPair[1] == "write") {
+    if (swtPair.size() == 2) {
+      BOOST_THROW_EXCEPTION(
+        AlfException() << ErrorInfo::Message("Too many arguments for READ operation"));
+    }
+  } else if (swtPair[swtPair.size() - 1] == "write") {
     operation = Swt::Operation::Write;
+    if (swtPair.size() == 1) {
+      BOOST_THROW_EXCEPTION(
+        AlfException() << ErrorInfo::Message("Too few arguments for WRITE operation"));
+    }
+  } else if (swtPair[swtPair.size() - 1] == "reset") {
+    operation = Swt::Operation::Reset;
+    if (swtPair.size() == 2) {
+      BOOST_THROW_EXCEPTION(
+        AlfException() << ErrorInfo::Message("Too many arguments for RESET operation"));
+    }
   } else {
     BOOST_THROW_EXCEPTION(std::out_of_range("Parameter for SWT operation unkown"));
+  }
+
+  SwtWord word;
+  if (operation == Swt::Operation::Write) {
+    std::string hexString = swtPair[0];
+    std::string leadingHex = "0x";
+
+    std::string::size_type i = hexString.find(leadingHex);
+    if (i != std::string::npos) {
+      hexString.erase(i, leadingHex.size());
+    }
+
+    if (hexString.length() > 19) {
+      BOOST_THROW_EXCEPTION(std::out_of_range("Parameter does not fit in 76-bit unsigned int"));
+    }
+
+    std::stringstream ss;
+    ss << std::setw(19) << std::setfill('0') << hexString;
+
+    word.setHigh(std::stoul(ss.str().substr(0, 3), NULL, 16));
+    word.setMed(std::stoul(ss.str().substr(3, 8), NULL, 16));
+    word.setLow(std::stoul(ss.str().substr(11, 8), NULL, 16));
   }
 
   return std::make_pair(word, operation);
