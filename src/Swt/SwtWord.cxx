@@ -75,7 +75,7 @@ void SwtWord::setMed(uint32_t med)
 
 void SwtWord::setHigh(uint16_t high)
 {
-  mHigh = high;
+  mHigh = high & 0xfff;
 }
 
 uint32_t SwtWord::getLow() const
@@ -90,7 +90,7 @@ uint32_t SwtWord::getMed() const
 
 uint16_t SwtWord::getHigh() const
 {
-  return mHigh;
+  return mHigh & 0xfff;
 }
 
 std::ostream& operator<<(std::ostream& output, const SwtWord& swtWord)
