@@ -59,10 +59,17 @@ class ProgramAlfClient : public AliceO2::Common::Program
     options.add_options()("link",
                           po::value<int>(&mOptions.link),
                           "Link number");
+    options.add_options()("alf-id",
+                          po::value<std::string>(&mOptions.alfId)->default_value(""),
+                          "Hostname of node running the ALF server(required)");
   }
 
   virtual void run(const po::variables_map&) override
   {
+    if (mOptions.alfId == "") {
+      getErrorLogger() << "Parameter alf-id is required." << endm;
+      return;
+    }
 
     getLogger() << "ALF client initializations..." << endm;
 
@@ -77,7 +84,7 @@ class ProgramAlfClient : public AliceO2::Common::Program
       BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("DIM_DNS_NODE env variable not set, and no relevant argument provided.")); // InfoLogger and errors?
     }
 
-    std::string alfId = ip::host_name();
+    std::string alfId = mOptions.alfId; //TODO: change to hostname argument
     boost::to_upper(alfId);
 
     getLogger() << "Starting the DIM Client using ALF ID=" << alfId << ", serial=" << mOptions.serial << " and link=" << mOptions.link << endm;
@@ -135,6 +142,7 @@ class ProgramAlfClient : public AliceO2::Common::Program
     std::string dimDnsNode = "";
     int serial = -1;
     int link = -1;
+    std::string alfId = "";
   } mOptions;
 };
 
