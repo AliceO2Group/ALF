@@ -39,6 +39,7 @@ The services are DIM RPC services. Every RPC is called with a string and expects
 * The return string is prefixed by "success\n" or "failure\n"
 * Address and values are hex strings with leading zeros for 32-bit unsigned integers. (e.g. 0x0000f00d)
   * An exception is made for SWT words which are 76-bit unsigned integers. (e.g. 0x00000000000badc0ffee)
+  * Input needs to be prefixed with "0x" but not necessarily with leading zeros.
 * Lines prefixed with `#` are disregarded as comments.
   
 ### REGISTER_READ
