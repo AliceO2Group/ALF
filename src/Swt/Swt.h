@@ -50,7 +50,8 @@ class Swt
   void read(std::vector<SwtWord>& words, SwtWord::Size wordSize = SwtWord::Size::High);
 
   enum Operation { Read,
-                   Write };
+                   Write,
+                   Reset };
 
   std::string writeSequence(std::vector<std::pair<SwtWord, Operation>> words);
 

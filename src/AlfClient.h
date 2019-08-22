@@ -136,7 +136,11 @@ class SwtSequenceRpc : DimRpcInfoWrapper
   {
     std::stringstream buffer;
     for (size_t i = 0; i < sequence.size(); ++i) {
-      buffer << sequence[i].first << pairSeparator() << sequence[i].second;
+      if (sequence[i].first != "") {
+        buffer << sequence[i].first << pairSeparator() << sequence[i].second;
+      } else {
+        buffer << sequence[i].second;
+      }
       if (i + 1 < sequence.size()) {
         buffer << argumentSeparator();
       }

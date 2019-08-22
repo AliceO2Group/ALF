@@ -41,7 +41,6 @@ namespace sc_regs = AliceO2::roc::Cru::ScRegisters;
 
 Swt::Swt(AlfLink link) : mBar2(*link.bar2), mLink(link)
 {
-  reset();
   setChannel(mLink.linkId);
 }
 
@@ -128,12 +127,15 @@ std::string Swt::writeSequence(std::vector<std::pair<SwtWord, Operation>> words)
       if (it.second == Operation::Read) {
         std::vector<SwtWord> results;
         read(results);
-        for (const auto& word : results) {
-          resultBuffer << word << "\n";
+        for (const auto& result : results) {
+          resultBuffer << result << "\n";
         }
       } else if (it.second == Operation::Write) {
         write(word);
-        resultBuffer << word << "\n";
+        resultBuffer << "0"
+                     << "\n";
+      } else if (it.second == Operation::Reset) {
+        reset();
       } else {
         BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("SWT operation type unknown"));
       }
