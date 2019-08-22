@@ -1,7 +1,7 @@
 # ALF
 
 ## Introduction
-ALF(Alice Low-level Frontend) spawns DIM services as an interface with detector FEEs(Front-End Electronics). The DIM services can be access through DCS's [FRED](https://gitlab.cern.ch/alialfred/FREDServer).
+ALF(Alice Low-level Frontend) spawns DIM services as an interface with detector FEEs(Front-End Electronics). The DIM services can be accessed through DCS's [FRED](https://gitlab.cern.ch/alialfred/FREDServer).
 
 ## Requirements
 In order to run ALF a DIM Nameserver has to be up and running.
@@ -17,10 +17,10 @@ o2-alf --dim-dns-node thedimdns
 `
 
 ### o2-alf-client
-o2-alf-client is the binary of an ALF client used solely for testing purposes. On top of the DIM Nameserver it expects the hostname of the node hosting the ALF server, as a command-line argument.
+o2-alf-client is the binary of an ALF client used solely for testing purposes. On top of the DIM Nameserver it expects the hostname of the node hosting the ALF server, the card's serial and the link number as command-line arguments.
 
 `
-o2-alf-client --dim-dns-node thedimdns --alf-id thealfserver
+o2-alf-client --dim-dns-node thedimdns --alf-id thealfserver --serial 0 --link 4
 `
 
 ## Services
