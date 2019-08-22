@@ -103,7 +103,7 @@ The services are DIM RPC services. Every RPC is called with a string and expects
 
 * Example:
   * DIM input: `0x54,0xff,write\n0x54,read\n`
-  * DIM output: `0xff\n0xff\n`
+  * DIM output: `0x000000ff\n0x000000ff\n`
   
 ### IC_GBT_I2C_WRITE
 
