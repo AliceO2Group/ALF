@@ -31,7 +31,7 @@ Service names are identified by the server's hostname, the card's serial number 
 ALF_[hostname]/SERIAL_[serial_number]/LINK_[link]/[service_name]
 `
 
-## DIM RPC services
+### DIM RPC services
 
 The services are DIM RPC services. Every RPC is called with a string and expects a string in return. For these strings the following requirements are defined:
 
@@ -42,7 +42,7 @@ The services are DIM RPC services. Every RPC is called with a string and expects
   * Input needs to be prefixed with "0x" but not necessarily with leading zeros.
 * Lines prefixed with `#` are disregarded as comments.
   
-### REGISTER_READ
+#### REGISTER_READ
 * Parameter:
   * Register address
 * Returns:
@@ -52,7 +52,7 @@ The services are DIM RPC services. Every RPC is called with a string and expects
   * DIM input: `0x0000f00d \n`
   * DIM output: `0x0000beef \n`
 
-### REGISTER_WRITE
+#### REGISTER_WRITE
 * Parameters:
   * Register address
   * Register value
@@ -63,7 +63,7 @@ The services are DIM RPC services. Every RPC is called with a string and expects
   * DIM input: `0x0000f00d,0x0000beef \n`
   * DIM output: ` `
 
-### SCA_SEQUENCE
+#### SCA_SEQUENCE
 * Parameters:
   * Sequence of SCA command and data pairs
 * Returns:
@@ -73,7 +73,7 @@ The services are DIM RPC services. Every RPC is called with a string and expects
   * DIM input: `0x00000010,0x00000011\n0x000000020,0x00000021\n`
   * DIM output: `0x00000010,0x00000111\n0x00000020,0x00000221\n`
 
-### SWT_SEQUENCE
+#### SWT_SEQUENCE
 * Parameters:
   * Sequence of SWT word and operation pairs as follows:
     * Operations may be:
@@ -90,7 +90,7 @@ The services are DIM RPC services. Every RPC is called with a string and expects
   * DIM input `reset\n0x0000000000badc0ffee,write\nread\n`
   * DIM output `0\n0x0000000000badc0ffee\n`
 
-### IC_SEQUENCE
+#### IC_SEQUENCE
 
 * Parameters:
   * Sequence of IC operations as follows:
@@ -106,7 +106,7 @@ The services are DIM RPC services. Every RPC is called with a string and expects
   * DIM input: `0x54,0xff,write\n0x54,read\n`
   * DIM output: `0x000000ff\n0x000000ff\n`
   
-### IC_GBT_I2C_WRITE
+#### IC_GBT_I2C_WRITE
 
 * Parameters:
   * Value
@@ -118,6 +118,6 @@ The services are DIM RPC services. Every RPC is called with a string and expects
   * DIM input `0x3\n`
   * DIM output ` `
 
-### Examples
+#### Examples
 
 Examples on making the RPC calls can be seen under [ProgramAlfClient.cxx](apps/ProgramAlfClient.cxx) and [AlfClient.h](src/AlfClient.h).
