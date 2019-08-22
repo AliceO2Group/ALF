@@ -114,7 +114,7 @@ The services are DIM RPC services. Every RPC is called with a string and expects
   * empty
   
 * Example:
-  * DIM input `0x3`
+  * DIM input `0x3\n`
   * DIM output ` `
 
 ### Examples
