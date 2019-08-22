@@ -12,8 +12,11 @@ In order to run ALF a DIM Nameserver has to be up and running.
 o2-alf is the binary of the ALF server. The only option it expects is the address of the DIM Nameserver. It can be passed either as a command-line argument or as an environmental variable.
 
 `
-DIM_DNS_NODE=thedimdns o2-alf
 o2-alf --dim-dns-node thedimdns
+`
+
+`
+DIM_DNS_NODE=thedimdns o2-alf
 `
 
 ### o2-alf-client
