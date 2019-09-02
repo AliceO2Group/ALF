@@ -74,8 +74,9 @@ class ProgramAlfClient : public AliceO2::Common::Program
     getLogger() << "ALF client initializations..." << endm;
 
     if (mOptions.dimDnsNode != "") {
-      getLogger() << "DIM_DNS_NODE env variable not set. Setting it from argument." << endm;
+      getLogger() << "Setting DIM_DNS_NODE from argument." << endm;
       getLogger() << "DIM_DNS_NODE=" << mOptions.dimDnsNode << endm;
+      setenv("DIM_DNS_NODE", mOptions.dimDnsNode.c_str(), true);
     } else if (const char* dimDnsNode = std::getenv("DIM_DNS_NODE")) {
       getLogger() << "Picked up DIM_DMS_NODE from the environment." << endm;
       getLogger() << "DIM_DNS_NODE=" << dimDnsNode << endm;
