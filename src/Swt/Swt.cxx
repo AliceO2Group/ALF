@@ -60,7 +60,7 @@ void Swt::read(std::vector<SwtWord>& words, SwtWord::Size wordSize)
   uint32_t numWords = 0x0;
 
   auto endTime = std::chrono::steady_clock::now() + std::chrono::milliseconds(10);
-  while (std::chrono::steady_clock::now() <= endTime) {
+  while ((std::chrono::steady_clock::now() <= endTime) && (numWords < 1)) {
     numWords = (barRead(sc_regs::SWT_MON.index) >> 16);
   }
 
