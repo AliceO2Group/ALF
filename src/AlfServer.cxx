@@ -44,7 +44,7 @@ std::string AlfServer::registerRead(const std::string& parameter, std::shared_pt
 
 std::string AlfServer::registerWrite(const std::string& parameter, std::shared_ptr<roc::BarInterface> bar2)
 {
-  std::vector<std::string> params = Util::split(parameter, argumentSeparator());
+  std::vector<std::string> params = Util::split(parameter, pairSeparator());
 
   if (params.size() != 2) {
     BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("Wrong number of parameters for RPC write call"));
