@@ -41,6 +41,7 @@ class ServiceNames
   std::string icGbtI2cWrite() const;
 
  private:
+  std::string formatLink(std::string name) const;
   std::string format(std::string name) const;
   std::string mAlfId;
   const int mSerial;
