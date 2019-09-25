@@ -68,7 +68,7 @@ class RegisterWriteRpc : DimRpcInfoWrapper
 
   void writeRegister(uint64_t registerAddress, uint32_t registerValue)
   {
-    setString((boost::format("0x%x%s0x%x%s") % registerAddress % pairSeparator() % registerValue).str());
+    setString((boost::format("0x%x%s0x%x") % registerAddress % pairSeparator() % registerValue).str());
     try {
       getString();
     } catch (const AlfException& e) {

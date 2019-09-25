@@ -296,12 +296,14 @@ void AlfServer::makeRpcServers(std::vector<AlfLink> links)
     auto& servers = mRpcServers[link.serial][link.linkId];
     std::shared_ptr<roc::BarInterface> bar2 = link.bar2;
 
-    // Register Read
-    servers.push_back(makeServer(names.registerRead(),
-                                 [bar2](auto parameter) { return registerRead(parameter, bar2); }));
-    // Register Write
-    servers.push_back(makeServer(names.registerWrite(),
-                                 [bar2](auto parameter) { return registerWrite(parameter, bar2); }));
+    if (link.linkId == 0) { // Register Read / Write services are per card; register them as soon as possible
+      // Register Read
+      servers.push_back(makeServer(names.registerRead(),
+                                   [bar2](auto parameter) { return registerRead(parameter, bar2); }));
+      // Register Write
+      servers.push_back(makeServer(names.registerWrite(),
+                                   [bar2](auto parameter) { return registerWrite(parameter, bar2); }));
+    }
 
     // SCA Sequence
     servers.push_back(makeServer(names.scaSequence(),
