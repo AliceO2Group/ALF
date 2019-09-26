@@ -55,12 +55,12 @@ void Swt::reset()
   barWrite(sc_regs::SC_RESET.index, 0x0); //void cmd to sync clocks
 }
 
-void Swt::read(std::vector<SwtWord>& words, SwtWord::Size wordSize)
+void Swt::read(std::vector<SwtWord>& words, TimeOut msTimeOut, SwtWord::Size wordSize)
 {
   uint32_t numWords = 0x0;
 
-  auto endTime = std::chrono::steady_clock::now() + std::chrono::milliseconds(10);
-  while ((std::chrono::steady_clock::now() <= endTime) && (numWords < 1)) {
+  auto timeOut = std::chrono::steady_clock::now() + std::chrono::milliseconds(msTimeOut);
+  while ((std::chrono::steady_clock::now() < timeOut) && (numWords < 1)) {
     numWords = (barRead(sc_regs::SWT_MON.index) >> 16);
   }
 
@@ -118,20 +118,32 @@ uint32_t Swt::barRead(uint32_t index)
   return read;
 }
 
-std::string Swt::writeSequence(std::vector<std::pair<SwtWord, Operation>> words)
+std::string Swt::writeSequence(std::vector<std::pair<SwtData, Operation>> sequence)
 {
   std::stringstream resultBuffer;
-  for (const auto& it : words) {
-    SwtWord word = it.first;
+  for (const auto& it : sequence) {
+    SwtData data = it.first;
     try {
       if (it.second == Operation::Read) {
         std::vector<SwtWord> results;
-        read(results);
+
+        int timeOut;
+        try {
+          timeOut = std::get<TimeOut>(data);
+        } catch (...) { // no timeout was provided
+          timeOut = -1;
+        }
+        if (timeOut >= 0) {
+          read(results, timeOut);
+        } else {
+          read(results);
+        }
+
         for (const auto& result : results) {
           resultBuffer << result << "\n";
         }
       } else if (it.second == Operation::Write) {
-        write(word);
+        write(std::get<SwtWord>(data));
         resultBuffer << "0"
                      << "\n";
       } else if (it.second == Operation::Reset) {
@@ -142,7 +154,14 @@ std::string Swt::writeSequence(std::vector<std::pair<SwtWord, Operation>> words)
     } catch (const SwtException& e) {
       // If an SWT error occurs, we stop executing the sequence of commands and return the results as far as we got them, plus
       // the error message.
-      std::string meaningfulMessage = (boost::format("SWT_SEQUENCE data=%s serial=%d link=%d, error='%s'") % word % mLink.serial % mLink.linkId % e.what()).str();
+      std::string meaningfulMessage;
+      if (it.second == Operation::Read) {
+        meaningfulMessage = (boost::format("SWT_SEQUENCE READ timeout=%d serial=%d link=%d, error='%s'") % std::get<TimeOut>(data) % mLink.serial % mLink.linkId % e.what()).str();
+      } else if (it.second == Operation::Write) {
+        meaningfulMessage = (boost::format("SWT_SEQUENCE WRITE data=%s serial=%d link=%d, error='%s'") % std::get<SwtWord>(data) % mLink.serial % mLink.linkId % e.what()).str();
+      } else {
+        meaningfulMessage = (boost::format("SWT_SEQUENCE RESET serial=%d link=%d, error='%s'") % mLink.serial % mLink.linkId % e.what()).str();
+      }
       getErrorLogger() << meaningfulMessage << endm;
       resultBuffer << meaningfulMessage;
       BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message(resultBuffer.str()));

@@ -70,7 +70,7 @@ std::string AlfServer::swtBlobWrite(const std::string& parameter, AlfLink link)
 {
 
   std::vector<std::string> stringPairs = Util::split(parameter, argumentSeparator());
-  std::vector<std::pair<SwtWord, Swt::Operation>> swtPairs = parseStringToSwtPairs(stringPairs);
+  std::vector<std::pair<Swt::SwtData, Swt::Operation>> swtPairs = parseStringToSwtPairs(stringPairs);
   Swt swt = Swt(link);
   return swt.writeSequence(swtPairs);
 }
@@ -113,10 +113,10 @@ Sca::CommandData AlfServer::stringToScaPair(std::string stringPair)
 }
 
 /// Converts a 76-bit hex number string
-std::pair<SwtWord, Swt::Operation> AlfServer::stringToSwtPair(const std::string stringPair)
+std::pair<Swt::SwtData, Swt::Operation> AlfServer::stringToSwtPair(const std::string stringPair)
 {
   std::vector<std::string> swtPair = Util::split(stringPair, pairSeparator());
-  if (swtPair.size() != 1 && swtPair.size() != 2) {
+  if (swtPair.size() < 1 || swtPair.size() > 2) {
     BOOST_THROW_EXCEPTION(
       AlfException() << ErrorInfo::Message("SWT word pair not formatted correctly"));
   }
@@ -125,10 +125,6 @@ std::pair<SwtWord, Swt::Operation> AlfServer::stringToSwtPair(const std::string 
 
   if (swtPair[swtPair.size() - 1] == "read") {
     operation = Swt::Operation::Read;
-    if (swtPair.size() == 2) {
-      BOOST_THROW_EXCEPTION(
-        AlfException() << ErrorInfo::Message("Too many arguments for READ operation"));
-    }
   } else if (swtPair[swtPair.size() - 1] == "write") {
     operation = Swt::Operation::Write;
     if (swtPair.size() == 1) {
@@ -145,8 +141,10 @@ std::pair<SwtWord, Swt::Operation> AlfServer::stringToSwtPair(const std::string 
     BOOST_THROW_EXCEPTION(std::out_of_range("Parameter for SWT operation unkown"));
   }
 
-  SwtWord word;
+  Swt::SwtData data;
+
   if (operation == Swt::Operation::Write) {
+    SwtWord word;
     std::string hexString = swtPair[0];
     std::string leadingHex = "0x";
 
@@ -165,9 +163,17 @@ std::pair<SwtWord, Swt::Operation> AlfServer::stringToSwtPair(const std::string 
     word.setHigh(std::stoul(ss.str().substr(0, 3), NULL, 16));
     word.setMed(std::stoul(ss.str().substr(3, 8), NULL, 16));
     word.setLow(std::stoul(ss.str().substr(11, 8), NULL, 16));
+
+    data = word;
+  } else if (operation == Swt::Operation::Read && swtPair.size() == 2) {
+    try {
+      data = std::stoi(swtPair[0]);
+    } catch (const std::exception& e) {
+      BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("SWT Read Timeout provided cannot be converted to int"));
+    }
   }
 
-  return std::make_pair(word, operation);
+  return std::make_pair(data, operation);
 }
 
 std::pair<Ic::IcData, Ic::Operation> AlfServer::stringToIcPair(const std::string stringPair)
@@ -256,10 +262,10 @@ std::vector<Sca::CommandData> AlfServer::parseStringToScaCommands(std::vector<st
   return pairs;
 }
 
-std::vector<std::pair<SwtWord, Swt::Operation>> AlfServer::parseStringToSwtPairs(std::vector<std::string> stringPairs)
+std::vector<std::pair<Swt::SwtData, Swt::Operation>> AlfServer::parseStringToSwtPairs(std::vector<std::string> stringPairs)
 {
 
-  std::vector<std::pair<SwtWord, Swt::Operation>> pairs;
+  std::vector<std::pair<Swt::SwtData, Swt::Operation>> pairs;
   for (const auto& stringPair : stringPairs) {
     if (stringPair.find('#') == std::string::npos) {
       pairs.push_back(stringToSwtPair(stringPair));

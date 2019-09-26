@@ -111,7 +111,11 @@ class ProgramAlfClient : public AliceO2::Common::Program
     auto swtOut = swtSequence.write({ std::make_pair("0x0000000000000000000", "write"),
                                       std::make_pair("", "reset"),
                                       std::make_pair("0x000000001234", "write"),
-                                      std::make_pair("", "read") });
+                                      std::make_pair("", "read"),
+                                      std::make_pair("0xdeadbeef", "write"),
+                                      std::make_pair("1", "read"),
+                                      std::make_pair("0xbadc0ffee", "write"),
+                                      std::make_pair("4", "read") });
     getWarningLogger() << "swtSequence output: " << swtOut << endm;
 
     auto scaOut = scaSequence.write({ std::make_pair("0x00010002", "0xff000000"),
