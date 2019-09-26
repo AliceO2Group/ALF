@@ -52,8 +52,8 @@ The services are DIM RPC services. Every RPC is called with a string and expects
   * Register value
 
 * Example:
-  * DIM input: `0x0000f00d \n`
-  * DIM output: `0x0000beef \n`
+  * DIM input: `0x0000f00d`
+  * DIM output: `0x0000beef`
 
 #### REGISTER_WRITE
 * Parameters:
@@ -63,7 +63,7 @@ The services are DIM RPC services. Every RPC is called with a string and expects
   * empty
   
 * Example:
-  * DIM input: `0x0000f00d,0x0000beef \n`
+  * DIM input: `0x0000f00d,0x0000beef`
   * DIM output: ` `
 
 #### SCA_SEQUENCE
@@ -73,7 +73,7 @@ The services are DIM RPC services. Every RPC is called with a string and expects
   * Sequence of SCA command, and SCA read pairs
   
 * Example:
-  * DIM input: `0x00000010,0x00000011\n0x000000020,0x00000021\n`
+  * DIM input: `0x00000010,0x00000011\n0x000000020,0x00000021`
   * DIM output: `0x00000010,0x00000111\n0x00000020,0x00000221\n`
 
 #### SWT_SEQUENCE
@@ -90,7 +90,7 @@ The services are DIM RPC services. Every RPC is called with a string and expects
     * `reset` returns nothing
     
 * Example:
-  * DIM input `reset\n0x0000000000badc0ffee,write\nread\n`
+  * DIM input `reset\n0x0000000000badc0ffee,write\nread`
   * DIM output `0\n0x0000000000badc0ffee\n`
 
 #### IC_SEQUENCE
@@ -106,7 +106,7 @@ The services are DIM RPC services. Every RPC is called with a string and expects
   * Value on `read`
 
 * Example:
-  * DIM input: `0x54,0xff,write\n0x54,read\n`
+  * DIM input: `0x54,0xff,write\n0x54,read`
   * DIM output: `0x000000ff\n0x000000ff\n`
   
 #### IC_GBT_I2C_WRITE
