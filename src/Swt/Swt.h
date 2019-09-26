@@ -27,6 +27,7 @@
 #define ALICEO2_ALF_SRC_SWT_SWT_H
 
 #include <string>
+#include <variant>
 
 #include "Common.h"
 #include "ReadoutCard/RegisterReadWriteInterface.h"
@@ -45,15 +46,18 @@ class Swt
  public:
   Swt(AlfLink link);
 
+  typedef int TimeOut;
+  typedef std::variant<SwtWord, TimeOut> SwtData;
+
   void reset();
   uint32_t write(const SwtWord& swtWord);
-  void read(std::vector<SwtWord>& words, SwtWord::Size wordSize = SwtWord::Size::High);
+  void read(std::vector<SwtWord>& word, TimeOut msTimeOut = 10, SwtWord::Size wordSize = SwtWord::Size::High);
 
   enum Operation { Read,
                    Write,
                    Reset };
 
-  std::string writeSequence(std::vector<std::pair<SwtWord, Operation>> words);
+  std::string writeSequence(std::vector<std::pair<SwtData, Operation>> sequence);
 
  private:
   void setChannel(int gbtChannel);

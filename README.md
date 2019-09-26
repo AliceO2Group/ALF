@@ -80,9 +80,9 @@ The services are DIM RPC services. Every RPC is called with a string and expects
 * Parameters:
   * Sequence of SWT word and operation pairs as follows:
     * Operations may be:
-    * SWT word with suffix `,write`
+    * `write` with SWT prefix (e.g. `0x0000f00d,write`)
     * `reset` (without SWT word)
-    * `read` (without SWT word)
+    * `read` with optional TimeOut prefix (e.g. `2,read`)
 * Returns:
   * Sequence of SWT output as follows:
     * `write` always retuns `0`
@@ -90,8 +90,8 @@ The services are DIM RPC services. Every RPC is called with a string and expects
     * `reset` returns nothing
     
 * Example:
-  * DIM input `reset\n0x0000000000badc0ffee,write\nread`
-  * DIM output `0\n0x0000000000badc0ffee\n`
+  * DIM input `reset\n0x0000000000badc0ffee,write\nread\n0xbadf00d,write\n4,read`
+  * DIM output `0\n0x0000000000badc0ffee\n0x000000000000badf00d\n`
 
 #### IC_SEQUENCE
 

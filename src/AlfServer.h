@@ -49,10 +49,10 @@ class AlfServer
   static std::string icGbtI2cWrite(const std::string& parameter, AlfLink link);
 
   static Sca::CommandData stringToScaPair(std::string stringPair);
-  static std::pair<SwtWord, Swt::Operation> stringToSwtPair(const std::string stringPair);
+  static std::pair<Swt::SwtData, Swt::Operation> stringToSwtPair(const std::string stringPair);
   static std::pair<Ic::IcData, Ic::Operation> stringToIcPair(const std::string stringPair);
   static std::vector<Sca::CommandData> parseStringToScaCommands(std::vector<std::string> stringPairs);
-  static std::vector<std::pair<SwtWord, Swt::Operation>> parseStringToSwtPairs(std::vector<std::string> stringPairs);
+  static std::vector<std::pair<Swt::SwtData, Swt::Operation>> parseStringToSwtPairs(std::vector<std::string> stringPairs);
   static std::vector<std::pair<Ic::IcData, Ic::Operation>> parseStringToIcPairs(std::vector<std::string> stringPairs);
 
   /// serial -> link -> vector of RPC servers
