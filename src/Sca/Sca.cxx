@@ -66,6 +66,7 @@ void Sca::init()
 
 void Sca::write(uint32_t command, uint32_t data)
 {
+  waitOnBusyClear();
   barWrite(sc_regs::SCA_WR_DATA.index, data);
   barWrite(sc_regs::SCA_WR_CMD.index, command);
   auto transactionId = (command >> 16) & 0xff;
@@ -83,6 +84,7 @@ void Sca::write(uint32_t command, uint32_t data)
 
 Sca::ReadResult Sca::read()
 {
+  waitOnBusyClear();
   auto data = barRead(sc_regs::SCA_RD_DATA.index);
   auto command = barRead(sc_regs::SCA_RD_CMD.index);
   /* printf("Sca::read   DATA=0x%x   CH=0x%x   TR=0x%x   CMD=0x%x\n", data,
@@ -90,10 +92,12 @@ Sca::ReadResult Sca::read()
 
   auto endTime = std::chrono::steady_clock::now() + CHANNEL_BUSY_TIMEOUT;
   while (std::chrono::steady_clock::now() < endTime) {
-    if (!isChannelBusy(barRead(sc_regs::SCA_RD_CMD.index))) {
+    if (!isChannelBusy(command)) {
       checkError(command);
       return { command, data };
     }
+    data = barRead(sc_regs::SCA_RD_DATA.index);
+    command = barRead(sc_regs::SCA_RD_CMD.index);
   }
 
   std::stringstream ss;
