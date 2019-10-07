@@ -6,6 +6,12 @@ ALF(Alice Low-level Frontend) spawns DIM services as an interface with detector 
 ## Requirements
 In order to run ALF a DIM Nameserver has to be up and running. For performance reasons, it is recommended to run the DIM Nameserver on the host running the FRED server.
 
+## Install ALF
+Under the specified directory run: git clone https://github.com/AliceMCH/ALF.git
+cd ALF
+cmake3 -DInfoLogger_ROOT=/home/flp/alice/sw/slc7_x86-64/libInfoLogger/latest-o2-dataflow
+make all
+
 ## Usage
 
 ### o2-alf
