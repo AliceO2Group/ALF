@@ -11,8 +11,14 @@ Under the specified directory run:
 
 `
 git clone https://github.com/AliceMCH/ALF.git
+`
+`
 cd ALF
+`
+`
 cmake3 -DInfoLogger_ROOT=/home/flp/alice/sw/slc7_x86-64/libInfoLogger/latest-o2-dataflow
+`
+`
 make all
 `
 
