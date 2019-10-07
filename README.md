@@ -11,13 +11,6 @@ Under the specified directory run:
 
 `
 git clone https://github.com/AliceMCH/ALF.git
-
-`
-cd ..
-`
-
-`
-. ./setup-QC.sh
 `
 
 `
