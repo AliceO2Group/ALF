@@ -92,17 +92,13 @@ void Swt::read(std::vector<SwtWord>& words, TimeOut msTimeOut, SwtWord::Size wor
 uint32_t Swt::write(const SwtWord& swtWord)
 {
   // prep the swt word
-  barWrite(sc_regs::SWT_WR_WORD_L.index, swtWord.getLow());
-  if (swtWord.getMed() || swtWord.getHigh()) {
-    barWrite(sc_regs::SWT_WR_WORD_M.index, swtWord.getMed());
-  }
   if (swtWord.getHigh()) {
     barWrite(sc_regs::SWT_WR_WORD_H.index, swtWord.getHigh());
   }
-
-  // perform write
-  barWrite(sc_regs::SWT_CMD.index, 0x1);
-  barWrite(sc_regs::SWT_CMD.index, 0x0); //void cmd to sync clocks
+  if (swtWord.getMed() || swtWord.getHigh()) {
+    barWrite(sc_regs::SWT_WR_WORD_M.index, swtWord.getMed());
+  }
+  barWrite(sc_regs::SWT_WR_WORD_L.index, swtWord.getLow()); // The LOW bar write, triggers the write operation
 
   return barRead(sc_regs::SWT_MON.index);
 }
