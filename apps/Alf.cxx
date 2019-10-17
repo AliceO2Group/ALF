@@ -8,7 +8,7 @@
 // granted to it by virtue of its status as an Intergovernmental Organization
 // or submit itself to any jurisdiction.
 
-/// \file ProgramAlf.cxx
+/// \file Alf.cxx
 /// \brief Definition of the command line tool to run the ALF server
 ///
 /// \author Pascal Boeschoten (pascal.boeschoten@cern.ch)
@@ -36,10 +36,10 @@ namespace Alf
 
 AliceO2::InfoLogger::InfoLogger logger;
 
-class ProgramAlf : public AliceO2::Common::Program
+class Alf : public AliceO2::Common::Program
 {
  public:
-  ProgramAlf()
+  Alf()
   {
   }
 
@@ -132,5 +132,5 @@ class ProgramAlf : public AliceO2::Common::Program
 
 int main(int argc, char** argv)
 {
-  return AliceO2::Alf::ProgramAlf().execute(argc, argv);
+  return AliceO2::Alf::Alf().execute(argc, argv);
 }

@@ -92,8 +92,8 @@ target_compile_features(ALF PUBLIC cxx_std_17)
 ####################################
 
 set(EXE_SRCS
-  ProgramAlf.cxx
-  ProgramAlfClient.cxx
+  Alf.cxx
+  AlfClient.cxx
 )
 
 set(EXE_NAMES
