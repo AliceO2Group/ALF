@@ -88,7 +88,7 @@ void Swt::read(std::vector<SwtWord>& words, TimeOut msTimeOut, SwtWord::Size wor
     mWordSequence = (mWordSequence + 1) % 16;
 
     // If we get the same counter as before it means the FIFO wasn't updated; drop the word
-    if (tempWord.getSequence() != mWordSequence) { //TODO: Need to reproduce so that I can test!
+    if (tempWord.getSequence() != mWordSequence) {
       getWarningLogger() << "SWT word sequence duplicate" << endm;
 
       mWordSequence = tempWord.getSequence(); //roll mWordSequence back by one
