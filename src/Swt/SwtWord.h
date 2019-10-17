@@ -46,6 +46,7 @@ class SwtWord
   uint32_t getLow() const;
   uint32_t getMed() const;
   uint16_t getHigh() const;
+  int getSequence() const;
 
   enum Size {
     High,
@@ -57,6 +58,7 @@ class SwtWord
   uint32_t mLow;
   uint32_t mMed;
   uint16_t mHigh;
+  int mSequence;
 };
 
 std::ostream& operator<<(std::ostream& output, const SwtWord& swtWord);

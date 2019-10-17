@@ -67,6 +67,7 @@ class Swt
   roc::RegisterReadWriteInterface& mBar2;
 
   AlfLink mLink;
+  int mWordSequence = -1;
 };
 
 } // namespace Alf
