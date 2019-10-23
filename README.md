@@ -20,7 +20,7 @@ DIM_DNS_NODE=thedimdns.cern.ch o2-alf
 `
 
 ### o2-alf-client
-o2-alf-client is the binary of an ALF client used solely for testing purposes. On top of the DIM Nameserver it expects the hostname of the node hosting the ALF server, the card's serial and the link number as command-line arguments.
+o2-alf-client is the binary of an ALF client used solely for testing purposes. On top of the DIM Nameserver it expects the hostname of the node hosting the ALF server, the card's serial and the link number as command-line arguments. Different arguments to test different types of services are available.
 
 `
 o2-alf-client --dim-dns-node thedimdns.cern.ch --alf-id thealfserver --serial 0 --link 4
