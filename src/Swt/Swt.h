@@ -67,7 +67,7 @@ class Swt
   roc::RegisterReadWriteInterface& mBar2;
 
   AlfLink mLink;
-  int mWordSequence = -1;
+  int mWordSequence = 0; //start from 0, as after the reset the counter starts at 1
 };
 
 } // namespace Alf

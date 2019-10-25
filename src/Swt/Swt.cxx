@@ -53,7 +53,7 @@ void Swt::reset()
 {
   barWrite(sc_regs::SC_RESET.index, 0x1);
   barWrite(sc_regs::SC_RESET.index, 0x0); //void cmd to sync clocks
-  mWordSequence = -1;
+  mWordSequence = 0;
 }
 
 void Swt::read(std::vector<SwtWord>& words, TimeOut msTimeOut, SwtWord::Size wordSize)
