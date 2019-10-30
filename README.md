@@ -16,7 +16,7 @@ o2-alf --dim-dns-node thedimdns.cern.ch
 `
 
 `
-DIM_DNS_NODE=thedimdns.cern.ch o2-alf
+DIM_DNS_NODE=thedimdns.cern.ch
 `
 
 ### o2-alf-client
