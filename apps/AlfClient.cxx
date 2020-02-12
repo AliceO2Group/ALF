@@ -53,9 +53,9 @@ class AlfClient : public AliceO2::Common::Program
     options.add_options()("dim-dns-node",
                           po::value<std::string>(&mOptions.dimDnsNode)->default_value(""),
                           "The DIM DNS node to connect to if the env var is not set");
-    options.add_options()("serial",
-                          po::value<int>(&mOptions.serial),
-                          "CRU serial number");
+    options.add_options()("cru-sequence",
+                          po::value<int>(&mOptions.cruSequence),
+                          "CRU sequence number");
     options.add_options()("link",
                           po::value<int>(&mOptions.link),
                           "Link number");
@@ -106,9 +106,9 @@ class AlfClient : public AliceO2::Common::Program
     std::string alfId = mOptions.alfId;
     boost::to_upper(alfId);
 
-    getLogger() << "Starting the DIM Client using ALF ID=" << alfId << ", serial=" << mOptions.serial << " and link=" << mOptions.link << endm;
+    getLogger() << "Starting the DIM Client using ALF ID=" << alfId << ", cru #=" << mOptions.cruSequence << " and link=" << mOptions.link << endm;
 
-    AlfLink link = AlfLink{ alfId, mOptions.serial, mOptions.link, nullptr };
+    AlfLink link = AlfLink{ alfId, mOptions.cruSequence, mOptions.link, nullptr };
 
     ServiceNames names(link);
     Alf::RegisterReadRpc registerReadRpc(names.registerRead());
@@ -188,7 +188,7 @@ class AlfClient : public AliceO2::Common::Program
  private:
   struct OptionsStruct {
     std::string dimDnsNode = "";
-    int serial = -1;
+    int cruSequence = -1;
     int link = -1;
     std::string alfId = "";
     bool ic = false;

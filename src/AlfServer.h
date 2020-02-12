@@ -55,7 +55,7 @@ class AlfServer
   static std::vector<std::pair<Swt::SwtData, Swt::Operation>> parseStringToSwtPairs(std::vector<std::string> stringPairs);
   static std::vector<std::pair<Ic::IcData, Ic::Operation>> parseStringToIcPairs(std::vector<std::string> stringPairs);
 
-  /// serial -> link -> vector of RPC servers
+  /// cruSequence -> link -> vector of RPC servers
   std::map<int, std::map<int, std::vector<std::unique_ptr<StringRpcServer>>>> mRpcServers;
 };
 

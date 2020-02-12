@@ -87,7 +87,7 @@ class Alf : public AliceO2::Common::Program
     AlfServer alfServer = AlfServer();
 
     std::vector<roc::CardDescriptor> cardsFound = roc::findCards();
-    int fakeSerial = 0;
+    int cruSequence = -1;
     for (auto const& card : cardsFound) {
       std::vector<AlfLink> links;
 
@@ -105,14 +105,12 @@ class Alf : public AliceO2::Common::Program
           }
         }
 
-        //auto serialMaybe = card.serialNumber.get();
-        //int serial = serialMaybe ? serialMaybe : fakeSerial++;
-        int serial = fakeSerial++;
+        cruSequence++;
 
-        getLogger() << "Card #" << serial << " : " << card.pciAddress << endm;
+        getLogger() << "CRU #" << cruSequence << " : " << card.pciAddress << endm;
         bar2 = roc::ChannelFactory().getBar(card.pciAddress, 2);
         for (int linkId = 0; linkId < CRU_NUM_LINKS; linkId++) {
-          links.push_back({ alfId, serial, linkId, bar2 });
+          links.push_back({ alfId, cruSequence, linkId, bar2 });
         }
 
       } else {
@@ -121,7 +119,7 @@ class Alf : public AliceO2::Common::Program
 
       if (isVerbose()) {
         for (auto const& link : links) {
-          getLogger() << link.alfId << " " << link.serial << " " << link.linkId << endm;
+          getLogger() << link.alfId << " " << link.cruSequence << " " << link.linkId << endm;
         }
       }
 

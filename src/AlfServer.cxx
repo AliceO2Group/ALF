@@ -299,7 +299,7 @@ void AlfServer::makeRpcServers(std::vector<AlfLink> links)
     ServiceNames names(link);
 
     // Start the RPC Servers
-    auto& servers = mRpcServers[link.serial][link.linkId];
+    auto& servers = mRpcServers[link.cruSequence][link.linkId];
     std::shared_ptr<roc::BarInterface> bar2 = link.bar2;
 
     if (link.linkId == 0) { // Register Read / Write services are per card; register them as soon as possible
