@@ -33,7 +33,7 @@ static constexpr auto CHANNEL_BUSY_TIMEOUT = std::chrono::milliseconds(10);
 
 struct AlfLink {
   std::string alfId;
-  int serial;
+  int cruSequence;
   int linkId;
   std::shared_ptr<roc::BarInterface> bar2;
 };

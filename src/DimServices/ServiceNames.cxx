@@ -43,12 +43,12 @@ DEFLINKSERVICENAME(icGbtI2cWrite, "IC_GBT_I2C_WRITE")
 
 std::string ServiceNames::formatLink(std::string name) const
 {
-  return ((boost::format("ALF_%1%/SERIAL_%2%/LINK_%3%/%4%") % mAlfId % mSerial % mLink % name)).str();
+  return ((boost::format("ALF_%1%/CRU_%2%/LINK_%3%/%4%") % mAlfId % mCruSequence % mLink % name)).str();
 }
 
 std::string ServiceNames::format(std::string name) const
 {
-  return ((boost::format("ALF_%1%/SERIAL_%2%/%3%") % mAlfId % mSerial % name)).str();
+  return ((boost::format("ALF_%1%/CRU_%2%/%3%") % mAlfId % mCruSequence % name)).str();
 }
 
 } // namespace Alf
