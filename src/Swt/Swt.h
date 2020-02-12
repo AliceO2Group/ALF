@@ -51,7 +51,7 @@ class Swt
 
   void reset();
   uint32_t write(const SwtWord& swtWord);
-  void read(std::vector<SwtWord>& word, TimeOut msTimeOut = 10, SwtWord::Size wordSize = SwtWord::Size::High);
+  void read(std::vector<SwtWord>& word, TimeOut msTimeOut, SwtWord::Size wordSize = SwtWord::Size::High);
 
   enum Operation { Read,
                    Write,
@@ -68,6 +68,7 @@ class Swt
 
   AlfLink mLink;
   int mWordSequence = 0; //start from 0, as after the reset the counter starts at 1
+  static constexpr int DEFAULT_SWT_TIMEOUT_MS = 10;
 };
 
 } // namespace Alf
