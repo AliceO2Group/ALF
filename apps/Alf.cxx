@@ -25,6 +25,8 @@
 #include "ReadoutCard/CardDescriptor.h"
 #include "ReadoutCard/CardFinder.h"
 #include "ReadoutCard/ChannelFactory.h"
+#include "ReadoutCard/Exception.h"
+#include "ReadoutCard/FirmwareChecker.h"
 
 namespace ip = boost::asio::ip;
 namespace po = boost::program_options;
@@ -53,6 +55,9 @@ class Alf : public AliceO2::Common::Program
     options.add_options()("dim-dns-node",
                           po::value<std::string>(&mOptions.dimDnsNode)->default_value(""),
                           "The DIM DNS node to set the env var if not already set");
+    options.add_options()("no-fw-check",
+                          po::bool_switch(&mOptions.noFirmwareCheck)->default_value(false),
+                          "Disable firmware compatibility check");
   }
 
   virtual void run(const po::variables_map&) override
@@ -89,8 +94,16 @@ class Alf : public AliceO2::Common::Program
       std::shared_ptr<roc::BarInterface> bar2;
 
       // Make the RPC services for every card & link
-      if (card.cardType == roc::CardType::Cru) { //TODO: To be deprecated when findCards supports types
-                                                 //TODO: What about CRORC ????????
+      if (card.cardType == roc::CardType::Cru) {
+
+        if (!mOptions.noFirmwareCheck) {
+          try {
+            roc::FirmwareChecker().checkFirmwareCompatibility(card.pciAddress);
+          } catch (const roc::Exception& e) {
+            getWarningLogger() << boost::diagnostic_information(e) << endm;
+            continue;
+          }
+        }
 
         //auto serialMaybe = card.serialNumber.get();
         //int serial = serialMaybe ? serialMaybe : fakeSerial++;
@@ -124,6 +137,7 @@ class Alf : public AliceO2::Common::Program
  private:
   struct OptionsStruct {
     std::string dimDnsNode = "";
+    bool noFirmwareCheck = false;
   } mOptions;
 };
 
