@@ -89,6 +89,11 @@ void Swt::read(std::vector<SwtWord>& words, TimeOut msTimeOut, SwtWord::Size wor
 
     // If we get the same counter as before it means the FIFO wasn't updated; drop the word
     if (tempWord.getSequence() != mWordSequence) {
+
+      if (std::chrono::steady_clock::now() < timeOut) {
+        BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("Timed out: not enough words in SWT READ FIFO"));
+      }
+
       getWarningLogger() << "SWT word sequence duplicate" << endm;
 
       mWordSequence = tempWord.getSequence(); //roll mWordSequence back by one
@@ -139,13 +144,10 @@ std::string Swt::writeSequence(std::vector<std::pair<SwtData, Operation>> sequen
         try {
           timeOut = std::get<TimeOut>(data);
         } catch (...) { // no timeout was provided
-          timeOut = -1;
+          data = DEFAULT_SWT_TIMEOUT_MS;
+          timeOut = std::get<TimeOut>(data);
         }
-        if (timeOut >= 0) {
-          read(results, timeOut);
-        } else {
-          read(results);
-        }
+        read(results, timeOut);
 
         for (const auto& result : results) {
           resultBuffer << result << "\n";
