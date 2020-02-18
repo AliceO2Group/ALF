@@ -31,7 +31,7 @@ o2-alf-client --dim-dns-node thedimdns.cern.ch --alf-id thealfserver --cru-seque
 Service names are identified by the server's hostname, the card's sequence number (as reported during ALF's startup) and the link, as follows:
 
 `
-ALF_[hostname]/CRU_[cru_sequence_number]/LINK_[link]/[service_name]
+ALF_[hostname]/SERIAL_[cru_sequence_number]/LINK_[link]/[service_name]
 `
 
 ### DIM RPC services
