@@ -77,6 +77,39 @@ class RegisterWriteRpc : DimRpcInfoWrapper
   }
 };
 
+class PatternPlayerRpc : DimRpcInfoWrapper
+{
+ public:
+  PatternPlayerRpc(const std::string& serviceName)
+    : DimRpcInfoWrapper(serviceName)
+  {
+  }
+  std::string play(const std::string& buffer)
+  {
+    setString(buffer);
+    std::string ret;
+    try {
+      ret = getString();
+    } catch (const AlfException& e) {
+      getErrorLogger() << "PatternPlayerRpc: " << boost::diagnostic_information(e, true) << endm;
+      return errString;
+    }
+    return ret;
+  }
+
+  std::string play(const std::vector<std::string>& info)
+  {
+    std::stringstream buffer;
+    for (size_t i = 0; i < info.size(); ++i) {
+      buffer << info[i];
+      if (i + 1 < info.size()) {
+        buffer << argumentSeparator();
+      }
+    }
+    return play(buffer.str());
+  }
+};
+
 class ScaSequenceRpc : DimRpcInfoWrapper
 {
  public:

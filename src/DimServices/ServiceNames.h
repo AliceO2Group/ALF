@@ -39,6 +39,7 @@ class ServiceNames
   std::string swtSequence() const;
   std::string icSequence() const;
   std::string icGbtI2cWrite() const;
+  std::string patternPlayer() const;
 
  private:
   std::string formatLink(std::string name) const;
