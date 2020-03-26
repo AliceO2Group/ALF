@@ -27,6 +27,8 @@
 #include "Common.h"
 #include "Ic/Ic.h"
 
+#include "ReadoutCard/PatternPlayer.h"
+
 namespace roc = AliceO2::roc;
 
 namespace AliceO2
@@ -47,6 +49,7 @@ class AlfServer
   static std::string swtBlobWrite(const std::string& parameter, AlfLink link);
   static std::string icBlobWrite(const std::string& parameter, AlfLink link);
   static std::string icGbtI2cWrite(const std::string& parameter, AlfLink link);
+  static std::string patternPlayer(const std::string& parameter, std::shared_ptr<roc::BarInterface>);
 
   static Sca::CommandData stringToScaPair(std::string stringPair);
   static std::pair<Swt::SwtData, Swt::Operation> stringToSwtPair(const std::string stringPair);
@@ -54,6 +57,7 @@ class AlfServer
   static std::vector<Sca::CommandData> parseStringToScaCommands(std::vector<std::string> stringPairs);
   static std::vector<std::pair<Swt::SwtData, Swt::Operation>> parseStringToSwtPairs(std::vector<std::string> stringPairs);
   static std::vector<std::pair<Ic::IcData, Ic::Operation>> parseStringToIcPairs(std::vector<std::string> stringPairs);
+  static roc::PatternPlayer::Info parseStringToPatternPlayerInfo(const std::vector<std::string> sringsPairs);
 
   /// cruSequence -> link -> vector of RPC servers
   std::map<int, std::map<int, std::vector<std::unique_ptr<StringRpcServer>>>> mRpcServers;

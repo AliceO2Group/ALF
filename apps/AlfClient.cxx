@@ -71,6 +71,9 @@ class AlfClient : public AliceO2::Common::Program
     options.add_options()("swt",
                           po::bool_switch(&mOptions.swt)->default_value(false),
                           "Flag enabling the swt tests");
+    options.add_options()("pattern-player",
+                          po::bool_switch(&mOptions.patternPlayer)->default_value(false),
+                          "Flag enabling the pattern player tests");
     options.add_options()("swt-stress",
                           po::bool_switch(&mOptions.swtStress)->default_value(false),
                           "Flag enabling the swt-stress tests");
@@ -113,6 +116,8 @@ class AlfClient : public AliceO2::Common::Program
     ServiceNames names(link);
     Alf::RegisterReadRpc registerReadRpc(names.registerRead());
     Alf::RegisterWriteRpc registerWriteRpc(names.registerWrite());
+    Alf::PatternPlayerRpc patternPlayerRpc(names.patternPlayer());
+
     Alf::SwtSequenceRpc swtSequence(names.swtSequence());
     Alf::ScaSequenceRpc scaSequence(names.scaSequence());
     Alf::IcSequenceRpc icSequence(names.icSequence());
@@ -182,6 +187,26 @@ class AlfClient : public AliceO2::Common::Program
       icGbtI2cWriteRpc.write(0x3);
     }
 
+    if (mOptions.patternPlayer) {
+      getLogger() << "Running the pattern player" << endm;
+      auto ppOut = patternPlayerRpc.play({
+        "0x23456789abcdef123456",
+        "0x5678",
+        "0x9abc",
+        "42",
+        "0",
+        "53",
+        //"30", // comment to test case of less parameters than expected
+        "29",
+        "#a comment", // tests that a comment is parsed gracfully
+        "false",
+        "true",
+        "false",
+        //"0xdeadbeef" // Uncomment to test more parameters than expected
+      });
+      getLogger() << "Pairs test return: " << ppOut << endm;
+    }
+
     getLogger() << "See ya!" << endm;
   }
 
@@ -194,6 +219,7 @@ class AlfClient : public AliceO2::Common::Program
     bool ic = false;
     bool sca = false;
     bool swt = false;
+    bool patternPlayer = false;
     bool swtStress = false;
     int swtStressCycles = 2;
     int swtStressWords = 1000;
