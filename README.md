@@ -122,6 +122,7 @@ The services are DIM RPC services. Every RPC is called with a string and expects
   * DIM output ` `
 
 #### PATTERN_PLAYER
+
 * Parameters
   * Sync Pattern
   * Reset Pattern
@@ -131,9 +132,9 @@ The services are DIM RPC services. Every RPC is called with a string and expects
   * Reset Length
   * Reset Trigger Select
   * Sync Trigger Select
-  * Sync At Start;
-  * Trigger Sync;
-  * Trigger Reset;
+  * Sync At Start
+  * Trigger Sync
+  * Trigger Reset
 
 * Returns
   * empty
