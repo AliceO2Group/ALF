@@ -120,3 +120,24 @@ The services are DIM RPC services. Every RPC is called with a string and expects
 * Example:
   * DIM input `0x3\n`
   * DIM output ` `
+
+#### PATTERN_PLAYER
+* Parameters
+  * Sync Pattern
+  * Reset Pattern
+  * Idle Pattern
+  * Sync Length
+  * Sync Delay
+  * Reset Length
+  * Reset Trigger Select
+  * Sync Trigger Select
+  * Sync At Start;
+  * Trigger Sync;
+  * Trigger Reset;
+
+* Returns
+  * empty
+
+* Example:
+  * DIM input `0x23456789abcdef123456\n0x5678\n0x9abc\n42\n0\n53\n30\n29\n#a comment\nfalse\ntrue\nfalse`
+  * DIM output ` `
