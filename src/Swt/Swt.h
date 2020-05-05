@@ -47,7 +47,7 @@ class Swt
   Swt(AlfLink link);
 
   typedef int TimeOut;
-  typedef std::variant<SwtWord, TimeOut> SwtData;
+  typedef std::variant<SwtWord, TimeOut> Data;
 
   void reset();
   uint32_t write(const SwtWord& swtWord);
@@ -57,7 +57,7 @@ class Swt
                    Write,
                    Reset };
 
-  std::string writeSequence(std::vector<std::pair<SwtData, Operation>> sequence);
+  std::string writeSequence(std::vector<std::pair<Data, Operation>> sequence);
 
  private:
   void setChannel(int gbtChannel);

@@ -14,9 +14,11 @@
 /// \author Pascal Boeschoten (pascal.boeschoten@cern.ch)
 /// \author Kostas Alexopoulos (kostas.alexopoulos@cern.ch)
 
+#include <boost/format.hpp>
 #include <chrono>
 #include <fstream>
 #include <sstream>
+#include <thread>
 #include <vector>
 
 #include "AlfException.h"
@@ -233,18 +235,41 @@ void Sca::waitOnBusyClear()
                         << ErrorInfo::Message("Exceeded timeout on busy wait"));
 }
 
-std::string Sca::writeSequence(const std::vector<CommandData>& commands)
+std::string Sca::writeSequence(const std::vector<std::pair<Data, Operation>>& operations)
 {
   std::stringstream resultBuffer;
-  for (const auto& commandData : commands) {
+  for (const auto& it : operations) {
+    Data data = it.first;
     try {
-      write(commandData);
-      ReadResult result = read();
-      resultBuffer << Util::formatValue(commandData.command) << "," << Util::formatValue(result.data) << "\n";
+      if (it.second == Operation::Command) {
+        auto commandData = std::get<CommandData>(data);
+        write(commandData);
+        ReadResult result = read();
+        resultBuffer << Util::formatValue(commandData.command) << "," << Util::formatValue(result.data) << "\n";
+      } else if (it.second == Operation::Wait) {
+        int waitTime;
+        try {
+          waitTime = std::get<WaitTime>(data);
+        } catch (...) { // no timeout was provided
+          data = DEFAULT_SCA_WAIT_TIME_MS;
+          waitTime = std::get<WaitTime>(data);
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
+        resultBuffer << waitTime << "\n";
+      } else {
+        BOOST_THROW_EXCEPTION(ScaException() << ErrorInfo::Message("SCA operation type unknown"));
+      }
     } catch (const ScaException& e) {
       // If an SCA error occurs, we stop executing the sequence of commands and return the results as far as we got
       // them, plus the error message.
-      std::string meaningfulMessage = (boost::format("SCA_SEQUENCE cmd=0x%08x data=0x%08x cruSequence=%d link=%d error='%s'") % commandData.command % commandData.data % mLink.cruSequence % mLink.linkId % e.what()).str();
+      std::string meaningfulMessage;
+      if (it.second == Operation::Command) {
+        meaningfulMessage = (boost::format("SCA_SEQUENCE cmd=0x%08x data=0x%08x cruSequence=%d link=%d error='%s'") % std::get<Command>(data).command % std::get<Command>(data).data % mLink.cruSequence % mLink.linkId % e.what()).str();
+      } else if (it.second == Operation::Wait) {
+        meaningfulMessage = (boost::format("SCA_SEQUENCE WAIT waitTime=%d cruSequence=%d link=%d error='%s'") % std::get<WaitTime>(data) % mLink.cruSequence % mLink.linkId % e.what()).str();
+      } else {
+        meaningfulMessage = (boost::format("SCA_SEQUENCE UNKNOWN cruSequence=%d link=%d error='%s'") % mLink.cruSequence % mLink.linkId % e.what()).str();
+      }
       getErrorLogger() << meaningfulMessage << endm;
       resultBuffer << meaningfulMessage;
       BOOST_THROW_EXCEPTION(ScaException() << ErrorInfo::Message(resultBuffer.str()));

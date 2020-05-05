@@ -131,11 +131,11 @@ uint32_t Swt::barRead(uint32_t index)
   return read;
 }
 
-std::string Swt::writeSequence(std::vector<std::pair<SwtData, Operation>> sequence)
+std::string Swt::writeSequence(std::vector<std::pair<Data, Operation>> sequence)
 {
   std::stringstream resultBuffer;
   for (const auto& it : sequence) {
-    SwtData data = it.first;
+    Data data = it.first;
     try {
       if (it.second == Operation::Read) {
         std::vector<SwtWord> results;
@@ -169,8 +169,10 @@ std::string Swt::writeSequence(std::vector<std::pair<SwtData, Operation>> sequen
         meaningfulMessage = (boost::format("SWT_SEQUENCE READ timeout=%d cruSequence=%d link=%d, error='%s'") % std::get<TimeOut>(data) % mLink.cruSequence % mLink.linkId % e.what()).str();
       } else if (it.second == Operation::Write) {
         meaningfulMessage = (boost::format("SWT_SEQUENCE WRITE data=%s cruSequence=%d link=%d, error='%s'") % std::get<SwtWord>(data) % mLink.cruSequence % mLink.linkId % e.what()).str();
-      } else {
+      } else if (it.second == Operation::Reset) {
         meaningfulMessage = (boost::format("SWT_SEQUENCE RESET cruSequence=%d link=%d, error='%s'") % mLink.cruSequence % mLink.linkId % e.what()).str();
+      } else {
+        meaningfulMessage = (boost::format("SWT_SEQUENCE UNKNOWN cruSequence=%d link=%d,  error='%s'") % mLink.cruSequence % mLink.linkId % e.what()).str();
       }
       getErrorLogger() << meaningfulMessage << endm;
       resultBuffer << meaningfulMessage;

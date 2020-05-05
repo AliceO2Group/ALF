@@ -68,13 +68,16 @@ The services are DIM RPC services. Every RPC is called with a string and expects
 
 #### SCA_SEQUENCE
 * Parameters:
-  * Sequence of SCA command and data pairs
+  * Sequence of SCA operations as follows:
+    * Operations may be:
+    * An SCA command and data pair (e.g. `0x0000f00d,0x0000cafe`)
+    * A wait operation (e.g. `30,wait`)
 * Returns:
-  * Sequence of SCA command, and SCA read pairs
+  * Sequence of SCA command and SCA read pairs, and wait confirmations
   
 * Example:
-  * DIM input: `0x00000010,0x00000011\n0x000000020,0x00000021`
-  * DIM output: `0x00000010,0x00000111\n0x00000020,0x00000221\n`
+  * DIM input: `0x00000010,0x00000011\n3\n0x000000020,0x00000021`
+  * DIM output: `0x00000010,0x00000111\n3\n0x00000020,0x00000221\n`
 
 #### SWT_SEQUENCE
 * Parameters:

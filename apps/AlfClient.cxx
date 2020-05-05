@@ -163,7 +163,8 @@ class AlfClient : public AliceO2::Common::Program
     }
 
     if (mOptions.sca) {
-      auto scaOut = scaSequence.write({ std::make_pair("0x00010002", "0xff000000"),
+      auto scaOut = scaSequence.write({ std::make_pair("1000", "wait"),
+                                        std::make_pair("0x00010002", "0xff000000"),
                                         std::make_pair("0x00020004", "0xff000000"),
                                         std::make_pair("0x00030006", "0xff000000"),
                                         std::make_pair("0x0B950282", "0x50010000"),
@@ -196,7 +197,7 @@ class AlfClient : public AliceO2::Common::Program
         "42",
         "0",
         "53",
-        //"30", // comment to test case of less parameters than expected
+        "30", // comment to test case of less parameters than expected
         "29",
         "#a comment", // tests that a comment is parsed gracfully
         "false",

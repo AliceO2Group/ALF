@@ -61,16 +61,16 @@ std::string AlfServer::registerWrite(const std::string& parameter, std::shared_p
 std::string AlfServer::scaBlobWrite(const std::string& parameter, AlfLink link)
 {
   std::vector<std::string> stringPairs = Util::split(parameter, argumentSeparator());
-  std::vector<Sca::CommandData> commands = parseStringToScaCommands(stringPairs);
+  std::vector<std::pair<Sca::Data, Sca::Operation>> scaPairs = parseStringToScaPairs(stringPairs);
   Sca sca = Sca(link);
-  return sca.writeSequence(commands);
+  return sca.writeSequence(scaPairs);
 }
 
 std::string AlfServer::swtBlobWrite(const std::string& parameter, AlfLink link)
 {
 
   std::vector<std::string> stringPairs = Util::split(parameter, argumentSeparator());
-  std::vector<std::pair<Swt::SwtData, Swt::Operation>> swtPairs = parseStringToSwtPairs(stringPairs);
+  std::vector<std::pair<Swt::Data, Swt::Operation>> swtPairs = parseStringToSwtPairs(stringPairs);
   Swt swt = Swt(link);
   return swt.writeSequence(swtPairs);
 }
@@ -177,22 +177,39 @@ roc::PatternPlayer::Info AlfServer::parseStringToPatternPlayerInfo(const std::ve
   return ppInfo;
 }
 
-Sca::CommandData AlfServer::stringToScaPair(std::string stringPair)
+std::pair<Sca::Data, Sca::Operation> AlfServer::stringToScaPair(const std::string stringPair)
 {
   std::vector<std::string> scaPair = Util::split(stringPair, pairSeparator());
   if (scaPair.size() != 2) {
     BOOST_THROW_EXCEPTION(
       AlfException() << ErrorInfo::Message("SCA command-data pair not formatted correctly"));
   }
-  Sca::CommandData commandData;
-  commandData.command = Util::stringToHex(scaPair[0]);
-  commandData.data = Util::stringToHex(scaPair[1]);
-  return commandData;
+
+  Sca::Data data;
+  Sca::Operation operation;
+
+  if (scaPair[scaPair.size() - 1] == "wait") {
+    operation = Sca::Operation::Wait;
+    try {
+      data = std::stoi(scaPair[0]);
+    } catch (const std::exception& e) {
+      BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("SCA Wait Time provided cannot be converted to int"));
+    }
+  } else { // regular sca command
+    operation = Sca::Operation::Command;
+    Sca::CommandData commandData;
+    commandData.command = Util::stringToHex(scaPair[0]);
+    commandData.data = Util::stringToHex(scaPair[1]);
+    data = commandData;
+  }
+
+  return std::make_pair(data, operation);
 }
 
 /// Converts a 76-bit hex number string
-std::pair<Swt::SwtData, Swt::Operation> AlfServer::stringToSwtPair(const std::string stringPair)
+std::pair<Swt::Data, Swt::Operation> AlfServer::stringToSwtPair(const std::string stringPair)
 {
+  std::cout << "trigger" << std::endl;
   std::vector<std::string> swtPair = Util::split(stringPair, pairSeparator());
   if (swtPair.size() < 1 || swtPair.size() > 2) {
     BOOST_THROW_EXCEPTION(
@@ -219,7 +236,7 @@ std::pair<Swt::SwtData, Swt::Operation> AlfServer::stringToSwtPair(const std::st
     BOOST_THROW_EXCEPTION(std::out_of_range("Parameter for SWT operation unkown"));
   }
 
-  Swt::SwtData data;
+  Swt::Data data;
 
   if (operation == Swt::Operation::Write) {
     SwtWord word;
@@ -329,9 +346,9 @@ std::pair<Ic::IcData, Ic::Operation> AlfServer::stringToIcPair(const std::string
   return std::make_pair(icData, icOperation);
 }
 
-std::vector<Sca::CommandData> AlfServer::parseStringToScaCommands(std::vector<std::string> stringPairs)
+std::vector<std::pair<Sca::Data, Sca::Operation>> AlfServer::parseStringToScaPairs(std::vector<std::string> stringPairs)
 {
-  std::vector<Sca::CommandData> pairs;
+  std::vector<std::pair<Sca::Data, Sca::Operation>> pairs;
   for (const auto& stringPair : stringPairs) {
     if (stringPair.find('#') == std::string::npos) { // =isn't a comment
       pairs.push_back(stringToScaPair(stringPair));
@@ -340,10 +357,10 @@ std::vector<Sca::CommandData> AlfServer::parseStringToScaCommands(std::vector<st
   return pairs;
 }
 
-std::vector<std::pair<Swt::SwtData, Swt::Operation>> AlfServer::parseStringToSwtPairs(std::vector<std::string> stringPairs)
+std::vector<std::pair<Swt::Data, Swt::Operation>> AlfServer::parseStringToSwtPairs(std::vector<std::string> stringPairs)
 {
 
-  std::vector<std::pair<Swt::SwtData, Swt::Operation>> pairs;
+  std::vector<std::pair<Swt::Data, Swt::Operation>> pairs;
   for (const auto& stringPair : stringPairs) {
     if (stringPair.find('#') == std::string::npos) {
       pairs.push_back(stringToSwtPair(stringPair));

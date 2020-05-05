@@ -19,6 +19,7 @@
 
 #include <string>
 #include <map>
+#include <variant>
 
 #include "Common.h"
 #include "ReadoutCard/CardType.h"
@@ -45,6 +46,12 @@ class Sca
     uint32_t data;
   };
 
+  typedef int WaitTime;
+  typedef std::variant<CommandData, WaitTime> Data;
+
+  enum Operation { Command,
+                   Wait };
+
   /// \param bar2 SCA is on BAR 2
   /// \param link Needed to get offset for SCA registers
   Sca(AlfLink link);
@@ -59,7 +66,7 @@ class Sca
     write(commandData.command, commandData.data);
   };
 
-  std::string writeSequence(const std::vector<CommandData>& commands);
+  std::string writeSequence(const std::vector<std::pair<Data, Operation>>& operations);
 
  private:
   uint32_t barRead(uint32_t index);
@@ -75,6 +82,7 @@ class Sca
   roc::RegisterReadWriteInterface& mBar2;
 
   AlfLink mLink;
+  static constexpr int DEFAULT_SCA_WAIT_TIME_MS = 3;
 };
 
 } // namespace Alf
