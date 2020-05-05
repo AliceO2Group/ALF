@@ -51,11 +51,11 @@ class AlfServer
   static std::string icGbtI2cWrite(const std::string& parameter, AlfLink link);
   static std::string patternPlayer(const std::string& parameter, std::shared_ptr<roc::BarInterface>);
 
-  static Sca::CommandData stringToScaPair(std::string stringPair);
-  static std::pair<Swt::SwtData, Swt::Operation> stringToSwtPair(const std::string stringPair);
+  static std::pair<Sca::Data, Sca::Operation> stringToScaPair(const std::string stringPair);
+  static std::pair<Swt::Data, Swt::Operation> stringToSwtPair(const std::string stringPair);
   static std::pair<Ic::IcData, Ic::Operation> stringToIcPair(const std::string stringPair);
-  static std::vector<Sca::CommandData> parseStringToScaCommands(std::vector<std::string> stringPairs);
-  static std::vector<std::pair<Swt::SwtData, Swt::Operation>> parseStringToSwtPairs(std::vector<std::string> stringPairs);
+  static std::vector<std::pair<Sca::Data, Sca::Operation>> parseStringToScaPairs(std::vector<std::string> stringPairs);
+  static std::vector<std::pair<Swt::Data, Swt::Operation>> parseStringToSwtPairs(std::vector<std::string> stringPairs);
   static std::vector<std::pair<Ic::IcData, Ic::Operation>> parseStringToIcPairs(std::vector<std::string> stringPairs);
   static roc::PatternPlayer::Info parseStringToPatternPlayerInfo(const std::vector<std::string> sringsPairs);
 
