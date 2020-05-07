@@ -53,15 +53,18 @@ class AlfClient : public AliceO2::Common::Program
     options.add_options()("dim-dns-node",
                           po::value<std::string>(&mOptions.dimDnsNode)->default_value(""),
                           "The DIM DNS node to connect to if the env var is not set");
-    options.add_options()("cru-sequence",
-                          po::value<int>(&mOptions.cruSequence),
-                          "CRU sequence number");
+    options.add_options()("card-sequence",
+                          po::value<int>(&mOptions.cardSequence),
+                          "Card sequence number");
     options.add_options()("link",
                           po::value<int>(&mOptions.link),
                           "Link number");
     options.add_options()("alf-id",
                           po::value<std::string>(&mOptions.alfId)->default_value(""),
                           "Hostname of node running the ALF server(required)");
+    options.add_options()("crorc",
+                          po::bool_switch(&mOptions.crorc)->default_value(false),
+                          "Flag enabling the test of the crorc (exclusive)");
     options.add_options()("ic",
                           po::bool_switch(&mOptions.ic)->default_value(false),
                           "Flag enabling the ic tests");
@@ -109,11 +112,26 @@ class AlfClient : public AliceO2::Common::Program
     std::string alfId = mOptions.alfId;
     boost::to_upper(alfId);
 
-    getLogger() << "Starting the DIM Client using ALF ID=" << alfId << ", cru #=" << mOptions.cruSequence << " and link=" << mOptions.link << endm;
+    getLogger() << "Starting the DIM Client using ALF ID=" << alfId << ", card #=" << mOptions.cardSequence << " and link=" << mOptions.link << endm;
 
-    AlfLink link = AlfLink{ alfId, mOptions.cruSequence, mOptions.link, nullptr };
+    AlfLink link = AlfLink{ alfId, mOptions.cardSequence, mOptions.link, nullptr, roc::CardType::Cru };
 
     ServiceNames names(link);
+
+    if (mOptions.crorc) {
+      link.cardType = roc::CardType::Crorc;
+      Alf::RegisterSequenceRpc registerSequence(names.registerSequence());
+      auto regOut = registerSequence.write({ std::make_pair("0x19c", ""),
+                                             std::make_pair("0xa0", ""),
+                                             std::make_pair("0x1f0", ""),
+                                             std::make_pair("0x1f0", "0x00080000"),
+                                             std::make_pair("0x1f0", "") });
+      getLogger() << "[REGISTER SEQUENCE] output: " << regOut << endm;
+
+      return;
+    }
+
+    // Only CRU from this point forward
     Alf::RegisterReadRpc registerReadRpc(names.registerRead());
     Alf::RegisterWriteRpc registerWriteRpc(names.registerWrite());
     Alf::PatternPlayerRpc patternPlayerRpc(names.patternPlayer());
@@ -214,9 +232,10 @@ class AlfClient : public AliceO2::Common::Program
  private:
   struct OptionsStruct {
     std::string dimDnsNode = "";
-    int cruSequence = -1;
+    int cardSequence = -1;
     int link = -1;
     std::string alfId = "";
+    bool crorc = false;
     bool ic = false;
     bool sca = false;
     bool swt = false;

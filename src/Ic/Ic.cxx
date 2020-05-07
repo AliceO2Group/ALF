@@ -49,7 +49,7 @@ static constexpr roc::Register IC_WR_CMD(IC_BASE.address + 0x28);
 static constexpr roc::Register IC_RD_DATA(IC_BASE.address + 0x30);
 } // namespace ic_regs
 
-Ic::Ic(AlfLink link) : mBar2(*link.bar2), mLink(link)
+Ic::Ic(AlfLink link) : mBar2(*link.bar), mLink(link)
 {
   setChannel(mLink.linkId);
   reset();
@@ -166,7 +166,7 @@ std::string Ic::writeSequence(std::vector<std::pair<IcData, Operation>> ops)
     } catch (const SwtException& e) {
       // If an IC error occurs, we stop executing the sequence of commands and return the results as far as we got them, plus
       // the error message.
-      std::string meaningfulMessage = (boost::format("ic_regs::IC_SEQUENCE address=0x%08x data=0x%08x cruSequence=%d link=%d, error='%s'") % icData.address % icData.data % mLink.cruSequence % mLink.linkId % e.what()).str();
+      std::string meaningfulMessage = (boost::format("ic_regs::IC_SEQUENCE address=0x%08x data=0x%08x cardSequence=%d link=%d, error='%s'") % icData.address % icData.data % mLink.cardSequence % mLink.linkId % e.what()).str();
       getErrorLogger() << meaningfulMessage << endm;
       resultBuffer << meaningfulMessage;
       BOOST_THROW_EXCEPTION(IcException() << ErrorInfo::Message(resultBuffer.str()));

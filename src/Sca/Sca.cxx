@@ -37,7 +37,7 @@ namespace Alf
 // std::map<std::string, uint32_t> Sca::registers;
 
 Sca::Sca(AlfLink link)
-  : mBar2(*link.bar2), mLink(link)
+  : mBar2(*link.bar), mLink(link)
 {
   if (mLink.linkId >= CRU_NUM_LINKS) {
     BOOST_THROW_EXCEPTION(
@@ -264,11 +264,11 @@ std::string Sca::writeSequence(const std::vector<std::pair<Data, Operation>>& op
       // them, plus the error message.
       std::string meaningfulMessage;
       if (it.second == Operation::Command) {
-        meaningfulMessage = (boost::format("SCA_SEQUENCE cmd=0x%08x data=0x%08x cruSequence=%d link=%d error='%s'") % std::get<Command>(data).command % std::get<Command>(data).data % mLink.cruSequence % mLink.linkId % e.what()).str();
+        meaningfulMessage = (boost::format("SCA_SEQUENCE cmd=0x%08x data=0x%08x cardSequence=%d link=%d error='%s'") % std::get<Command>(data).command % std::get<Command>(data).data % mLink.cardSequence % mLink.linkId % e.what()).str();
       } else if (it.second == Operation::Wait) {
-        meaningfulMessage = (boost::format("SCA_SEQUENCE WAIT waitTime=%d cruSequence=%d link=%d error='%s'") % std::get<WaitTime>(data) % mLink.cruSequence % mLink.linkId % e.what()).str();
+        meaningfulMessage = (boost::format("SCA_SEQUENCE WAIT waitTime=%d cardSequence=%d link=%d error='%s'") % std::get<WaitTime>(data) % mLink.cardSequence % mLink.linkId % e.what()).str();
       } else {
-        meaningfulMessage = (boost::format("SCA_SEQUENCE UNKNOWN cruSequence=%d link=%d error='%s'") % mLink.cruSequence % mLink.linkId % e.what()).str();
+        meaningfulMessage = (boost::format("SCA_SEQUENCE UNKNOWN cardSequence=%d link=%d error='%s'") % mLink.cardSequence % mLink.linkId % e.what()).str();
       }
       getErrorLogger() << meaningfulMessage << endm;
       resultBuffer << meaningfulMessage;

@@ -39,7 +39,7 @@ namespace Alf
 
 namespace sc_regs = AliceO2::roc::Cru::ScRegisters;
 
-Swt::Swt(AlfLink link) : mBar2(*link.bar2), mLink(link)
+Swt::Swt(AlfLink link) : mBar2(*link.bar), mLink(link)
 {
   setChannel(mLink.linkId);
 }
@@ -166,13 +166,13 @@ std::string Swt::writeSequence(std::vector<std::pair<Data, Operation>> sequence)
       // the error message.
       std::string meaningfulMessage;
       if (it.second == Operation::Read) {
-        meaningfulMessage = (boost::format("SWT_SEQUENCE READ timeout=%d cruSequence=%d link=%d, error='%s'") % std::get<TimeOut>(data) % mLink.cruSequence % mLink.linkId % e.what()).str();
+        meaningfulMessage = (boost::format("SWT_SEQUENCE READ timeout=%d cardSequence=%d link=%d, error='%s'") % std::get<TimeOut>(data) % mLink.cardSequence % mLink.linkId % e.what()).str();
       } else if (it.second == Operation::Write) {
-        meaningfulMessage = (boost::format("SWT_SEQUENCE WRITE data=%s cruSequence=%d link=%d, error='%s'") % std::get<SwtWord>(data) % mLink.cruSequence % mLink.linkId % e.what()).str();
+        meaningfulMessage = (boost::format("SWT_SEQUENCE WRITE data=%s cardSequence=%d link=%d, error='%s'") % std::get<SwtWord>(data) % mLink.cardSequence % mLink.linkId % e.what()).str();
       } else if (it.second == Operation::Reset) {
-        meaningfulMessage = (boost::format("SWT_SEQUENCE RESET cruSequence=%d link=%d, error='%s'") % mLink.cruSequence % mLink.linkId % e.what()).str();
+        meaningfulMessage = (boost::format("SWT_SEQUENCE RESET cardSequence=%d link=%d, error='%s'") % mLink.cardSequence % mLink.linkId % e.what()).str();
       } else {
-        meaningfulMessage = (boost::format("SWT_SEQUENCE UNKNOWN cruSequence=%d link=%d,  error='%s'") % mLink.cruSequence % mLink.linkId % e.what()).str();
+        meaningfulMessage = (boost::format("SWT_SEQUENCE UNKNOWN cardSequence=%d link=%d,  error='%s'") % mLink.cardSequence % mLink.linkId % e.what()).str();
       }
       getErrorLogger() << meaningfulMessage << endm;
       resultBuffer << meaningfulMessage;

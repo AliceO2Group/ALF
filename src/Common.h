@@ -19,6 +19,7 @@
 
 #include <chrono>
 #include "ReadoutCard/BarInterface.h"
+#include "ReadoutCard/CardType.h"
 
 namespace AliceO2
 {
@@ -33,9 +34,10 @@ static constexpr auto CHANNEL_BUSY_TIMEOUT = std::chrono::milliseconds(10);
 
 struct AlfLink {
   std::string alfId;
-  int cruSequence;
+  int cardSequence;
   int linkId;
-  std::shared_ptr<roc::BarInterface> bar2;
+  std::shared_ptr<roc::BarInterface> bar;
+  roc::CardType::type cardType;
 };
 
 } // namespace Alf

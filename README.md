@@ -94,7 +94,7 @@ The services are DIM RPC services. Every RPC is called with a string and expects
     
 * Example:
   * DIM input `reset\n0x0000000000badc0ffee,write\nread\n0xbadf00d,write\n4,read`
-  * DIM output `0\n0x0000000000badc0ffee\n0x000000000000badf00d\n`
+  * DIM output `0\n0x0000000000badc0ffee\n0\n0x000000000000badf00d\n`
 
 #### IC_SEQUENCE
 

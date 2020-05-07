@@ -144,6 +144,45 @@ class ScaSequenceRpc : DimRpcInfoWrapper
   }
 };
 
+class RegisterSequenceRpc : DimRpcInfoWrapper
+{
+ public:
+  RegisterSequenceRpc(const std::string& serviceName)
+    : DimRpcInfoWrapper(serviceName)
+  {
+  }
+
+  std::string write(const std::string& buffer)
+  {
+    std::cout << "Setting: " << buffer << std::endl;
+    setString(buffer);
+    std::string ret;
+    try {
+      ret = getString();
+    } catch (const AlfException& e) {
+      getErrorLogger() << "RegisterSequence: " << boost::diagnostic_information(e, true) << endm;
+      return errString;
+    }
+    return ret;
+  }
+
+  std::string write(const std::vector<std::pair<std::string, std::string>>& sequence)
+  {
+    std::stringstream buffer;
+    for (size_t i = 0; i < sequence.size(); ++i) {
+      if (sequence[i].second == "") { // It's a read
+        buffer << sequence[i].first;
+      } else { //It's a write
+        buffer << sequence[i].first << pairSeparator() << sequence[i].second;
+      }
+      if (i + 1 < sequence.size()) {
+        buffer << argumentSeparator();
+      }
+    }
+    return write(buffer.str());
+  }
+};
+
 class SwtSequenceRpc : DimRpcInfoWrapper
 {
  public:
