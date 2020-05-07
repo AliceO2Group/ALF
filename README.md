@@ -9,7 +9,7 @@ In order to run ALF a DIM Nameserver has to be up and running. For performance r
 ## Usage
 
 ### o2-alf
-o2-alf is the binary of the ALF server. The only option it expects is the address of the DIM Nameserver. It can be passed either as a command-line argument or as an environmental variable.
+o2-alf is the binary of the ALF server. It expects the address of the DIM Nameserver, which can be passed either as a command-line argument or as an environmental variable.
 
 `
 o2-alf --dim-dns-node thedimdns.cern.ch
@@ -20,10 +20,10 @@ DIM_DNS_NODE=thedimdns.cern.ch
 `
 
 ### o2-alf-client
-o2-alf-client is the binary of an ALF client used solely for testing purposes. On top of the DIM Nameserver it expects the hostname of the node hosting the ALF server, the CRU's sequence number and the link number as command-line arguments. Different arguments to test different types of services are available.
+o2-alf-client is the binary of an ALF client used solely for testing purposes. On top of the DIM Nameserver it expects the hostname of the node hosting the ALF server, the card's sequence number and the link number as command-line arguments. Different arguments to test different types of services are available (run with `--help`).
 
 `
-o2-alf-client --dim-dns-node thedimdns.cern.ch --alf-id thealfserver --cru-sequence 0 --link 4
+o2-alf-client --dim-dns-node thedimdns.cern.ch --alf-id thealfserver --card-sequence 0 --link 4
 `
 
 ## Services
@@ -31,7 +31,7 @@ o2-alf-client --dim-dns-node thedimdns.cern.ch --alf-id thealfserver --cru-seque
 Service names are identified by the server's hostname, the card's sequence number (as reported during ALF's startup) and the link, as follows:
 
 `
-ALF_[hostname]/SERIAL_[cru_sequence_number]/LINK_[link]/[service_name]
+ALF_[hostname]/SERIAL_[card_sequence_number]/LINK_[link]/[service_name]
 `
 
 ### DIM RPC services
@@ -44,8 +44,9 @@ The services are DIM RPC services. Every RPC is called with a string and expects
   * An exception is made for SWT words which are 76-bit unsigned integers. (e.g. 0x0000000000badc0ffee)
   * Input needs to be prefixed with "0x" but not necessarily with leading zeros.
 * Lines prefixed with `#` are disregarded as comments.
-  
-#### REGISTER_READ
+
+#### CRU
+##### REGISTER_READ
 * Parameter:
   * Register address
 * Returns:
@@ -55,7 +56,7 @@ The services are DIM RPC services. Every RPC is called with a string and expects
   * DIM input: `0x0000f00d`
   * DIM output: `0x0000beef`
 
-#### REGISTER_WRITE
+##### REGISTER_WRITE
 * Parameters:
   * Register address
   * Register value
@@ -66,7 +67,7 @@ The services are DIM RPC services. Every RPC is called with a string and expects
   * DIM input: `0x0000f00d,0x0000beef`
   * DIM output: ` `
 
-#### SCA_SEQUENCE
+##### SCA_SEQUENCE
 * Parameters:
   * Sequence of SCA operations as follows:
     * Operations may be:
@@ -79,7 +80,7 @@ The services are DIM RPC services. Every RPC is called with a string and expects
   * DIM input: `0x00000010,0x00000011\n3\n0x000000020,0x00000021`
   * DIM output: `0x00000010,0x00000111\n3\n0x00000020,0x00000221\n`
 
-#### SWT_SEQUENCE
+##### SWT_SEQUENCE
 * Parameters:
   * Sequence of SWT word and operation pairs as follows:
     * Operations may be:
@@ -96,7 +97,7 @@ The services are DIM RPC services. Every RPC is called with a string and expects
   * DIM input `reset\n0x0000000000badc0ffee,write\nread\n0xbadf00d,write\n4,read`
   * DIM output `0\n0x0000000000badc0ffee\n0\n0x000000000000badf00d\n`
 
-#### IC_SEQUENCE
+##### IC_SEQUENCE
 
 * Parameters:
   * Sequence of IC operations as follows:
@@ -112,7 +113,7 @@ The services are DIM RPC services. Every RPC is called with a string and expects
   * DIM input: `0x54,0xff,write\n0x54,read`
   * DIM output: `0x000000ff\n0x000000ff\n`
   
-#### IC_GBT_I2C_WRITE
+##### IC_GBT_I2C_WRITE
 
 * Parameters:
   * Value
@@ -124,7 +125,7 @@ The services are DIM RPC services. Every RPC is called with a string and expects
   * DIM input `0x3\n`
   * DIM output ` `
 
-#### PATTERN_PLAYER
+##### PATTERN_PLAYER
 
 * Parameters
   * Sync Pattern
@@ -145,3 +146,19 @@ The services are DIM RPC services. Every RPC is called with a string and expects
 * Example:
   * DIM input `0x23456789abcdef123456\n0x5678\n0x9abc\n42\n0\n53\n30\n29\n#a comment\nfalse\ntrue\nfalse`
   * DIM output ` `
+
+#### CRORC
+
+##### REGISTER_SEQUENCE
+* Parameters:
+   * Operations may be:
+     * `write` with address and value (e.g. `0x0000f00d,0x0000beef`)
+     * `read` with address (e.g `0x0000cafe`)
+
+* Returns:
+   * `write` always retuns `0`
+   * `read` returns the value read from the register
+    
+* Example:
+  * DIM input `0xf00d\n0x0000f00d, 0x0000beef\n0x0000f00d`
+  * DIM output `0xcafe\n0\n0xbeef\n`
