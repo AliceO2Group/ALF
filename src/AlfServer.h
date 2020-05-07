@@ -50,16 +50,19 @@ class AlfServer
   static std::string icBlobWrite(const std::string& parameter, AlfLink link);
   static std::string icGbtI2cWrite(const std::string& parameter, AlfLink link);
   static std::string patternPlayer(const std::string& parameter, std::shared_ptr<roc::BarInterface>);
+  static std::string registerBlobWrite(const std::string& parameter, AlfLink link);
 
+  static std::vector<uint32_t> stringToRegisterPair(const std::string stringPair);
   static std::pair<Sca::Data, Sca::Operation> stringToScaPair(const std::string stringPair);
   static std::pair<Swt::Data, Swt::Operation> stringToSwtPair(const std::string stringPair);
   static std::pair<Ic::IcData, Ic::Operation> stringToIcPair(const std::string stringPair);
+  static std::vector<std::vector<uint32_t>> parseStringToRegisterPairs(std::vector<std::string> stringPairs);
   static std::vector<std::pair<Sca::Data, Sca::Operation>> parseStringToScaPairs(std::vector<std::string> stringPairs);
   static std::vector<std::pair<Swt::Data, Swt::Operation>> parseStringToSwtPairs(std::vector<std::string> stringPairs);
   static std::vector<std::pair<Ic::IcData, Ic::Operation>> parseStringToIcPairs(std::vector<std::string> stringPairs);
   static roc::PatternPlayer::Info parseStringToPatternPlayerInfo(const std::vector<std::string> sringsPairs);
 
-  /// cruSequence -> link -> vector of RPC servers
+  /// cardSequence -> link -> vector of RPC servers
   std::map<int, std::map<int, std::vector<std::unique_ptr<StringRpcServer>>>> mRpcServers;
 };
 

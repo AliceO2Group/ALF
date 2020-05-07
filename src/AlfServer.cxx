@@ -33,16 +33,16 @@ AlfServer::AlfServer() : mRpcServers()
 {
 }
 
-std::string AlfServer::registerRead(const std::string& parameter, std::shared_ptr<roc::BarInterface> bar2)
+std::string AlfServer::registerRead(const std::string& parameter, std::shared_ptr<roc::BarInterface> bar)
 {
   uint32_t address = Util::stringToHex(parameter); // Error from here will get picked up by the StringRpcServer try clause
   //Util::checkAddress(address);
 
-  uint32_t value = bar2->readRegister(address / 4);
+  uint32_t value = bar->readRegister(address / 4);
   return Util::formatValue(value);
 }
 
-std::string AlfServer::registerWrite(const std::string& parameter, std::shared_ptr<roc::BarInterface> bar2)
+std::string AlfServer::registerWrite(const std::string& parameter, std::shared_ptr<roc::BarInterface> bar)
 {
   std::vector<std::string> params = Util::split(parameter, pairSeparator());
 
@@ -54,8 +54,30 @@ std::string AlfServer::registerWrite(const std::string& parameter, std::shared_p
   //Util::checkAddress(address);
   uint32_t value = Util::stringToHex(params[1]);
 
-  bar2->writeRegister(address / 4, value);
+  bar->writeRegister(address / 4, value);
   return "";
+}
+
+std::string AlfServer::registerBlobWrite(const std::string& parameter, AlfLink link)
+{
+  std::vector<std::string> stringPairs = Util::split(parameter, argumentSeparator());
+  std::vector<std::vector<uint32_t>> registerPairs = parseStringToRegisterPairs(stringPairs);
+  std::stringstream resultBuffer;
+  uint32_t value;
+  uint32_t address;
+  for (const auto& registerPair : registerPairs) {
+    address = registerPair.at(0);
+    if (registerPair.size() == 1) {
+      value = link.bar->readRegister(address / 4);
+      resultBuffer << Util::formatValue(value) << "\n";
+    } else if (registerPair.size() == 2) {
+      value = registerPair.at(1);
+      link.bar->writeRegister(address / 4, value);
+      resultBuffer << "0"
+                   << "\n";
+    }
+  }
+  return resultBuffer.str();
 }
 
 std::string AlfServer::scaBlobWrite(const std::string& parameter, AlfLink link)
@@ -177,6 +199,16 @@ roc::PatternPlayer::Info AlfServer::parseStringToPatternPlayerInfo(const std::ve
   return ppInfo;
 }
 
+std::vector<uint32_t> AlfServer::stringToRegisterPair(const std::string stringPair)
+{
+  std::vector<uint32_t> registers;
+  auto stringRegisters = Util::split(stringPair, pairSeparator());
+  for (const auto& stringRegister : stringRegisters) {
+    registers.push_back(Util::stringToHex(stringRegister));
+  }
+  return registers;
+}
+
 std::pair<Sca::Data, Sca::Operation> AlfServer::stringToScaPair(const std::string stringPair)
 {
   std::vector<std::string> scaPair = Util::split(stringPair, pairSeparator());
@@ -209,7 +241,6 @@ std::pair<Sca::Data, Sca::Operation> AlfServer::stringToScaPair(const std::strin
 /// Converts a 76-bit hex number string
 std::pair<Swt::Data, Swt::Operation> AlfServer::stringToSwtPair(const std::string stringPair)
 {
-  std::cout << "trigger" << std::endl;
   std::vector<std::string> swtPair = Util::split(stringPair, pairSeparator());
   if (swtPair.size() < 1 || swtPair.size() > 2) {
     BOOST_THROW_EXCEPTION(
@@ -346,6 +377,17 @@ std::pair<Ic::IcData, Ic::Operation> AlfServer::stringToIcPair(const std::string
   return std::make_pair(icData, icOperation);
 }
 
+std::vector<std::vector<uint32_t>> AlfServer::parseStringToRegisterPairs(std::vector<std::string> stringPairs)
+{
+  std::vector<std::vector<uint32_t>> pairs;
+  for (const auto& stringPair : stringPairs) {
+    if (stringPair.find('#') == std::string::npos) {
+      pairs.push_back(stringToRegisterPair(stringPair));
+    }
+  }
+  return pairs;
+}
+
 std::vector<std::pair<Sca::Data, Sca::Operation>> AlfServer::parseStringToScaPairs(std::vector<std::string> stringPairs)
 {
   std::vector<std::pair<Sca::Data, Sca::Operation>> pairs;
@@ -394,35 +436,42 @@ void AlfServer::makeRpcServers(std::vector<AlfLink> links)
     ServiceNames names(link);
 
     // Start the RPC Servers
-    auto& servers = mRpcServers[link.cruSequence][link.linkId];
-    std::shared_ptr<roc::BarInterface> bar2 = link.bar2;
+    auto& servers = mRpcServers[link.cardSequence][link.linkId];
+    std::shared_ptr<roc::BarInterface> bar = link.bar;
 
-    if (link.linkId == 0) { // Register Read / Write services are per card; register them as soon as possible
-      // Register Read
-      servers.push_back(makeServer(names.registerRead(),
-                                   [bar2](auto parameter) { return registerRead(parameter, bar2); }));
-      // Register Write
-      servers.push_back(makeServer(names.registerWrite(),
-                                   [bar2](auto parameter) { return registerWrite(parameter, bar2); }));
+    if (link.cardType == roc::CardType::Cru) {
+      if (link.linkId == 0) { // Register Read / Write services are per card; register them as soon as possible
+        // Register Read
+        servers.push_back(makeServer(names.registerRead(),
+                                     [bar](auto parameter) { return registerRead(parameter, bar); }));
+        // Register Write
+        servers.push_back(makeServer(names.registerWrite(),
+                                     [bar](auto parameter) { return registerWrite(parameter, bar); }));
 
-      // Register Write
-      servers.push_back(makeServer(names.patternPlayer(),
-                                   [bar2](auto parameter) { return patternPlayer(parameter, bar2); }));
+        // Pattern Player
+        servers.push_back(makeServer(names.patternPlayer(),
+                                     [bar](auto parameter) { return patternPlayer(parameter, bar); }));
+      }
+
+      // SCA Sequence
+      servers.push_back(makeServer(names.scaSequence(),
+                                   [link](auto parameter) { return scaBlobWrite(parameter, link); }));
+      // SWT Sequence
+      servers.push_back(makeServer(names.swtSequence(),
+                                   [link](auto parameter) { return swtBlobWrite(parameter, link); }));
+      // IC Sequence
+      servers.push_back(makeServer(names.icSequence(),
+                                   [link](auto parameter) { return icBlobWrite(parameter, link); }));
+
+      // IC GBT I2C write
+      servers.push_back(makeServer(names.icGbtI2cWrite(),
+                                   [link](auto parameter) { return icGbtI2cWrite(parameter, link); }));
+
+    } else if (link.cardType == roc::CardType::Crorc) {
+      // Register Sequence
+      servers.push_back(makeServer(names.registerSequence(),
+                                   [link](auto parameter) { return registerBlobWrite(parameter, link); }));
     }
-
-    // SCA Sequence
-    servers.push_back(makeServer(names.scaSequence(),
-                                 [link](auto parameter) { return scaBlobWrite(parameter, link); }));
-    // SWT Sequence
-    servers.push_back(makeServer(names.swtSequence(),
-                                 [link](auto parameter) { return swtBlobWrite(parameter, link); }));
-    // IC Sequence
-    servers.push_back(makeServer(names.icSequence(),
-                                 [link](auto parameter) { return icBlobWrite(parameter, link); }));
-
-    // IC GBT I2C write
-    servers.push_back(makeServer(names.icGbtI2cWrite(),
-                                 [link](auto parameter) { return icGbtI2cWrite(parameter, link); }));
   }
 }
 

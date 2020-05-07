@@ -87,39 +87,45 @@ class Alf : public AliceO2::Common::Program
     AlfServer alfServer = AlfServer();
 
     std::vector<roc::CardDescriptor> cardsFound = roc::findCards();
-    int cruSequence = -1;
+    int cardSequence = -1;
     for (auto const& card : cardsFound) {
       std::vector<AlfLink> links;
 
-      std::shared_ptr<roc::BarInterface> bar2;
+      std::shared_ptr<roc::BarInterface> bar;
 
       // Make the RPC services for every card & link
+      if (!mOptions.noFirmwareCheck) {
+        try {
+          roc::FirmwareChecker().checkFirmwareCompatibility(card.pciAddress);
+        } catch (const roc::Exception& e) {
+          getWarningLogger() << boost::diagnostic_information(e) << endm;
+          continue;
+        }
+      }
+
+      cardSequence++;
+
       if (card.cardType == roc::CardType::Cru) {
 
-        if (!mOptions.noFirmwareCheck) {
-          try {
-            roc::FirmwareChecker().checkFirmwareCompatibility(card.pciAddress);
-          } catch (const roc::Exception& e) {
-            getWarningLogger() << boost::diagnostic_information(e) << endm;
-            continue;
-          }
-        }
-
-        cruSequence++;
-
-        getLogger() << "CRU #" << cruSequence << " : " << card.pciAddress << endm;
-        bar2 = roc::ChannelFactory().getBar(card.pciAddress, 2);
+        getLogger() << "CRU #" << cardSequence << " : " << card.pciAddress << endm;
+        bar = roc::ChannelFactory().getBar(card.pciAddress, 2);
         for (int linkId = 0; linkId < CRU_NUM_LINKS; linkId++) {
-          links.push_back({ alfId, cruSequence, linkId, bar2 });
+          links.push_back({ alfId, cardSequence, linkId, bar, roc::CardType::Cru });
         }
 
+      } else if (card.cardType == roc::CardType::Crorc) {
+        getLogger() << "CRORC #" << cardSequence << " : " << card.pciAddress << endm;
+        for (int linkId = 0; linkId < CRORC_NUM_LINKS; linkId++) {
+          bar = roc::ChannelFactory().getBar(card.pciAddress, linkId);
+          links.push_back({ alfId, cardSequence, linkId, bar, roc::CardType::Crorc });
+        }
       } else {
-        getLogger() << InfoLogger::InfoLogger::Severity::Warning << card.pciAddress << " is not a CRU. Skipping..." << endm;
+        getLogger() << InfoLogger::InfoLogger::Severity::Warning << card.pciAddress << " is not a CRU or a CRORC. Skipping..." << endm;
       }
 
       if (isVerbose()) {
         for (auto const& link : links) {
-          getLogger() << link.alfId << " " << link.cruSequence << " " << link.linkId << endm;
+          getLogger() << link.alfId << " " << link.cardSequence << " " << link.linkId << endm;
         }
       }
 

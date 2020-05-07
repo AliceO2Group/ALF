@@ -29,7 +29,7 @@ class ServiceNames
 {
  public:
   ServiceNames(AlfLink link)
-    : mAlfId(link.alfId), mCruSequence(link.cruSequence), mLink(link.linkId)
+    : mAlfId(link.alfId), mCardSequence(link.cardSequence), mLink(link.linkId)
   {
   }
 
@@ -40,12 +40,13 @@ class ServiceNames
   std::string icSequence() const;
   std::string icGbtI2cWrite() const;
   std::string patternPlayer() const;
+  std::string registerSequence() const;
 
  private:
   std::string formatLink(std::string name) const;
   std::string format(std::string name) const;
   std::string mAlfId;
-  const int mCruSequence;
+  const int mCardSequence;
   const int mLink;
 };
 

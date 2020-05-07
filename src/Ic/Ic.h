@@ -45,7 +45,7 @@ namespace Alf
   static constexpr Register IC_RD_DATA(0x0f000030);
 } // namespace IcRegisters*/
 
-/// Class for IC(TODO:?) Transactions with the CRU
+/// Class for IC Transactions with the CRU
 class Ic
 {
  public:
