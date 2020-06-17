@@ -50,6 +50,7 @@ find_package(Common REQUIRED)
 find_package(InfoLogger REQUIRED)
 find_package(ReadoutCard REQUIRED)
 find_package(DIM REQUIRED)
+find_package(LLA REQUIRED)
 
 ####################################
 # Module, library and executable definition
@@ -67,9 +68,10 @@ add_library(ALF OBJECT
 
 target_include_directories(ALF
   PUBLIC
-    ${Common_INCLUDE_DIRS}
-    ${InfoLogger_INCLUDE_DIRS}
-    ${ReadoutCard_INCLUDE_DIRS}
+  #    ${Common_INCLUDE_DIRS}
+  #    ${InfoLogger_INCLUDE_DIRS}
+  #    ${ReadoutCard_INCLUDE_DIRS}
+  #    ${LLA_INCLUDE_DIRS}
   PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
@@ -80,6 +82,7 @@ target_link_libraries(ALF
     AliceO2::Common
     AliceO2::InfoLogger
     AliceO2::ReadoutCard
+    o2::LLA
     dim::dim
 )
 

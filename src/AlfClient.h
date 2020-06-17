@@ -274,6 +274,61 @@ class IcGbtI2cWriteRpc : DimRpcInfoWrapper
   }
 };
 
+class LlaSessionStartRpc : DimRpcInfoWrapper
+{
+  public:
+    LlaSessionStartRpc(const std::string& serviceName)
+      : DimRpcInfoWrapper(serviceName)
+    {
+    }
+
+    std::string write(const std::string& buffer)
+    {
+      setString(buffer);
+      std::string ret;
+      try {
+        ret = getString();
+      } catch (const AlfException& e) {
+        getErrorLogger() << "LlaSessionStart: " << boost::diagnostic_information(e, true) << endm;
+        return errString;
+      }
+      return ret;
+    }
+
+    std::string write(std::string sessionName, int timeOut)
+    {
+      std::stringstream buffer;
+      buffer << sessionName;
+      if (timeOut) {
+        buffer << "," << timeOut;
+      }
+
+      return write(buffer.str());
+    }
+};
+
+class LlaSessionStopRpc : DimRpcInfoWrapper
+{
+  public:
+    LlaSessionStopRpc(const std::string& serviceName)
+      : DimRpcInfoWrapper(serviceName)
+    {
+    }
+
+    std::string write(const std::string& buffer)
+    {
+      setString(buffer);
+      std::string ret;
+      try {
+        ret = getString();
+      } catch (const AlfException& e) {
+        getErrorLogger() << "LlaSessionStop: " << boost::diagnostic_information(e, true) << endm;
+        return errString;
+      }
+      return ret;
+    }
+};
+
 } // namespace Alf
 } // namespace AliceO2
 

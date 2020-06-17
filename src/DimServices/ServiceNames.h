@@ -41,6 +41,8 @@ class ServiceNames
   std::string icGbtI2cWrite() const;
   std::string patternPlayer() const;
   std::string registerSequence() const;
+  std::string llaSessionStart() const;
+  std::string llaSessionStop() const;
 
  private:
   std::string formatLink(std::string name) const;
