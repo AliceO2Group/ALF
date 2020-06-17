@@ -135,6 +135,44 @@ std::string AlfServer::patternPlayer(const std::string& parameter, std::shared_p
   return "";
 }
 
+std::string AlfServer::llaSessionStart(const std::string& parameter, int cardId)
+{
+  std::vector<std::string> parameters = Util::split(parameter, pairSeparator());
+  if (parameters.size() < 1 || parameters.size() > 2) {
+    BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("Wrong number of parameters for the LLA Session Start RPC call: " + std::to_string(parameters.size())));
+  }
+
+  if (mSessions.find(cardId) == mSessions.end()) {
+    lla::SessionParameters params = lla::SessionParameters::makeParameters()
+      .setSessionName(parameters[0])
+      .setCardId(cardId);
+    mSessions[cardId] = std::make_unique<lla::Session>(params);
+  }/*else {
+    // TODO: Update session name?
+  }*/
+
+  if (parameters.size() == 2) {
+    if(!mSessions[cardId]->timedStart(std::stoi(parameters[1]))) {
+      BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("Could not start session for serial " + std::to_string(cardId)));
+    }
+  } else {
+    if(!mSessions[cardId]->start()) {
+      BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("Could not start session for serial " + std::to_string(cardId)));
+    }
+  }
+  return "";
+}
+
+std::string AlfServer::llaSessionStop(const std::string& parameter, int cardId)
+{
+  if (mSessions.find(cardId) == mSessions.end()) {
+    BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("Session was not started for serial  " + std::to_string(cardId)));
+  }
+
+  mSessions[cardId]->stop();
+  return "";
+}
+
 roc::PatternPlayer::Info AlfServer::parseStringToPatternPlayerInfo(const std::vector<std::string> parameters)
 {
   roc::PatternPlayer::Info ppInfo;
@@ -451,6 +489,14 @@ void AlfServer::makeRpcServers(std::vector<AlfLink> links)
         // Pattern Player
         servers.push_back(makeServer(names.patternPlayer(),
                                      [bar](auto parameter) { return patternPlayer(parameter, bar); }));
+        
+        // LLA Session Start
+        servers.push_back(makeServer(names.llaSessionStart(),
+                                     [link, this](auto parameter) { return llaSessionStart(parameter, link.cardSequence); }));
+        
+        // LLA Session Stop
+        servers.push_back(makeServer(names.llaSessionStop(),
+                                     [link, this](auto parameter) { return llaSessionStop(parameter, link.cardSequence); }));
       }
 
       // SCA Sequence

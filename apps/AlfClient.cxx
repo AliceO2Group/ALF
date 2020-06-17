@@ -68,6 +68,9 @@ class AlfClient : public AliceO2::Common::Program
     options.add_options()("ic",
                           po::bool_switch(&mOptions.ic)->default_value(false),
                           "Flag enabling the ic tests");
+    options.add_options()("lla",
+                          po::bool_switch(&mOptions.lla)->default_value(false),
+                          "Flag enabling the lla tests");
     options.add_options()("sca",
                           po::bool_switch(&mOptions.sca)->default_value(false),
                           "Flag enabling the sca tests");
@@ -135,6 +138,8 @@ class AlfClient : public AliceO2::Common::Program
     Alf::RegisterReadRpc registerReadRpc(names.registerRead());
     Alf::RegisterWriteRpc registerWriteRpc(names.registerWrite());
     Alf::PatternPlayerRpc patternPlayerRpc(names.patternPlayer());
+    Alf::LlaSessionStartRpc llaSessionStartRpc(names.llaSessionStart());
+    Alf::LlaSessionStopRpc llaSessionStopRpc(names.llaSessionStop());
 
     Alf::SwtSequenceRpc swtSequence(names.swtSequence());
     Alf::ScaSequenceRpc scaSequence(names.scaSequence());
@@ -226,6 +231,24 @@ class AlfClient : public AliceO2::Common::Program
       getLogger() << "Pairs test return: " << ppOut << endm;
     }
 
+    if (mOptions.lla) {
+      getLogger() << "Running the lla" << endm;
+      const auto start = std::chrono::steady_clock::now();
+      auto timeExceeded = [&]() { return ((std::chrono::steady_clock::now() - start) > std::chrono::milliseconds(4100)); };
+
+      while (!timeExceeded()) {
+        //auto llaOut = llaSessionStartRpc.write("alf_client_test", 0);
+        auto llaOut = llaSessionStartRpc.write("alf_client_test");
+        if (llaOut == "success\n") {
+          std::this_thread::sleep_for(std::chrono::seconds(4));
+          llaOut = llaSessionStopRpc.write("");
+          break;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(10)); // This sleep is necessary to unblock the DIM RPC channel so the other thread can unlock...
+                                                                    // However, we cannot know how quickly the other thread will be successful in running the RPC call
+      }
+    }
+
     getLogger() << "See ya!" << endm;
   }
 
@@ -237,6 +260,7 @@ class AlfClient : public AliceO2::Common::Program
     std::string alfId = "";
     bool crorc = false;
     bool ic = false;
+    bool lla = false;
     bool sca = false;
     bool swt = false;
     bool patternPlayer = false;

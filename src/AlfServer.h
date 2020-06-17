@@ -27,9 +27,11 @@
 #include "Common.h"
 #include "Ic/Ic.h"
 
+#include "Lla/Lla.h"
 #include "ReadoutCard/PatternPlayer.h"
 
 namespace roc = AliceO2::roc;
+namespace lla = o2::lla;
 
 namespace AliceO2
 {
@@ -51,6 +53,8 @@ class AlfServer
   static std::string icGbtI2cWrite(const std::string& parameter, AlfLink link);
   static std::string patternPlayer(const std::string& parameter, std::shared_ptr<roc::BarInterface>);
   static std::string registerBlobWrite(const std::string& parameter, AlfLink link);
+  std::string llaSessionStart(const std::string& parameter, int cardSequence);
+  std::string llaSessionStop(const std::string& parameter, int cardSequence);
 
   static std::vector<uint32_t> stringToRegisterPair(const std::string stringPair);
   static std::pair<Sca::Data, Sca::Operation> stringToScaPair(const std::string stringPair);
@@ -64,6 +68,8 @@ class AlfServer
 
   /// cardSequence -> link -> vector of RPC servers
   std::map<int, std::map<int, std::vector<std::unique_ptr<StringRpcServer>>>> mRpcServers;
+
+  std::map<int, std::unique_ptr<lla::Session>> mSessions;
 };
 
 } // namespace Alf
