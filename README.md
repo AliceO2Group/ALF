@@ -147,6 +147,32 @@ The services are DIM RPC services. Every RPC is called with a string and expects
   * DIM input `0x23456789abcdef123456\n0x5678\n0x9abc\n42\n0\n53\n30\n29\n#a comment\nfalse\ntrue\nfalse`
   * DIM output ` `
 
+##### LLA_SESSION_START
+
+* Parameters
+  * Session Name
+  * Timeout for timed start in ms (optional)
+
+* Returns
+  * empty
+
+* Examples:
+  *  DIM input `FRED\n` 
+  *  DIM output ` ` 
+
+##### LLA_SESSION_STOP
+
+* Parameters
+  * No parameters
+
+* Returns
+  * empty
+
+* Examples:
+  *  DIM input ` ` 
+  *  DIM output ` ` 
+
+
 #### CRORC
 
 ##### REGISTER_SEQUENCE
