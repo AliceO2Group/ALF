@@ -8,19 +8,19 @@
 // granted to it by virtue of its status as an Intergovernmental Organization
 // or submit itself to any jurisdiction.
 
-/// \file AlfException.h
+/// \file Exception.h
 /// \brief Definition of the ALF exceptions and related functions.
 ///
 /// \author Pascal Boeschoten (pascal.boeschoten@cern.ch)
 
-#ifndef ALICEO2_ALF_ALF_EXCEPTION_H_
-#define ALICEO2_ALF_ALF_EXCEPTION_H_
+#ifndef O2_ALF_INC_EXCEPTION_H_
+#define O2_ALF_INC_EXCEPTION_H_
 
 #include <Common/Exceptions.h>
 
-namespace AliceO2
+namespace o2
 {
-namespace Alf
+namespace alf
 {
 
 struct AlfException : AliceO2::Common::Exception {
@@ -37,7 +37,7 @@ namespace ErrorInfo
 using Message = AliceO2::Common::ErrorInfo::Message;
 } // namespace ErrorInfo
 
-} // namespace Alf
-} // namespace AliceO2
+} // namespace alf
+} // namespace o2
 
-#endif // ALICEO2_ALF_ALF_EXCEPTION_H_
+#endif // O2_ALF_INC_EXCEPTION_H_

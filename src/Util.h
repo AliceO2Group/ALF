@@ -14,18 +14,18 @@
 /// \author Pascal Boeschoten (pascal.boeschoten@cern.ch)
 /// \author Kostas Alexopoulos (kostas.alexopoulos@cern.ch)
 
-#ifndef ALICEO2_ALF_SRC_UTIL_H
-#define ALICEO2_ALF_SRC_UTIL_H
+#ifndef O2_ALF_SRC_UTIL_H
+#define O2_ALF_SRC_UTIL_H
 
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 
-#include "Common.h"
+#include "Alf/Common.h"
 #include "Logger.h"
 
-namespace AliceO2
+namespace o2
 {
-namespace Alf
+namespace alf
 {
 namespace Util
 {
@@ -75,7 +75,7 @@ inline size_t strlenMax(char* str, size_t max)
 }
 
 } // namespace Util
-} // namespace Alf
-} // namespace AliceO2
+} // namespace alf
+} // namespace o2
 
-#endif // ALICEO2_ALF_SRC_UTIL_H
+#endif // O2_ALF_SRC_UTIL_H

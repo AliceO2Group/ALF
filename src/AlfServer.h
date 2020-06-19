@@ -14,18 +14,20 @@
 /// \author Pascal Boeschoten (pascal.boeschoten@cern.ch)
 /// \author Kostas Alexopoulos (kostas.alexopoulos@cern.ch)
 
-#ifndef ALICEO2_ALF_ALFSERVER_H_
-#define ALICEO2_ALF_ALFSERVER_H_
+#ifndef O2_ALF_ALFSERVER_H_
+#define O2_ALF_ALFSERVER_H_
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <chrono>
 #include <iomanip>
 #include <thread>
 
-#include "AlfException.h"
+#include "Alf/Exception.h"
 #include "DimServices/DimServices.h"
-#include "Common.h"
-#include "Ic/Ic.h"
+#include "Alf/Common.h"
+#include "Alf/Ic.h"
+#include "Alf/Sca.h"
+#include "Alf/Swt.h"
 
 #include "Lla/Lla.h"
 #include "ReadoutCard/PatternPlayer.h"
@@ -33,9 +35,9 @@
 namespace roc = AliceO2::roc;
 namespace lla = o2::lla;
 
-namespace AliceO2
+namespace o2
 {
-namespace Alf
+namespace alf
 {
 
 class AlfServer
@@ -57,13 +59,13 @@ class AlfServer
   std::string llaSessionStop(const std::string& parameter, int cardSequence);
 
   static std::vector<uint32_t> stringToRegisterPair(const std::string stringPair);
-  static std::pair<Sca::Data, Sca::Operation> stringToScaPair(const std::string stringPair);
-  static std::pair<Swt::Data, Swt::Operation> stringToSwtPair(const std::string stringPair);
-  static std::pair<Ic::IcData, Ic::Operation> stringToIcPair(const std::string stringPair);
+  static std::pair<Sca::Operation, Sca::Data> stringToScaPair(const std::string stringPair);
+  static std::pair<Swt::Operation, Swt::Data> stringToSwtPair(const std::string stringPair);
+  static std::pair<Ic::Operation, Ic::Data> stringToIcPair(const std::string stringPair);
   static std::vector<std::vector<uint32_t>> parseStringToRegisterPairs(std::vector<std::string> stringPairs);
-  static std::vector<std::pair<Sca::Data, Sca::Operation>> parseStringToScaPairs(std::vector<std::string> stringPairs);
-  static std::vector<std::pair<Swt::Data, Swt::Operation>> parseStringToSwtPairs(std::vector<std::string> stringPairs);
-  static std::vector<std::pair<Ic::IcData, Ic::Operation>> parseStringToIcPairs(std::vector<std::string> stringPairs);
+  static std::vector<std::pair<Sca::Operation, Sca::Data>> parseStringToScaPairs(std::vector<std::string> stringPairs);
+  static std::vector<std::pair<Swt::Operation, Swt::Data>> parseStringToSwtPairs(std::vector<std::string> stringPairs);
+  static std::vector<std::pair<Ic::Operation, Ic::Data>> parseStringToIcPairs(std::vector<std::string> stringPairs);
   static roc::PatternPlayer::Info parseStringToPatternPlayerInfo(const std::vector<std::string> sringsPairs);
 
   /// cardSequence -> link -> vector of RPC servers
@@ -72,7 +74,7 @@ class AlfServer
   std::map<int, std::unique_ptr<lla::Session>> mSessions;
 };
 
-} // namespace Alf
-} // namespace AliceO2
+} // namespace alf
+} // namespace o2
 
-#endif // ALICEO2_ALF_ALFSERVER_H_
+#endif // O2_ALF_ALFSERVER_H_

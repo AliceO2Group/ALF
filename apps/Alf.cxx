@@ -31,9 +31,9 @@
 namespace ip = boost::asio::ip;
 namespace po = boost::program_options;
 
-namespace AliceO2
+namespace o2
 {
-namespace Alf
+namespace alf
 {
 
 AliceO2::InfoLogger::InfoLogger logger;
@@ -120,7 +120,7 @@ class Alf : public AliceO2::Common::Program
           links.push_back({ alfId, cardSequence, linkId, bar, roc::CardType::Crorc });
         }
       } else {
-        getLogger() << InfoLogger::InfoLogger::Severity::Warning << card.pciAddress << " is not a CRU or a CRORC. Skipping..." << endm;
+        getLogger() << AliceO2::InfoLogger::InfoLogger::Severity::Warning << card.pciAddress << " is not a CRU or a CRORC. Skipping..." << endm;
       }
 
       if (isVerbose()) {
@@ -145,10 +145,10 @@ class Alf : public AliceO2::Common::Program
   } mOptions;
 };
 
-} // namespace Alf
-} // namespace AliceO2
+} // namespace alf
+} // namespace o2
 
 int main(int argc, char** argv)
 {
-  return AliceO2::Alf::Alf().execute(argc, argv);
+  return o2::alf::Alf().execute(argc, argv);
 }

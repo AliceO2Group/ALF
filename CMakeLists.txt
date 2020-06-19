@@ -19,7 +19,7 @@ project(ALF
 )
 
 # Documentation dir
-# add_subdirectory(doc)
+add_subdirectory(doc)
 
 # Add compiler flags for warnings and debug symbols
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra")
@@ -56,22 +56,20 @@ find_package(LLA REQUIRED)
 # Module, library and executable definition
 ####################################
 
-add_library(ALF OBJECT
+add_library(ALF SHARED
   src/AlfServer.cxx
   src/DimServices/DimServices.cxx
   src/DimServices/ServiceNames.cxx
-  src/Ic/Ic.cxx
-  src/Sca/Sca.cxx
-  src/Swt/Swt.cxx
-  src/Swt/SwtWord.cxx
+  src/Ic.cxx
+  src/Sca.cxx
+  src/Swt.cxx
+  src/SwtWord.cxx
 )
 
 target_include_directories(ALF
   PUBLIC
-  #    ${Common_INCLUDE_DIRS}
-  #    ${InfoLogger_INCLUDE_DIRS}
-  #    ${ReadoutCard_INCLUDE_DIRS}
-  #    ${LLA_INCLUDE_DIRS}
+    $<INSTALL_INTERFACE:include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
@@ -86,6 +84,12 @@ target_link_libraries(ALF
     dim::dim
 )
 
+set_target_properties(ALF
+  PROPERTIES
+  OUTPUT_NAME
+    O2Alf # Adhere to O2 naming conventions
+)
+
 # Use C++17
 target_compile_features(ALF PUBLIC cxx_std_17)
 
@@ -97,11 +101,13 @@ target_compile_features(ALF PUBLIC cxx_std_17)
 set(EXE_SRCS
   Alf.cxx
   AlfClient.cxx
+  AlfLibClient.cxx
 )
 
 set(EXE_NAMES
   o2-alf
   o2-alf-client
+  o2-alf-lib-client
 )
 
 list(LENGTH EXE_SRCS count)
@@ -142,6 +148,8 @@ unset(isSystemDir)
 # Install library and executables
 install(TARGETS ALF ${EXE_NAMES}
   EXPORT ALFTargets
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
@@ -153,14 +161,14 @@ write_basic_package_version_file("${CMAKE_CURRENT_BINARY_DIR}/cmake/ALFConfigVer
 )
 
 # Install headers # NO PUBLIC HEADERS
-# install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ALF DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/Alf DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 
 # Export targets
 install(EXPORT ALFTargets
   FILE
     ALFTargets.cmake
   NAMESPACE
-    AliceO2::
+    o2::
   DESTINATION
     ${CMAKE_INSTALL_LIBDIR}/cmake/ALF
 )

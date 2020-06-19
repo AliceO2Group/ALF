@@ -14,8 +14,8 @@
 /// \author Pascal Boeschoten (pascal.boeschoten@cern.ch)
 /// \author Kostas Alexopoulos (kostas.alexopoulos@cern.ch)
 
-#ifndef ALICEO2_ALF_ALFCLIENT_H_
-#define ALICEO2_ALF_ALFCLIENT_H_
+#ifndef O2_ALF_ALFCLIENT_H_
+#define O2_ALF_ALFCLIENT_H_
 
 #include <boost/format.hpp>
 #include <string>
@@ -25,9 +25,9 @@
 
 namespace roc = AliceO2::roc;
 
-namespace AliceO2
+namespace o2
 {
-namespace Alf
+namespace alf
 {
 
 constexpr const uint32_t errHex = 0xffffffff;
@@ -276,60 +276,60 @@ class IcGbtI2cWriteRpc : DimRpcInfoWrapper
 
 class LlaSessionStartRpc : DimRpcInfoWrapper
 {
-  public:
-    LlaSessionStartRpc(const std::string& serviceName)
-      : DimRpcInfoWrapper(serviceName)
-    {
+ public:
+  LlaSessionStartRpc(const std::string& serviceName)
+    : DimRpcInfoWrapper(serviceName)
+  {
+  }
+
+  std::string write(const std::string& buffer)
+  {
+    setString(buffer);
+    std::string ret;
+    try {
+      ret = getString();
+    } catch (const AlfException& e) {
+      getErrorLogger() << "LlaSessionStart: " << boost::diagnostic_information(e, true) << endm;
+      return errString;
+    }
+    return ret;
+  }
+
+  std::string write(std::string sessionName, int timeOut)
+  {
+    std::stringstream buffer;
+    buffer << sessionName;
+    if (timeOut) {
+      buffer << "," << timeOut;
     }
 
-    std::string write(const std::string& buffer)
-    {
-      setString(buffer);
-      std::string ret;
-      try {
-        ret = getString();
-      } catch (const AlfException& e) {
-        getErrorLogger() << "LlaSessionStart: " << boost::diagnostic_information(e, true) << endm;
-        return errString;
-      }
-      return ret;
-    }
-
-    std::string write(std::string sessionName, int timeOut)
-    {
-      std::stringstream buffer;
-      buffer << sessionName;
-      if (timeOut) {
-        buffer << "," << timeOut;
-      }
-
-      return write(buffer.str());
-    }
+    return write(buffer.str());
+  }
 };
 
 class LlaSessionStopRpc : DimRpcInfoWrapper
 {
-  public:
-    LlaSessionStopRpc(const std::string& serviceName)
-      : DimRpcInfoWrapper(serviceName)
-    {
-    }
+ public:
+  LlaSessionStopRpc(const std::string& serviceName)
+    : DimRpcInfoWrapper(serviceName)
+  {
+  }
 
-    std::string write(const std::string& buffer)
-    {
-      setString(buffer);
-      std::string ret;
-      try {
-        ret = getString();
-      } catch (const AlfException& e) {
-        getErrorLogger() << "LlaSessionStop: " << boost::diagnostic_information(e, true) << endm;
-        return errString;
-      }
-      return ret;
+  std::string write(const std::string& buffer)
+  {
+    setString(buffer);
+    std::string ret;
+    try {
+      ret = getString();
+    } catch (const AlfException& e) {
+      getErrorLogger() << "LlaSessionStop: " << boost::diagnostic_information(e, true) << endm;
+      return errString;
     }
+    return ret;
+  }
 };
 
-} // namespace Alf
-} // namespace AliceO2
+} // namespace alf
+} // namespace o2
 
-#endif // ALICEO2_ALF_ALFCLIENT_H_
+#endif // O2_ALF_ALFCLIENT_H_

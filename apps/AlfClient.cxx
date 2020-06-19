@@ -26,12 +26,11 @@
 #include "DimServices/ServiceNames.h"
 #include "Logger.h"
 
-namespace ip = boost::asio::ip;
 namespace po = boost::program_options;
 
-namespace AliceO2
+namespace o2
 {
-namespace Alf
+namespace alf
 {
 
 AliceO2::InfoLogger::InfoLogger logger;
@@ -123,7 +122,7 @@ class AlfClient : public AliceO2::Common::Program
 
     if (mOptions.crorc) {
       link.cardType = roc::CardType::Crorc;
-      Alf::RegisterSequenceRpc registerSequence(names.registerSequence());
+      RegisterSequenceRpc registerSequence(names.registerSequence());
       auto regOut = registerSequence.write({ std::make_pair("0x19c", ""),
                                              std::make_pair("0xa0", ""),
                                              std::make_pair("0x1f0", ""),
@@ -135,16 +134,16 @@ class AlfClient : public AliceO2::Common::Program
     }
 
     // Only CRU from this point forward
-    Alf::RegisterReadRpc registerReadRpc(names.registerRead());
-    Alf::RegisterWriteRpc registerWriteRpc(names.registerWrite());
-    Alf::PatternPlayerRpc patternPlayerRpc(names.patternPlayer());
-    Alf::LlaSessionStartRpc llaSessionStartRpc(names.llaSessionStart());
-    Alf::LlaSessionStopRpc llaSessionStopRpc(names.llaSessionStop());
+    RegisterReadRpc registerReadRpc(names.registerRead());
+    RegisterWriteRpc registerWriteRpc(names.registerWrite());
+    PatternPlayerRpc patternPlayerRpc(names.patternPlayer());
+    LlaSessionStartRpc llaSessionStartRpc(names.llaSessionStart());
+    LlaSessionStopRpc llaSessionStopRpc(names.llaSessionStop());
 
-    Alf::SwtSequenceRpc swtSequence(names.swtSequence());
-    Alf::ScaSequenceRpc scaSequence(names.scaSequence());
-    Alf::IcSequenceRpc icSequence(names.icSequence());
-    Alf::IcGbtI2cWriteRpc icGbtI2cWriteRpc(names.icGbtI2cWrite());
+    SwtSequenceRpc swtSequence(names.swtSequence());
+    ScaSequenceRpc scaSequence(names.scaSequence());
+    IcSequenceRpc icSequence(names.icSequence());
+    IcGbtI2cWriteRpc icGbtI2cWriteRpc(names.icGbtI2cWrite());
 
     // Test register write and read
     uint32_t wAddress = 0x00f00078;
@@ -157,6 +156,7 @@ class AlfClient : public AliceO2::Common::Program
     if (mOptions.swt) {
       auto swtOut = swtSequence.write({ std::make_pair("0x0000000000000000000", "write"),
                                         std::make_pair("", "reset"),
+                                        std::make_pair("0x0000000000000000000", "write"),
                                         std::make_pair("0x000000001234", "write"),
                                         std::make_pair("", "read"),
                                         std::make_pair("0xdeadbeef", "write"),
@@ -270,10 +270,10 @@ class AlfClient : public AliceO2::Common::Program
   } mOptions;
 };
 
-} // namespace Alf
-} // namespace AliceO2
+} // namespace alf
+} // namespace o2
 
 int main(int argc, char** argv)
 {
-  return AliceO2::Alf::AlfClient().execute(argc, argv);
+  return o2::alf::AlfClient().execute(argc, argv);
 }

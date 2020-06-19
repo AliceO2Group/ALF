@@ -23,47 +23,51 @@
 ///
 /// \author Kostas Alexopoulos (kostas.alexopoulos@cern.ch)
 
-#ifndef ALICEO2_ALF_SRC_SWT_SWTWORD_H
-#define ALICEO2_ALF_SRC_SWT_SWTWORD_H
+#ifndef O2_ALF_SRC_SWT_SWTWORD_H
+#define O2_ALF_SRC_SWT_SWTWORD_H
 
-namespace AliceO2
+namespace o2
 {
-namespace Alf
+namespace alf
 {
 
 class SwtWord
 {
  public:
-  SwtWord();
-  SwtWord(uint32_t low, uint32_t med, uint16_t high);
-  SwtWord(uint64_t swtInt);
-
-  bool operator==(const SwtWord& swtWord);
-  bool operator!=(const SwtWord& swtWord);
-  void setLow(uint32_t low);
-  void setMed(uint32_t med);
-  void setHigh(uint16_t high);
-  uint32_t getLow() const;
-  uint32_t getMed() const;
-  uint16_t getHigh() const;
-  int getSequence() const;
-
   enum Size {
     High,
     Medium,
     Low
   };
 
+  SwtWord(SwtWord::Size size = SwtWord::Size::High);
+  SwtWord(uint32_t low, uint32_t med, uint16_t high, SwtWord::Size size = SwtWord::Size::High);
+  SwtWord(uint64_t swtInt, SwtWord::Size size = SwtWord::Size::High);
+
+  bool operator==(const SwtWord& swtWord);
+  bool operator!=(const SwtWord& swtWord);
+  void setLow(uint32_t low);
+  void setMed(uint32_t med);
+  void setHigh(uint16_t high);
+  void setSequence(uint16_t high);
+  void setSize(Size size);
+  uint32_t getLow() const;
+  uint32_t getMed() const;
+  uint16_t getHigh() const;
+  Size getSize() const;
+  int getSequence() const;
+
  private:
   uint32_t mLow;
   uint32_t mMed;
   uint16_t mHigh;
   int mSequence;
+  Size mSize;
 };
 
 std::ostream& operator<<(std::ostream& output, const SwtWord& swtWord);
 
-} // namespace Alf
-} // namespace AliceO2
+} // namespace alf
+} // namespace o2
 
-#endif // ALICEO2_ALF_SRC_SWT_SWTWORD_H
+#endif // O2_ALF_SRC_SWT_SWTWORD_H

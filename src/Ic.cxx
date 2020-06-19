@@ -27,17 +27,20 @@
 #include <chrono>
 #include <thread>
 
-#include "AlfException.h"
+#include "ReadoutCard/CardFinder.h"
+#include "ReadoutCard/ChannelFactory.h"
+
+#include "Alf/Exception.h"
 #include "Logger.h"
-#include "Ic/Ic.h"
+#include "Alf/Ic.h"
 #include "Util.h"
 
 namespace roc = AliceO2::roc;
 namespace sc_regs = AliceO2::roc::Cru::ScRegisters;
 
-namespace AliceO2
+namespace o2
 {
-namespace Alf
+namespace alf
 {
 
 namespace ic_regs
@@ -49,8 +52,38 @@ static constexpr roc::Register IC_WR_CMD(IC_BASE.address + 0x28);
 static constexpr roc::Register IC_RD_DATA(IC_BASE.address + 0x30);
 } // namespace ic_regs
 
-Ic::Ic(AlfLink link) : mBar2(*link.bar), mLink(link)
+Ic::Ic(AlfLink link) : mBar2(link.bar), mLink(link)
 {
+  setChannel(mLink.linkId);
+  reset();
+
+  // Set CFG to 0x3 by default
+  barWrite(ic_regs::IC_WR_CFG.index, 0x3);
+}
+
+Ic::Ic(const roc::Parameters::CardIdType& cardId, int linkId)
+{
+  init(cardId, linkId);
+}
+
+Ic::Ic(std::string cardId, int linkId)
+{
+  init(roc::Parameters::cardIdFromString(cardId), linkId);
+}
+
+void Ic::init(const roc::Parameters::CardIdType& cardId, int linkId)
+{
+  auto card = roc::findCard(cardId);
+  mBar2 = roc::ChannelFactory().getBar(cardId, 2);
+
+  mLink = AlfLink{
+    "DDT", //TODO: From session?
+    card.sequenceId,
+    linkId,
+    mBar2,
+    roc::CardType::Cru
+  };
+
   setChannel(mLink.linkId);
   reset();
 
@@ -138,42 +171,64 @@ void Ic::writeGbtI2c(uint32_t data)
 
 void Ic::barWrite(uint32_t index, uint32_t data)
 {
-  mBar2.writeRegister(index, data);
+  mBar2->writeRegister(index, data);
 }
 
 uint32_t Ic::barRead(uint32_t index)
 {
-  uint32_t read = mBar2.readRegister(index);
+  uint32_t read = mBar2->readRegister(index);
   return read;
 }
 
-std::string Ic::writeSequence(std::vector<std::pair<IcData, Operation>> ops)
+std::vector<std::pair<Ic::Operation, Ic::Data>> Ic::executeSequence(std::vector<std::pair<Operation, Data>> ops)
 {
-  std::stringstream resultBuffer;
+  std::vector<std::pair<Ic::Operation, Ic::Data>> ret;
   for (const auto& it : ops) {
-    IcData icData = it.first;
-    uint32_t ret;
+    Operation operation = it.first;
+    Data data = it.second;
     try {
-      if (it.second == Operation::Read) {
-        ret = read(icData);
-        resultBuffer << Util::formatValue(ret) << "\n";
-      } else if (it.second == Operation::Write) {
-        ret = write(icData);
-        resultBuffer << Util::formatValue(ret) << "\n";
+      if (operation == Operation::Read) {
+        auto out = read(boost::get<IcData>(data));
+        ret.push_back({ operation, out });
+      } else if (operation == Operation::Write) {
+        auto out = write(boost::get<IcData>(data));
+        ret.push_back({ operation, out });
       } else {
         BOOST_THROW_EXCEPTION(IcException() << ErrorInfo::Message("IC operation type unknown"));
       }
-    } catch (const SwtException& e) {
+    } catch (const IcException& e) {
       // If an IC error occurs, we stop executing the sequence of commands and return the results as far as we got them, plus
       // the error message.
+      IcData icData = boost::get<IcData>(data);
       std::string meaningfulMessage = (boost::format("ic_regs::IC_SEQUENCE address=0x%08x data=0x%08x cardSequence=%d link=%d, error='%s'") % icData.address % icData.data % mLink.cardSequence % mLink.linkId % e.what()).str();
       getErrorLogger() << meaningfulMessage << endm;
-      resultBuffer << meaningfulMessage;
+      ret.push_back({ Operation::Error, meaningfulMessage });
+      break;
+    }
+  }
+
+  return ret;
+}
+
+std::string Ic::writeSequence(std::vector<std::pair<Operation, Data>> ops)
+{
+  std::stringstream resultBuffer;
+  auto out = executeSequence(ops);
+  for (const auto& it : out) {
+    Operation operation = it.first;
+    Data data = it.second;
+    if (operation == Operation::Read || operation == Operation::Write) {
+      resultBuffer << Util::formatValue(boost::get<IcOut>(data)) << "\n";
+    } else if (operation == Operation::Error) {
+      std::string errMessage = boost::get<std::string>(data);
+      resultBuffer << errMessage;
+      getErrorLogger() << errMessage << endm;
       BOOST_THROW_EXCEPTION(IcException() << ErrorInfo::Message(resultBuffer.str()));
     }
   }
+
   return resultBuffer.str();
 }
 
-} // namespace Alf
-} // namespace AliceO2
+} // namespace alf
+} // namespace o2
