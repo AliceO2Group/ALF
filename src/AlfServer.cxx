@@ -163,7 +163,7 @@ std::string AlfServer::llaSessionStart(const std::string& parameter, int cardId)
   return "";
 }
 
-std::string AlfServer::llaSessionStop(const std::string& parameter, int cardId)
+std::string AlfServer::llaSessionStop(const std::string& /*parameter*/, int cardId)
 {
   if (mSessions.find(cardId) == mSessions.end()) {
     BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("Session was not started for serial  " + std::to_string(cardId)));
