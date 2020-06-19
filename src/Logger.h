@@ -13,14 +13,14 @@
 ///
 /// \author Kostas Alexopoulos (kostas.alexopoulos@cern.ch)
 
-#ifndef ALICEO2_ALF_LOGGER_H_
-#define ALICEO2_ALF_LOGGER_H_
+#ifndef O2_ALF_LOGGER_H_
+#define O2_ALF_LOGGER_H_
 
 #include "InfoLogger/InfoLogger.hxx"
 
-namespace AliceO2
+namespace o2
 {
-namespace Alf
+namespace alf
 {
 
 constexpr auto endm = AliceO2::InfoLogger::InfoLogger::endm;
@@ -43,7 +43,7 @@ inline AliceO2::InfoLogger::InfoLogger& getErrorLogger()
   return logger << AliceO2::InfoLogger::InfoLogger::Severity::Error;
 }
 
-} // namespace Alf
-} // namespace AliceO2
+} // namespace alf
+} // namespace o2
 
-#endif // ALICEO2_ALF_COMMON_H_
+#endif // O2_ALF_COMMON_H_

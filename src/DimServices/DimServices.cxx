@@ -16,14 +16,14 @@
 
 #include <string>
 
-#include "AlfException.h"
+#include "Alf/Exception.h"
 #include "boost/algorithm/string/predicate.hpp"
 #include "DimServices/DimServices.h"
 #include "Logger.h"
 
-namespace AliceO2
+namespace o2
 {
-namespace Alf
+namespace alf
 {
 
 /// We use this in a few places because DIM insists on non-const char*
@@ -92,11 +92,11 @@ void StringRpcServer::rpcHandler()
     auto returnValue = mCallback(std::string(getString()));
     setDataString(makeSuccessString(returnValue), *this);
   } catch (const std::exception& e) {
-    getLogger() << InfoLogger::InfoLogger::Error << mServiceName << ": " << boost::diagnostic_information(e, true)
+    getLogger() << AliceO2::InfoLogger::InfoLogger::Error << mServiceName << ": " << boost::diagnostic_information(e, true)
                 << endm;
     setDataString(makeFailureString(e.what()), *this);
   }
 }
 
-} // namespace Alf
-} // namespace AliceO2
+} // namespace alf
+} // namespace o2

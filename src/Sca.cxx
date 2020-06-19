@@ -21,23 +21,23 @@
 #include <thread>
 #include <vector>
 
-#include "AlfException.h"
-#include "Logger.h"
+#include "ReadoutCard/CardFinder.h"
+#include "ReadoutCard/ChannelFactory.h"
 #include "ReadoutCard/Cru.h"
-#include "Sca/Sca.h"
-#include "Util.h"
+
+#include "Alf/Exception.h"
+#include "Logger.h"
+#include "Alf/Sca.h"
 
 namespace sc_regs = AliceO2::roc::Cru::ScRegisters;
 
-namespace AliceO2
+namespace o2
 {
-namespace Alf
+namespace alf
 {
-
-// std::map<std::string, uint32_t> Sca::registers;
 
 Sca::Sca(AlfLink link)
-  : mBar2(*link.bar), mLink(link)
+  : mBar2(link.bar), mLink(link)
 {
   if (mLink.linkId >= CRU_NUM_LINKS) {
     BOOST_THROW_EXCEPTION(
@@ -49,21 +49,44 @@ Sca::Sca(AlfLink link)
   barWrite(sc_regs::SC_LINK.index, mLink.linkId);
 }
 
-// UNUSED
-void Sca::initialize()
+Sca::Sca(const roc::Parameters::CardIdType& cardId, int linkId)
 {
-  init(); //TODO: handle error??
-  gpioEnable();
+  init(cardId, linkId);
 }
 
-// UNUSED
-void Sca::init()
+Sca::Sca(std::string cardId, int linkId)
 {
-  barWrite(sc_regs::SCA_WR_CTRL.index, 0x1);
-  waitOnBusyClear();
-  barWrite(sc_regs::SCA_WR_CTRL.index, 0x2);
-  waitOnBusyClear();
-  barWrite(sc_regs::SCA_WR_CTRL.index, 0x0);
+  init(roc::Parameters::cardIdFromString(cardId), linkId);
+}
+
+void Sca::init(const roc::Parameters::CardIdType& cardId, int linkId)
+{
+  auto card = roc::findCard(cardId); //TODO: Use it elsewhere??
+
+  mBar2 = roc::ChannelFactory().getBar(cardId, 2);
+  mLink = AlfLink{
+    "DDT",
+    card.sequenceId,
+    linkId,
+    mBar2,
+    roc::CardType::Cru
+  };
+}
+
+Sca::CommandData Sca::executeCommand(uint32_t command, uint32_t data, bool lock)
+{
+  if (lock) {
+    startLlaSession();
+  }
+
+  write(command, data);
+  auto result = read();
+
+  if (lock) {
+    stopLlaSession();
+  }
+
+  return result;
 }
 
 void Sca::write(uint32_t command, uint32_t data)
@@ -78,13 +101,13 @@ void Sca::write(uint32_t command, uint32_t data)
   }
 
   try {
-    executeCommand();
+    execute();
   } catch (const ScaException& e) {
     throw;
   }
 }
 
-Sca::ReadResult Sca::read()
+Sca::CommandData Sca::read()
 {
   waitOnBusyClear();
   auto data = barRead(sc_regs::SCA_RD_DATA.index);
@@ -163,59 +186,17 @@ void Sca::checkError(uint32_t command)
   }
 }
 
-// UNUSED
-void Sca::gpioEnable()
-{
-  // Enable GPIO
-  // WR CONTROL REG B
-  write(0x00010002, 0xff000000);
-  read();
-  // RD CONTROL REG B
-  write(0x00020003, 0xff000000);
-  read();
-
-  // WR GPIO DIR
-  write(0x02030020, 0xffffffff);
-  // RD GPIO DIR
-  write(0x02040021, 0x0);
-  read();
-}
-
-// UNUSED
-Sca::ReadResult Sca::gpioWrite(uint32_t data)
-{
-  //  printf("Sca::gpioWrite DATA=0x%x\n", data);
-  initialize();
-  // WR REGISTER OUT DATA
-  write(0x02040010, data);
-  // RD DATA
-  write(0x02050011, 0x0);
-  read();
-  // RD REGISTER DATAIN
-  write(0x02060001, 0x0);
-  return read();
-}
-
-// UNUSED
-Sca::ReadResult Sca::gpioRead()
-{
-  // printf("Sca::gpioRead\n", data);
-  // RD DATA
-  write(0x02050011, 0x0);
-  return read();
-}
-
 void Sca::barWrite(uint32_t index, uint32_t data)
 {
-  mBar2.writeRegister(index, data);
+  mBar2->writeRegister(index, data);
 }
 
 uint32_t Sca::barRead(uint32_t index)
 {
-  return mBar2.readRegister(index);
+  return mBar2->readRegister(index);
 }
 
-void Sca::executeCommand()
+void Sca::execute()
 {
   barWrite(sc_regs::SCA_WR_CTRL.index, 0x4);
   barWrite(sc_regs::SCA_WR_CTRL.index, 0x0);
@@ -235,27 +216,51 @@ void Sca::waitOnBusyClear()
                         << ErrorInfo::Message("Exceeded timeout on busy wait"));
 }
 
-std::string Sca::writeSequence(const std::vector<std::pair<Data, Operation>>& operations)
+void Sca::startLlaSession()
 {
-  std::stringstream resultBuffer;
+  if (!mSession->isStarted()) {
+    lla::SessionParameters params = lla::SessionParameters::makeParameters()
+                                      .setSessionName("ALF write sequence")                   // TODO: Should come from above
+                                      .setCardId(roc::PciSequenceNumber(mLink.cardSequence)); // TODO: How will I have this if not through the constructor??
+
+    mSession = std::make_unique<lla::Session>(params);
+    if (!mSession->start()) {
+      BOOST_THROW_EXCEPTION(lla::LlaException()
+                            << ErrorInfo::Message("Couldn't start session")); // couldn't grab lock
+    }
+  }
+}
+
+void Sca::stopLlaSession()
+{
+  mSession->stop();
+}
+
+std::vector<std::pair<Sca::Operation, Sca::Data>> Sca::executeSequence(const std::vector<std::pair<Operation, Data>>& operations, bool lock)
+{
+  if (lock) {
+    startLlaSession();
+  }
+
+  std::vector<std::pair<Sca::Operation, Sca::Data>> ret;
   for (const auto& it : operations) {
-    Data data = it.first;
+    Operation operation = it.first;
+    Data data = it.second;
     try {
-      if (it.second == Operation::Command) {
-        auto commandData = std::get<CommandData>(data);
-        write(commandData);
-        ReadResult result = read();
-        resultBuffer << Util::formatValue(commandData.command) << "," << Util::formatValue(result.data) << "\n";
-      } else if (it.second == Operation::Wait) {
+      if (operation == Operation::Command) {
+        auto commandData = boost::get<CommandData>(data);
+        auto result = executeCommand(commandData);
+        ret.push_back({ operation, result });
+      } else if (operation == Operation::Wait) {
         int waitTime;
         try {
-          waitTime = std::get<WaitTime>(data);
-        } catch (...) { // no timeout was provided
+          waitTime = boost::get<WaitTime>(data);
+        } catch (...) { // no timeout provided
           data = DEFAULT_SCA_WAIT_TIME_MS;
-          waitTime = std::get<WaitTime>(data);
+          waitTime = boost::get<WaitTime>(data);
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
-        resultBuffer << waitTime << "\n";
+        ret.push_back({ operation, waitTime });
       } else {
         BOOST_THROW_EXCEPTION(ScaException() << ErrorInfo::Message("SCA operation type unknown"));
       }
@@ -263,21 +268,53 @@ std::string Sca::writeSequence(const std::vector<std::pair<Data, Operation>>& op
       // If an SCA error occurs, we stop executing the sequence of commands and return the results as far as we got
       // them, plus the error message.
       std::string meaningfulMessage;
-      if (it.second == Operation::Command) {
-        meaningfulMessage = (boost::format("SCA_SEQUENCE cmd=0x%08x data=0x%08x cardSequence=%d link=%d error='%s'") % std::get<Command>(data).command % std::get<Command>(data).data % mLink.cardSequence % mLink.linkId % e.what()).str();
-      } else if (it.second == Operation::Wait) {
-        meaningfulMessage = (boost::format("SCA_SEQUENCE WAIT waitTime=%d cardSequence=%d link=%d error='%s'") % std::get<WaitTime>(data) % mLink.cardSequence % mLink.linkId % e.what()).str();
+      if (operation == Operation::Command) {
+        meaningfulMessage = (boost::format("SCA_SEQUENCE cmd=0x%08x data=0x%08x cardSequence=%d link=%d error='%s'") % boost::get<CommandData>(data).command % boost::get<CommandData>(data).data % mLink.cardSequence % mLink.linkId % e.what()).str();
+      } else if (operation == Operation::Wait) {
+        meaningfulMessage = (boost::format("SCA_SEQUENCE WAIT waitTime=%d cardSequence=%d link=%d error='%s'") % boost::get<WaitTime>(data) % mLink.cardSequence % mLink.linkId % e.what()).str();
       } else {
         meaningfulMessage = (boost::format("SCA_SEQUENCE UNKNOWN cardSequence=%d link=%d error='%s'") % mLink.cardSequence % mLink.linkId % e.what()).str();
       }
       getErrorLogger() << meaningfulMessage << endm;
-      resultBuffer << meaningfulMessage;
+      ret.push_back({ Operation::Error, meaningfulMessage });
+      break;
+    }
+  }
+
+  if (lock) {
+    stopLlaSession();
+  }
+
+  return ret;
+}
+
+std::string Sca::writeSequence(const std::vector<std::pair<Operation, Data>>& operations, bool lock)
+{
+  std::stringstream resultBuffer;
+  auto out = executeSequence(operations, lock);
+  for (const auto& it : out) {
+    Operation operation = it.first;
+    Data data = it.second;
+    if (operation == Operation::Command) {
+      resultBuffer << data << "\n"; // "[cmd],[data]\n"
+    } else if (operation == Operation::Wait) {
+      resultBuffer << data << "\n"; // "[time]\n"
+    } else if (operation == Operation::Error) {
+      resultBuffer << data; // "[error_msg]"
+      getErrorLogger() << data << endm;
       BOOST_THROW_EXCEPTION(ScaException() << ErrorInfo::Message(resultBuffer.str()));
+      break;
     }
   }
 
   return resultBuffer.str();
 }
 
-} // namespace Alf
-} // namespace AliceO2
+std::ostream& operator<<(std::ostream& output, const Sca::CommandData& commandData)
+{
+  output << Util::formatValue(commandData.command) << "," << Util::formatValue(commandData.data);
+  return output;
+}
+
+} // namespace alf
+} // namespace o2

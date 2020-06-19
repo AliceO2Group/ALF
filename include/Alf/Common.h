@@ -14,17 +14,19 @@
 /// \author Pascal Boeschoten (pascal.boeschoten@cern.ch)
 /// \author Kostas Alexopoulos (kostas.alexopoulos@cern.ch)
 
-#ifndef ALICEO2_ALF_COMMON_H_
-#define ALICEO2_ALF_COMMON_H_
+#ifndef O2_ALF_INC_COMMON_H_
+#define O2_ALF_INC_COMMON_H_
 
 #include <chrono>
 #include "ReadoutCard/BarInterface.h"
 #include "ReadoutCard/CardType.h"
 
-namespace AliceO2
+namespace o2
 {
-namespace Alf
+namespace alf
 {
+
+namespace roc = AliceO2::roc;
 
 static constexpr int CRU_NUM_LINKS(24);
 static constexpr int CRORC_NUM_LINKS(6);
@@ -40,7 +42,7 @@ struct AlfLink {
   roc::CardType::type cardType;
 };
 
-} // namespace Alf
-} // namespace AliceO2
+} // namespace alf
+} // namespace o2
 
-#endif // ALICEO2_ALF_COMMON_H_
+#endif // O2_ALF_INC_COMMON_H_

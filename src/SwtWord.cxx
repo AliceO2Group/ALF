@@ -27,30 +27,33 @@
 #include <cstddef>
 #include <iomanip>
 
-#include "Swt/SwtWord.h"
+#include "Alf/SwtWord.h"
 
-namespace AliceO2
+namespace o2
 {
-namespace Alf
+namespace alf
 {
 
-SwtWord::SwtWord() : mLow(0),
-                     mMed(0),
-                     mHigh(0)
-{
-}
-
-SwtWord::SwtWord(uint32_t low, uint32_t med, uint16_t high) : mLow(low),
-                                                              mMed(med),
-                                                              mHigh(high)
+SwtWord::SwtWord(SwtWord::Size size) : mLow(0),
+                                       mMed(0),
+                                       mHigh(0),
+                                       mSize(size)
 {
 }
 
-SwtWord::SwtWord(uint64_t swtInt)
+SwtWord::SwtWord(uint32_t low, uint32_t med, uint16_t high, SwtWord::Size size) : mLow(low),
+                                                                                  mMed(med),
+                                                                                  mHigh(high),
+                                                                                  mSize(size)
+{
+}
+
+SwtWord::SwtWord(uint64_t swtInt, SwtWord::Size size)
 {
   mLow = swtInt & 0xffffffff;
   mMed = (swtInt >> 32) & 0xffffffff;
   mHigh = 0;
+  mSize = size;
 }
 
 bool SwtWord::operator==(const SwtWord& swtWord)
@@ -79,6 +82,16 @@ void SwtWord::setHigh(uint16_t high)
   mSequence = (high & 0xf000) >> 12;
 }
 
+void SwtWord::setSize(Size size)
+{
+  mSize = size;
+}
+
+void SwtWord::setSequence(uint16_t high)
+{
+  mSequence = (high & 0xf000) >> 12;
+}
+
 uint32_t SwtWord::getLow() const
 {
   return mLow;
@@ -99,6 +112,11 @@ int SwtWord::getSequence() const
   return mSequence;
 }
 
+SwtWord::Size SwtWord::getSize() const
+{
+  return mSize;
+}
+
 std::ostream& operator<<(std::ostream& output, const SwtWord& swtWord)
 {
   output << "0x" << std::setfill('0') << std::hex << std::setw(3) << swtWord.getHigh()
@@ -106,5 +124,5 @@ std::ostream& operator<<(std::ostream& output, const SwtWord& swtWord)
   return output;
 }
 
-} // namespace Alf
-} // namespace AliceO2
+} // namespace alf
+} // namespace o2

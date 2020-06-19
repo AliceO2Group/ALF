@@ -14,8 +14,8 @@
 /// \author Pascal Boeschoten (pascal.boeschoten@cern.ch)
 /// \author Kostas Alexopoulos (kostas.alexopoulos@cern.ch)
 
-#ifndef ALICEO2_ALF_SRC_DIMSERVICES_DIMSERVICES_H
-#define ALICEO2_ALF_SRC_DIMSERVICES_DIMSERVICES_H
+#ifndef O2_ALF_SRC_DIMSERVICES_DIMSERVICES_H
+#define O2_ALF_SRC_DIMSERVICES_DIMSERVICES_H
 
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/variant.hpp>
@@ -24,16 +24,14 @@
 #include <dim/dis.hxx>
 #include <string>
 
-#include "AlfException.h"
-#include "Common.h"
-#include "Logger.h"
+#include "Alf/Exception.h"
+#include "Alf/Common.h"
 #include "ReadoutCard/Register.h"
-#include "Sca/Sca.h"
-#include "Swt/Swt.h"
+#include "Logger.h"
 
-namespace AliceO2
+namespace o2
 {
-namespace Alf
+namespace alf
 {
 
 /// Length of the success/failure prefix that's returned in RPC calls
@@ -124,6 +122,6 @@ class DimRpcInfoWrapper
   std::unique_ptr<DimRpcInfo> mRpcInfo;
 };
 
-} // namespace Alf
-} // namespace AliceO2
-#endif // ALICEO2_ALF_SRC_DIMSERVICES_DIMSERVICES_H
+} // namespace alf
+} // namespace o2
+#endif // O2_ALF_SRC_DIMSERVICES_DIMSERVICES_H

@@ -21,12 +21,11 @@
 #include "AlfServer.h"
 #include "DimServices/ServiceNames.h"
 #include "Logger.h"
-#include "Swt/Swt.h"
 #include "Util.h"
 
-namespace AliceO2
+namespace o2
 {
-namespace Alf
+namespace alf
 {
 
 AlfServer::AlfServer() : mRpcServers()
@@ -83,7 +82,7 @@ std::string AlfServer::registerBlobWrite(const std::string& parameter, AlfLink l
 std::string AlfServer::scaBlobWrite(const std::string& parameter, AlfLink link)
 {
   std::vector<std::string> stringPairs = Util::split(parameter, argumentSeparator());
-  std::vector<std::pair<Sca::Data, Sca::Operation>> scaPairs = parseStringToScaPairs(stringPairs);
+  std::vector<std::pair<Sca::Operation, Sca::Data>> scaPairs = parseStringToScaPairs(stringPairs);
   Sca sca = Sca(link);
   return sca.writeSequence(scaPairs);
 }
@@ -92,7 +91,7 @@ std::string AlfServer::swtBlobWrite(const std::string& parameter, AlfLink link)
 {
 
   std::vector<std::string> stringPairs = Util::split(parameter, argumentSeparator());
-  std::vector<std::pair<Swt::Data, Swt::Operation>> swtPairs = parseStringToSwtPairs(stringPairs);
+  std::vector<std::pair<Swt::Operation, Swt::Data>> swtPairs = parseStringToSwtPairs(stringPairs);
   Swt swt = Swt(link);
   return swt.writeSequence(swtPairs);
 }
@@ -101,7 +100,7 @@ std::string AlfServer::icBlobWrite(const std::string& parameter, AlfLink link)
 {
 
   std::vector<std::string> stringPairs = Util::split(parameter, argumentSeparator());
-  std::vector<std::pair<Ic::IcData, Ic::Operation>> icPairs = parseStringToIcPairs(stringPairs);
+  std::vector<std::pair<Ic::Operation, Ic::Data>> icPairs = parseStringToIcPairs(stringPairs);
   Ic ic = Ic(link);
   return ic.writeSequence(icPairs);
 }
@@ -144,19 +143,19 @@ std::string AlfServer::llaSessionStart(const std::string& parameter, int cardId)
 
   if (mSessions.find(cardId) == mSessions.end()) {
     lla::SessionParameters params = lla::SessionParameters::makeParameters()
-      .setSessionName(parameters[0])
-      .setCardId(cardId);
+                                      .setSessionName(parameters[0])
+                                      .setCardId(roc::PciSequenceNumber(cardId));
     mSessions[cardId] = std::make_unique<lla::Session>(params);
-  }/*else {
+  } /*else {
     // TODO: Update session name?
   }*/
 
   if (parameters.size() == 2) {
-    if(!mSessions[cardId]->timedStart(std::stoi(parameters[1]))) {
+    if (!mSessions[cardId]->timedStart(std::stoi(parameters[1]))) {
       BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("Could not start session for serial " + std::to_string(cardId)));
     }
   } else {
-    if(!mSessions[cardId]->start()) {
+    if (!mSessions[cardId]->start()) {
       BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("Could not start session for serial " + std::to_string(cardId)));
     }
   }
@@ -247,7 +246,7 @@ std::vector<uint32_t> AlfServer::stringToRegisterPair(const std::string stringPa
   return registers;
 }
 
-std::pair<Sca::Data, Sca::Operation> AlfServer::stringToScaPair(const std::string stringPair)
+std::pair<Sca::Operation, Sca::Data> AlfServer::stringToScaPair(const std::string stringPair)
 {
   std::vector<std::string> scaPair = Util::split(stringPair, pairSeparator());
   if (scaPair.size() != 2) {
@@ -273,11 +272,11 @@ std::pair<Sca::Data, Sca::Operation> AlfServer::stringToScaPair(const std::strin
     data = commandData;
   }
 
-  return std::make_pair(data, operation);
+  return std::make_pair(operation, data);
 }
 
 /// Converts a 76-bit hex number string
-std::pair<Swt::Data, Swt::Operation> AlfServer::stringToSwtPair(const std::string stringPair)
+std::pair<Swt::Operation, Swt::Data> AlfServer::stringToSwtPair(const std::string stringPair)
 {
   std::vector<std::string> swtPair = Util::split(stringPair, pairSeparator());
   if (swtPair.size() < 1 || swtPair.size() > 2) {
@@ -337,10 +336,10 @@ std::pair<Swt::Data, Swt::Operation> AlfServer::stringToSwtPair(const std::strin
     }
   }
 
-  return std::make_pair(data, operation);
+  return std::make_pair(operation, data);
 }
 
-std::pair<Ic::IcData, Ic::Operation> AlfServer::stringToIcPair(const std::string stringPair)
+std::pair<Ic::Operation, Ic::Data> AlfServer::stringToIcPair(const std::string stringPair)
 {
   std::vector<std::string> icPair = Util::split(stringPair, pairSeparator());
   if (icPair.size() != 2 && icPair.size() != 3) {
@@ -412,7 +411,7 @@ std::pair<Ic::IcData, Ic::Operation> AlfServer::stringToIcPair(const std::string
   ss << std::setw(2) << std::setfill('0') << hexData;
   icData.data = std::stoul(ss.str(), NULL, 16);
 
-  return std::make_pair(icData, icOperation);
+  return std::make_pair(icOperation, icData);
 }
 
 std::vector<std::vector<uint32_t>> AlfServer::parseStringToRegisterPairs(std::vector<std::string> stringPairs)
@@ -426,9 +425,9 @@ std::vector<std::vector<uint32_t>> AlfServer::parseStringToRegisterPairs(std::ve
   return pairs;
 }
 
-std::vector<std::pair<Sca::Data, Sca::Operation>> AlfServer::parseStringToScaPairs(std::vector<std::string> stringPairs)
+std::vector<std::pair<Sca::Operation, Sca::Data>> AlfServer::parseStringToScaPairs(std::vector<std::string> stringPairs)
 {
-  std::vector<std::pair<Sca::Data, Sca::Operation>> pairs;
+  std::vector<std::pair<Sca::Operation, Sca::Data>> pairs;
   for (const auto& stringPair : stringPairs) {
     if (stringPair.find('#') == std::string::npos) { // =isn't a comment
       pairs.push_back(stringToScaPair(stringPair));
@@ -437,10 +436,10 @@ std::vector<std::pair<Sca::Data, Sca::Operation>> AlfServer::parseStringToScaPai
   return pairs;
 }
 
-std::vector<std::pair<Swt::Data, Swt::Operation>> AlfServer::parseStringToSwtPairs(std::vector<std::string> stringPairs)
+std::vector<std::pair<Swt::Operation, Swt::Data>> AlfServer::parseStringToSwtPairs(std::vector<std::string> stringPairs)
 {
 
-  std::vector<std::pair<Swt::Data, Swt::Operation>> pairs;
+  std::vector<std::pair<Swt::Operation, Swt::Data>> pairs;
   for (const auto& stringPair : stringPairs) {
     if (stringPair.find('#') == std::string::npos) {
       pairs.push_back(stringToSwtPair(stringPair));
@@ -449,10 +448,10 @@ std::vector<std::pair<Swt::Data, Swt::Operation>> AlfServer::parseStringToSwtPai
   return pairs;
 }
 
-std::vector<std::pair<Ic::IcData, Ic::Operation>> AlfServer::parseStringToIcPairs(std::vector<std::string> stringPairs)
+std::vector<std::pair<Ic::Operation, Ic::Data>> AlfServer::parseStringToIcPairs(std::vector<std::string> stringPairs)
 {
 
-  std::vector<std::pair<Ic::IcData, Ic::Operation>> pairs;
+  std::vector<std::pair<Ic::Operation, Ic::Data>> pairs;
   for (const auto& stringPair : stringPairs) {
     if (stringPair.find('#') == std::string::npos) {
       pairs.push_back(stringToIcPair(stringPair));
@@ -489,11 +488,11 @@ void AlfServer::makeRpcServers(std::vector<AlfLink> links)
         // Pattern Player
         servers.push_back(makeServer(names.patternPlayer(),
                                      [bar](auto parameter) { return patternPlayer(parameter, bar); }));
-        
+
         // LLA Session Start
         servers.push_back(makeServer(names.llaSessionStart(),
                                      [link, this](auto parameter) { return llaSessionStart(parameter, link.cardSequence); }));
-        
+
         // LLA Session Stop
         servers.push_back(makeServer(names.llaSessionStop(),
                                      [link, this](auto parameter) { return llaSessionStop(parameter, link.cardSequence); }));
@@ -521,5 +520,5 @@ void AlfServer::makeRpcServers(std::vector<AlfLink> links)
   }
 }
 
-} // namespace Alf
-} // namespace AliceO2
+} // namespace alf
+} // namespace o2

@@ -17,9 +17,9 @@
 
 #include "DimServices/ServiceNames.h"
 
-namespace AliceO2
+namespace o2
 {
-namespace Alf
+namespace alf
 {
 
 #define DEFLINKSERVICENAME(_function, _name)  \
@@ -56,5 +56,5 @@ std::string ServiceNames::format(std::string name) const
   return ((boost::format("ALF_%1%/SERIAL_%2%/%3%") % mAlfId % mCardSequence % name)).str();
 }
 
-} // namespace Alf
-} // namespace AliceO2
+} // namespace alf
+} // namespace o2

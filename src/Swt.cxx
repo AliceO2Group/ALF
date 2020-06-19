@@ -27,20 +27,50 @@
 #include <chrono>
 #include <thread>
 
-#include "AlfException.h"
+#include "Alf/Exception.h"
 #include "Logger.h"
+#include "ReadoutCard/CardDescriptor.h"
+#include "ReadoutCard/CardFinder.h"
+#include "ReadoutCard/ChannelFactory.h"
 #include "ReadoutCard/Cru.h"
-#include "Swt/Swt.h"
+#include "Alf/Swt.h"
 
-namespace AliceO2
+namespace o2
 {
-namespace Alf
+namespace alf
 {
 
 namespace sc_regs = AliceO2::roc::Cru::ScRegisters;
 
-Swt::Swt(AlfLink link) : mBar2(*link.bar), mLink(link)
+Swt::Swt(AlfLink link) : mBar2(link.bar), mLink(link)
 {
+  setChannel(mLink.linkId); // TODO: Decouple this from the class?
+}
+
+Swt::Swt(const roc::Parameters::CardIdType& cardId, int linkId)
+{
+  init(cardId, linkId);
+}
+
+Swt::Swt(std::string cardId, int linkId)
+{
+  init(roc::Parameters::cardIdFromString(cardId), linkId);
+}
+
+void Swt::init(const roc::Parameters::CardIdType& cardId, int linkId)
+{
+  auto card = roc::findCard(cardId); //TODO: Use it elsewhere??
+
+  mBar2 = roc::ChannelFactory().getBar(card.pciAddress, 2);
+
+  mLink = AlfLink{
+    "DDT", //TODO: From session?
+    card.sequenceId,
+    linkId,
+    mBar2,
+    roc::CardType::Cru
+  };
+
   setChannel(mLink.linkId);
 }
 
@@ -56,8 +86,9 @@ void Swt::reset()
   mWordSequence = 0;
 }
 
-void Swt::read(std::vector<SwtWord>& words, TimeOut msTimeOut, SwtWord::Size wordSize)
+std::vector<SwtWord> Swt::read(SwtWord::Size wordSize, TimeOut msTimeOut)
 {
+  std::vector<SwtWord> words;
   uint32_t numWords = 0x0;
 
   auto timeOut = std::chrono::steady_clock::now() + std::chrono::milliseconds(msTimeOut);
@@ -76,21 +107,23 @@ void Swt::read(std::vector<SwtWord>& words, TimeOut msTimeOut, SwtWord::Size wor
     barWrite(sc_regs::SWT_CMD.index, 0x0); // void cmd to sync clocks
 
     tempWord.setLow(barRead(sc_regs::SWT_RD_WORD_L.index));
-    if (wordSize == SwtWord::Size::Low) {
-      continue;
+
+    if (wordSize == SwtWord::Size::Medium || wordSize == SwtWord::Size::High) {
+      tempWord.setMed(barRead(sc_regs::SWT_RD_WORD_M.index));
     }
-    tempWord.setMed(barRead(sc_regs::SWT_RD_WORD_M.index));
-    if (wordSize == SwtWord::Size::Medium) {
-      continue;
+
+    if (wordSize == SwtWord::Size::High) { // Sequence set with high part of the word
+      tempWord.setHigh(barRead(sc_regs::SWT_RD_WORD_H.index));
+    } else { // Only set sequence if smaller word requested
+      tempWord.setSequence(barRead(sc_regs::SWT_RD_WORD_H.index));
     }
-    tempWord.setHigh(barRead(sc_regs::SWT_RD_WORD_H.index));
 
     mWordSequence = (mWordSequence + 1) % 16;
 
     // If we get the same counter as before it means the FIFO wasn't updated; drop the word
     if (tempWord.getSequence() != mWordSequence) {
 
-      if (std::chrono::steady_clock::now() < timeOut) {
+      if (std::chrono::steady_clock::now() > timeOut) {
         BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("Timed out: not enough words in SWT READ FIFO"));
       }
 
@@ -104,83 +137,111 @@ void Swt::read(std::vector<SwtWord>& words, TimeOut msTimeOut, SwtWord::Size wor
     //wordMonPairs.push_back(std::make_pair(tempWord, barRead(sc_regs::SWT_MON.index)));
     words.push_back(tempWord);
   }
+
+  return words;
 }
 
-uint32_t Swt::write(const SwtWord& swtWord)
+void Swt::write(const SwtWord& swtWord)
 {
   // prep the swt word
-  if (swtWord.getHigh()) {
+  if (swtWord.getSize() == SwtWord::Size::High) {
     barWrite(sc_regs::SWT_WR_WORD_H.index, swtWord.getHigh());
   }
-  if (swtWord.getMed() || swtWord.getHigh()) {
+  if (swtWord.getSize() == SwtWord::Size::High || swtWord.getSize() == SwtWord::Size::Medium) {
     barWrite(sc_regs::SWT_WR_WORD_M.index, swtWord.getMed());
   }
   barWrite(sc_regs::SWT_WR_WORD_L.index, swtWord.getLow()); // The LOW bar write, triggers the write operation
 
-  return barRead(sc_regs::SWT_MON.index);
+  //return barRead(sc_regs::SWT_MON.index);
 }
 
 void Swt::barWrite(uint32_t index, uint32_t data)
 {
-  mBar2.writeRegister(index, data);
+  mBar2->writeRegister(index, data);
 }
 
 uint32_t Swt::barRead(uint32_t index)
 {
-  uint32_t read = mBar2.readRegister(index);
+  uint32_t read = mBar2->readRegister(index);
   return read;
 }
 
-std::string Swt::writeSequence(std::vector<std::pair<Data, Operation>> sequence)
+std::vector<std::pair<Swt::Operation, Swt::Data>> Swt::executeSequence(std::vector<std::pair<Operation, Data>> sequence)
 {
-  std::stringstream resultBuffer;
-  for (const auto& it : sequence) {
-    Data data = it.first;
-    try {
-      if (it.second == Operation::Read) {
-        std::vector<SwtWord> results;
+  std::vector<std::pair<Operation, Data>> ret;
 
+  for (const auto& it : sequence) {
+    Operation operation = it.first;
+    Data data = it.second;
+    try {
+      if (operation == Operation::Read) {
         int timeOut;
         try {
-          timeOut = std::get<TimeOut>(data);
+          timeOut = boost::get<TimeOut>(data);
         } catch (...) { // no timeout was provided
           data = DEFAULT_SWT_TIMEOUT_MS;
-          timeOut = std::get<TimeOut>(data);
+          timeOut = boost::get<TimeOut>(data);
         }
-        read(results, timeOut);
+        auto results = read(SwtWord::Size::High, timeOut);
 
         for (const auto& result : results) {
-          resultBuffer << result << "\n";
+          ret.push_back({ Operation::Read, result });
         }
-      } else if (it.second == Operation::Write) {
-        write(std::get<SwtWord>(data));
-        resultBuffer << "0"
-                     << "\n";
-      } else if (it.second == Operation::Reset) {
+      } else if (operation == Operation::Write) {
+        SwtWord word = boost::get<SwtWord>(data);
+        write(word);
+        ret.push_back({ Operation::Write, word });
+        //ret.push_back({ Operation::Write, {} }); // TODO: Is it better to return {} ?
+      } else if (operation == Operation::Reset) {
         reset();
+        ret.push_back({ Operation::Reset, {} });
       } else {
         BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("SWT operation type unknown"));
       }
     } catch (const SwtException& e) {
-      // If an SWT error occurs, we stop executing the sequence of commands and return the results as far as we got them, plus
-      // the error message.
       std::string meaningfulMessage;
-      if (it.second == Operation::Read) {
-        meaningfulMessage = (boost::format("SWT_SEQUENCE READ timeout=%d cardSequence=%d link=%d, error='%s'") % std::get<TimeOut>(data) % mLink.cardSequence % mLink.linkId % e.what()).str();
-      } else if (it.second == Operation::Write) {
-        meaningfulMessage = (boost::format("SWT_SEQUENCE WRITE data=%s cardSequence=%d link=%d, error='%s'") % std::get<SwtWord>(data) % mLink.cardSequence % mLink.linkId % e.what()).str();
-      } else if (it.second == Operation::Reset) {
+      if (operation == Operation::Read) {
+        meaningfulMessage = (boost::format("SWT_SEQUENCE READ timeout=%d cardSequence=%d link=%d, error='%s'") % boost::get<TimeOut>(data) % mLink.cardSequence % mLink.linkId % e.what()).str();
+      } else if (operation == Operation::Write) {
+        meaningfulMessage = (boost::format("SWT_SEQUENCE WRITE data=%s cardSequence=%d link=%d, error='%s'") % boost::get<SwtWord>(data) % mLink.cardSequence % mLink.linkId % e.what()).str();
+      } else if (operation == Operation::Reset) {
         meaningfulMessage = (boost::format("SWT_SEQUENCE RESET cardSequence=%d link=%d, error='%s'") % mLink.cardSequence % mLink.linkId % e.what()).str();
       } else {
         meaningfulMessage = (boost::format("SWT_SEQUENCE UNKNOWN cardSequence=%d link=%d,  error='%s'") % mLink.cardSequence % mLink.linkId % e.what()).str();
       }
       getErrorLogger() << meaningfulMessage << endm;
-      resultBuffer << meaningfulMessage;
-      BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message(resultBuffer.str()));
+
+      ret.push_back({ Operation::Error, meaningfulMessage });
+      break;
     }
   }
+
+  return ret;
+}
+
+std::string Swt::writeSequence(std::vector<std::pair<Operation, Data>> sequence)
+{
+  std::stringstream resultBuffer;
+  auto out = executeSequence(sequence);
+  for (const auto& it : out) {
+    Operation operation = it.first;
+    Data data = it.second;
+    if (operation == Operation::Read) {
+      resultBuffer << data << "\n";
+    } else if (operation == Operation::Write) {
+      resultBuffer << "0\n";
+    } else if (operation == Operation::Reset) {
+      /* DO NOTHING */
+    } else if (operation == Operation::Error) {
+      resultBuffer << data;
+      getErrorLogger() << data << endm;
+      BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message(resultBuffer.str()));
+      break;
+    }
+  }
+
   return resultBuffer.str();
 }
 
-} // namespace Alf
-} // namespace AliceO2
+} // namespace alf
+} // namespace o2

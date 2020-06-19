@@ -13,16 +13,16 @@
 ///
 /// \author Pascal Boeschoten (pascal.boeschoten@cern.ch)
 
-#ifndef ALICEO2_ALF_SRC_DIMSERVICES_SERVICENAMES_H
-#define ALICEO2_ALF_SRC_DIMSERVICES_SERVICENAMES_H
+#ifndef O2_ALF_SRC_DIMSERVICES_SERVICENAMES_H
+#define O2_ALF_SRC_DIMSERVICES_SERVICENAMES_H
 
 #include <string>
 
-#include "Common.h"
+#include "Alf/Common.h"
 
-namespace AliceO2
+namespace o2
 {
-namespace Alf
+namespace alf
 {
 
 class ServiceNames
@@ -52,7 +52,7 @@ class ServiceNames
   const int mLink;
 };
 
-} // namespace Alf
-} // namespace AliceO2
+} // namespace alf
+} // namespace o2
 
-#endif // ALICEO2_ALF_SRC_DIMSERVICES_SERVICENAMES_H
+#endif // O2_ALF_SRC_DIMSERVICES_SERVICENAMES_H
