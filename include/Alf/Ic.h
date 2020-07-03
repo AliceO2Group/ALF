@@ -28,9 +28,11 @@
 
 #include <boost/variant.hpp>
 
-#include "Common.h"
 #include "ReadoutCard/BarInterface.h"
 #include "ReadoutCard/Parameters.h"
+
+#include "Common.h"
+#include "Lla.h"
 
 namespace roc = AliceO2::roc;
 
@@ -99,13 +101,13 @@ class Ic
                    Write,
                    Error };
 
-  std::vector<std::pair<Operation, Data>> executeSequence(std::vector<std::pair<Operation, Data>> ops);
+  std::vector<std::pair<Operation, Data>> executeSequence(std::vector<std::pair<Operation, Data>> ops, bool lock = false);
 
   /// Executes an IC sequence
   /// \param ops A vector of Data and Operations pairs
   /// \return A string of newline separated results for each operation
   /// \throws o2::alf::IcException on operation error
-  std::string writeSequence(std::vector<std::pair<Operation, Data>> ops);
+  std::string writeSequence(std::vector<std::pair<Operation, Data>> ops, bool lock = false);
 
  private:
   void init(const roc::Parameters::CardIdType& cardId, int linkId);
@@ -117,6 +119,7 @@ class Ic
   std::shared_ptr<roc::BarInterface> mBar2;
 
   AlfLink mLink;
+  std::unique_ptr<LlaSession> mLlaSession;
 };
 
 } // namespace alf

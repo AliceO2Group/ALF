@@ -17,10 +17,7 @@
 #include <thread>
 
 #include "Common/Program.h"
-#include "Alf/Exception.h"
-#include "Alf/Ic.h"
-#include "Alf/Sca.h"
-#include "Alf/Swt.h"
+#include "Alf/Alf.h"
 #include "Logger.h"
 
 namespace po = boost::program_options;
@@ -129,7 +126,7 @@ class AlfLibClient : public AliceO2::Common::Program
       ops.push_back({ Swt::Operation::Write, SwtWord{ 0xcafe, 0x41d, 0x0 } });
       ops.push_back({ Swt::Operation::Read, { 50 } });
       ops.push_back({ Swt::Operation::Error, {} });
-      auto output = swt.executeSequence(ops);
+      auto output = swt.executeSequence(ops, true);
       for (const auto& out : output) {
         if (out.first == Swt::Operation::Write) {
           std::cout << "Write | " << boost::get<SwtWord>(out.second) << std::endl;

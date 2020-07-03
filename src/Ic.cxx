@@ -54,6 +54,8 @@ static constexpr roc::Register IC_RD_DATA(IC_BASE.address + 0x30);
 
 Ic::Ic(AlfLink link) : mBar2(link.bar), mLink(link)
 {
+  mLlaSession = std::make_unique<LlaSession>("DDT", link.cardSequence);
+
   setChannel(mLink.linkId);
   reset();
 
@@ -83,6 +85,8 @@ void Ic::init(const roc::Parameters::CardIdType& cardId, int linkId)
     mBar2,
     roc::CardType::Cru
   };
+
+  mLlaSession = std::make_unique<LlaSession>("DDT", card.sequenceId);
 
   setChannel(mLink.linkId);
   reset();
@@ -180,8 +184,12 @@ uint32_t Ic::barRead(uint32_t index)
   return read;
 }
 
-std::vector<std::pair<Ic::Operation, Ic::Data>> Ic::executeSequence(std::vector<std::pair<Operation, Data>> ops)
+std::vector<std::pair<Ic::Operation, Ic::Data>> Ic::executeSequence(std::vector<std::pair<Operation, Data>> ops, bool lock)
 {
+  if (lock) {
+    mLlaSession->start();
+  }
+
   std::vector<std::pair<Ic::Operation, Ic::Data>> ret;
   for (const auto& it : ops) {
     Operation operation = it.first;
@@ -207,13 +215,17 @@ std::vector<std::pair<Ic::Operation, Ic::Data>> Ic::executeSequence(std::vector<
     }
   }
 
+  if (lock) {
+    mLlaSession->stop();
+  }
+
   return ret;
 }
 
-std::string Ic::writeSequence(std::vector<std::pair<Operation, Data>> ops)
+std::string Ic::writeSequence(std::vector<std::pair<Operation, Data>> ops, bool lock)
 {
   std::stringstream resultBuffer;
-  auto out = executeSequence(ops);
+  auto out = executeSequence(ops, lock);
   for (const auto& it : out) {
     Operation operation = it.first;
     Data data = it.second;

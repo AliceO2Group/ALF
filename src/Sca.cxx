@@ -47,6 +47,8 @@ Sca::Sca(AlfLink link)
   barWrite(sc_regs::SC_RESET.index, 0x1);
   barWrite(sc_regs::SC_RESET.index, 0x0);
   barWrite(sc_regs::SC_LINK.index, mLink.linkId);
+
+  mLlaSession = std::make_unique<LlaSession>("DDT", mLink.cardSequence);
 }
 
 Sca::Sca(const roc::Parameters::CardIdType& cardId, int linkId)
@@ -71,19 +73,29 @@ void Sca::init(const roc::Parameters::CardIdType& cardId, int linkId)
     mBar2,
     roc::CardType::Cru
   };
+
+  mLlaSession = std::make_unique<LlaSession>("DDT", card.sequenceId);
 }
 
 Sca::CommandData Sca::executeCommand(uint32_t command, uint32_t data, bool lock)
 {
   if (lock) {
-    startLlaSession();
+    mLlaSession->start();
   }
 
-  write(command, data);
-  auto result = read();
+  CommandData result;
+  try {
+    write(command, data);
+    result = read();
+  } catch (const ScaException& e) {
+    if (lock) {
+      mLlaSession->stop();
+    }
+    BOOST_THROW_EXCEPTION(e);
+  }
 
   if (lock) {
-    stopLlaSession();
+    mLlaSession->stop();
   }
 
   return result;
@@ -216,30 +228,10 @@ void Sca::waitOnBusyClear()
                         << ErrorInfo::Message("Exceeded timeout on busy wait"));
 }
 
-void Sca::startLlaSession()
-{
-  if (!mSession->isStarted()) {
-    lla::SessionParameters params = lla::SessionParameters::makeParameters()
-                                      .setSessionName("ALF write sequence")                   // TODO: Should come from above
-                                      .setCardId(roc::PciSequenceNumber(mLink.cardSequence)); // TODO: How will I have this if not through the constructor??
-
-    mSession = std::make_unique<lla::Session>(params);
-    if (!mSession->start()) {
-      BOOST_THROW_EXCEPTION(lla::LlaException()
-                            << ErrorInfo::Message("Couldn't start session")); // couldn't grab lock
-    }
-  }
-}
-
-void Sca::stopLlaSession()
-{
-  mSession->stop();
-}
-
 std::vector<std::pair<Sca::Operation, Sca::Data>> Sca::executeSequence(const std::vector<std::pair<Operation, Data>>& operations, bool lock)
 {
   if (lock) {
-    startLlaSession();
+    mLlaSession->start();
   }
 
   std::vector<std::pair<Sca::Operation, Sca::Data>> ret;
@@ -282,7 +274,7 @@ std::vector<std::pair<Sca::Operation, Sca::Data>> Sca::executeSequence(const std
   }
 
   if (lock) {
-    stopLlaSession();
+    mLlaSession->stop();
   }
 
   return ret;
