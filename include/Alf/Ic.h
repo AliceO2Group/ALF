@@ -52,6 +52,8 @@ class Ic
   };
 
   typedef uint32_t IcOut;
+  /// Typedef for the Data type of an IC sequence operation.
+  /// Variant of IcData for writes, IcOut for reads, std::string for errors;
   typedef boost::variant<IcData, IcOut, std::string> Data;
 
   /// Internal constructor for the ALF server
@@ -70,10 +72,12 @@ class Ic
 
   /// Performs an IC read
   /// \param address IC address to read from
+  /// \return IC data requested
   uint32_t read(uint32_t address);
 
   /// Performs an IC read
   /// \param icData Data struct containing the address to read from
+  /// \return echo of the IC data written
   uint32_t read(IcData icData)
   {
     return read(icData.address);
@@ -82,6 +86,7 @@ class Ic
   /// Performs an IC write
   /// \param address IC address to write to
   /// \param data Data to write
+  /// \throws o2::alf::IcException on write failure
   uint32_t write(uint32_t address, uint32_t data);
 
   /// Performs an IC write
@@ -101,12 +106,19 @@ class Ic
                    Write,
                    Error };
 
+  /// Executes an IC sequence
+  /// \param ops A vector of Data and Operations pairs
+  /// \return A vector of Data and Operation pairs
+  //          IcOut for Writes and Reads
+  //          std::string for Errors
+  /// \throws o2::lla::LlaException on lock fail
   std::vector<std::pair<Operation, Data>> executeSequence(std::vector<std::pair<Operation, Data>> ops, bool lock = false);
 
-  /// Executes an IC sequence
+  /// Executes an IC sequence for the ALF server
   /// \param ops A vector of Data and Operations pairs
   /// \return A string of newline separated results for each operation
   /// \throws o2::alf::IcException on operation error
+  ///         o2::lla::LlaException on lock fail
   std::string writeSequence(std::vector<std::pair<Operation, Data>> ops, bool lock = false);
 
  private:

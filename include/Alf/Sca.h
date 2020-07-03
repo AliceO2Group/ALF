@@ -40,7 +40,6 @@ class Sca
 {
  public:
   /// Struct holding the command and data pair of an SCA command
-  /// Useful to AlfServer
   struct CommandData {
     uint32_t command;
     uint32_t data;
@@ -48,7 +47,7 @@ class Sca
 
   typedef int WaitTime;
   /// Typedef for the Data type of an SCA sequence operation.
-  /// Variant of CommandData for writes, WaitTime for waits; useful for DIM RPCs
+  /// Variant of CommandData for writes, WaitTime for waits, std::string for errors;
   typedef boost::variant<CommandData, WaitTime, std::string> Data;
 
   /// Enum for the different SCA operation types as seen from DIM RPCs
@@ -73,8 +72,8 @@ class Sca
   /// Executes an SCA command
   /// \param commandData SCA command, data pair
   /// \param lock Boolean enabling implicit locking
-  /// \throws o2::lla::Exception on lock fail,
-  ///          o2::alf::ScaException on SCA error
+  /// \throws o2::lla::LlaException on lock fail,
+  ///         o2::alf::ScaException on SCA error
   CommandData executeCommand(CommandData commandData, bool lock = false)
   {
     return executeCommand(commandData.command, commandData.data, lock);
@@ -83,19 +82,26 @@ class Sca
   /// \param command SCA command
   /// \param data SCA data
   /// \param lock Boolean enabling implicit locking
-  /// \throws o2::lla::Exception on lock fail,
+  /// \throws  o2::lla::LlaException on lock fail
   ///          o2::alf::ScaException on SCA error
   CommandData executeCommand(uint32_t command, uint32_t data, bool lock = false);
 
+  /// Executes an SCA sequence
+  /// \param operations A vector of Operation and Data pairs
+  /// \param lock Boolean enabling implicit locking
+  /// \return A vector of Operation and Data pairs
+  ///         CommandData for Commands
+  ///         WaitTime for Waits
+  ///         std::string for Errors
+  /// \throws o2::lla::LlaException on lock fail
   std::vector<std::pair<Operation, Data>> executeSequence(const std::vector<std::pair<Operation, Data>>& operations, bool lock = false);
 
-  /// Executes an SCA sequence
+  /// Executes an SCA sequence for the ALF Server
   /// \param operations A vector of Data and Operation pairs
   /// \param lock Boolean enabling implicit locking
   /// \return A string of newline separated results;
-  ///  "<command>,<data>" for Commands
-  ///  waitTime for Waits
-  /// \throws o2::alf::ScaException on invalid operation or error
+  /// \throws o2::lla::LlaException on lock fail
+  ///         o2::alf::ScaException on invalid operation or error
   std::string writeSequence(const std::vector<std::pair<Operation, Data>>& operations, bool lock = false);
 
  private:

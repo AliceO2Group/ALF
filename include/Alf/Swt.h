@@ -51,7 +51,7 @@ class Swt
   typedef int TimeOut;
 
   /// Typedef for the Data type of an SWT sequence operation.
-  /// Variant of TimeOut for reads, SwtWord for writes, std::string for Errors; useful for DIM RPCs
+  /// Variant of TimeOut for reads, SwtWord for writes, std::string for Errors
   typedef boost::variant<boost::blank, TimeOut, SwtWord, std::string> Data;
 
   /// Enum for the different SWT operation types
@@ -92,17 +92,18 @@ class Swt
   /// Executes an SWT sequence
   /// \param sequence A vector of Operation and Data pairs
   /// \return A vector of Operation and resulting Data pairs
-  //   Write -> Echoes written data
-  //   Read  -> The SwtWord read
-  //   Reset -> Empty Data
-  //   Error -> Error message in std::string
+  ///         Write -> Echoes written data
+  ///         Read  -> The SwtWord read
+  ///         Reset -> Empty Data
+  ///         Error -> Error message in std::string
+  /// \throws o2:lla::LlaException on lock fail
   std::vector<std::pair<Operation, Data>> executeSequence(std::vector<std::pair<Operation, Data>> sequence, bool lock = false);
 
   /// Executes an SWT sequence for the ALF server
   /// \param sequence A vector of Data and Operation pairs
   /// \return A string of newline separated results;
-  ///  0 for successful writes, the SwtWord for succesful reads
-  /// \throws o2::alf::SwtException on invalid operation or error
+  /// \throws o2:lla::LlaException on lock fail
+  ///         o2::alf::SwtException on invalid operation or error
   std::string writeSequence(std::vector<std::pair<Operation, Data>> sequence, bool lock = false);
 
  private:
