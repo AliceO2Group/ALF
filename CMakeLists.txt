@@ -61,6 +61,7 @@ add_library(ALF SHARED
   src/DimServices/DimServices.cxx
   src/DimServices/ServiceNames.cxx
   src/Ic.cxx
+  src/Lla.cxx
   src/Sca.cxx
   src/Swt.cxx
   src/SwtWord.cxx

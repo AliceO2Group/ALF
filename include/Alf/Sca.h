@@ -21,11 +21,12 @@
 #include <map>
 #include <boost/variant.hpp>
 
-#include "Common.h"
-#include "Util.h"
 #include "ReadoutCard/BarInterface.h"
 #include "ReadoutCard/Parameters.h"
-#include "Lla/Lla.h"
+
+#include "Common.h"
+#include "Lla.h"
+#include "Util.h"
 
 namespace roc = AliceO2::roc;
 
@@ -126,14 +127,11 @@ class Sca
   bool isChannelBusy(uint32_t command);
   void waitOnBusyClear();
 
-  void startLlaSession();
-  void stopLlaSession();
-
   /// Interface for BAR 2
   std::shared_ptr<roc::BarInterface> mBar2;
-  std::unique_ptr<lla::Session> mSession;
-
   AlfLink mLink;
+  std::unique_ptr<LlaSession> mLlaSession;
+
   static constexpr int DEFAULT_SCA_WAIT_TIME_MS = 3;
 };
 

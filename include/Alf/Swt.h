@@ -30,10 +30,12 @@
 #include <boost/blank.hpp>
 #include <boost/variant.hpp>
 
-#include "Common.h"
 #include "ReadoutCard/BarInterface.h"
 #include "ReadoutCard/Parameters.h"
+
 #include "Alf/SwtWord.h"
+#include "Common.h"
+#include "Lla.h"
 
 namespace roc = AliceO2::roc;
 
@@ -94,14 +96,14 @@ class Swt
   //   Read  -> The SwtWord read
   //   Reset -> Empty Data
   //   Error -> Error message in std::string
-  std::vector<std::pair<Operation, Data>> executeSequence(std::vector<std::pair<Operation, Data>> sequence);
+  std::vector<std::pair<Operation, Data>> executeSequence(std::vector<std::pair<Operation, Data>> sequence, bool lock = false);
 
   /// Executes an SWT sequence for the ALF server
   /// \param sequence A vector of Data and Operation pairs
   /// \return A string of newline separated results;
   ///  0 for successful writes, the SwtWord for succesful reads
   /// \throws o2::alf::SwtException on invalid operation or error
-  std::string writeSequence(std::vector<std::pair<Operation, Data>> sequence);
+  std::string writeSequence(std::vector<std::pair<Operation, Data>> sequence, bool lock = false);
 
  private:
   void init(const roc::Parameters::CardIdType& cardId, int linkId);
@@ -112,6 +114,8 @@ class Swt
   std::shared_ptr<roc::BarInterface> mBar2;
 
   AlfLink mLink;
+  std::unique_ptr<LlaSession> mLlaSession;
+
   int mWordSequence = 0; //start from 0, as after the reset the counter starts at 1
   static constexpr int DEFAULT_SWT_TIMEOUT_MS = 10;
 };

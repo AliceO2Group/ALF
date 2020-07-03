@@ -45,6 +45,7 @@ namespace sc_regs = AliceO2::roc::Cru::ScRegisters;
 Swt::Swt(AlfLink link) : mBar2(link.bar), mLink(link)
 {
   setChannel(mLink.linkId); // TODO: Decouple this from the class?
+  mLlaSession = std::make_unique<LlaSession>("DDT", link.cardSequence);
 }
 
 Swt::Swt(const roc::Parameters::CardIdType& cardId, int linkId)
@@ -70,6 +71,8 @@ void Swt::init(const roc::Parameters::CardIdType& cardId, int linkId)
     mBar2,
     roc::CardType::Cru
   };
+
+  mLlaSession = std::make_unique<LlaSession>("DDT", card.sequenceId);
 
   setChannel(mLink.linkId);
 }
@@ -166,8 +169,12 @@ uint32_t Swt::barRead(uint32_t index)
   return read;
 }
 
-std::vector<std::pair<Swt::Operation, Swt::Data>> Swt::executeSequence(std::vector<std::pair<Operation, Data>> sequence)
+std::vector<std::pair<Swt::Operation, Swt::Data>> Swt::executeSequence(std::vector<std::pair<Operation, Data>> sequence, bool lock)
 {
+  if (lock) {
+    mLlaSession->start();
+  }
+
   std::vector<std::pair<Operation, Data>> ret;
 
   for (const auto& it : sequence) {
@@ -175,6 +182,7 @@ std::vector<std::pair<Swt::Operation, Swt::Data>> Swt::executeSequence(std::vect
     Data data = it.second;
     try {
       if (operation == Operation::Read) {
+        std::this_thread::sleep_for(std::chrono::seconds(13));
         int timeOut;
         try {
           timeOut = boost::get<TimeOut>(data);
@@ -216,13 +224,17 @@ std::vector<std::pair<Swt::Operation, Swt::Data>> Swt::executeSequence(std::vect
     }
   }
 
+  if (lock) {
+    mLlaSession->stop();
+  }
+
   return ret;
 }
 
-std::string Swt::writeSequence(std::vector<std::pair<Operation, Data>> sequence)
+std::string Swt::writeSequence(std::vector<std::pair<Operation, Data>> sequence, bool lock)
 {
   std::stringstream resultBuffer;
-  auto out = executeSequence(sequence);
+  auto out = executeSequence(sequence, lock);
   for (const auto& it : out) {
     Operation operation = it.first;
     Data data = it.second;

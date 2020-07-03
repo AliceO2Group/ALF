@@ -46,4 +46,4 @@ inline AliceO2::InfoLogger::InfoLogger& getErrorLogger()
 } // namespace alf
 } // namespace o2
 
-#endif // O2_ALF_COMMON_H_
+#endif // O2_ALF_LOGGER_H_
