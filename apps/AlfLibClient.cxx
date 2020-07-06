@@ -106,7 +106,7 @@ class AlfLibClient : public AliceO2::Common::Program
         swt.write({ 0xb00f, 0x42, 0x88 });
         swt.write({ 0xbe0f, 0x0, 0x0, SwtWord::Size::High });
         swt.write({ 0xb00f, 0x42, 0x21, SwtWord::Size::Low });
-        auto wordsRead = swt.read(SwtWord::Size::Medium, 50);
+        auto wordsRead = swt.read(SwtWord::Size::Medium, 10);
         for (const auto& word : wordsRead) {
           std::cout << word << std::endl;
         }
@@ -116,6 +116,8 @@ class AlfLibClient : public AliceO2::Common::Program
 
       std::cout << "Running an SWT sequence" << std::endl;
       std::vector<std::pair<Swt::Operation, Swt::Data>> ops;
+      swt = Swt(mOptions.cardId);
+      swt.setChannel(1);
       ops.push_back({ Swt::Operation::Reset, {} });
       ops.push_back({ Swt::Operation::Write, SwtWord{ 0xcafe, 0x41d, 0x0 } });
       ops.push_back({ Swt::Operation::Write, SwtWord{ 0xb00f, 0x42, 0x88, SwtWord::Size::High } });
@@ -123,6 +125,11 @@ class AlfLibClient : public AliceO2::Common::Program
       ops.push_back({ Swt::Operation::Read, {} });
       ops.push_back({ Swt::Operation::Write, SwtWord{ 0x1, 0x0, 0x0, SwtWord::Size::Low } });
       ops.push_back({ Swt::Operation::Write, SwtWord{ 0xb00f, 0x42, 0x88, SwtWord::Size::Low } });
+      ops.push_back({ Swt::Operation::Write, SwtWord{ 0xcafe, 0x41d, 0x0 } });
+      ops.push_back({ Swt::Operation::Read, {} });
+      swt.setChannel(0);
+      ops.push_back({ Swt::Operation::Write, SwtWord{ 0x42, 0x0, 0x0, SwtWord::Size::Low } });
+      ops.push_back({ Swt::Operation::Write, SwtWord{ 0xbad, 0x88, 0x43, SwtWord::Size::Low } });
       ops.push_back({ Swt::Operation::Write, SwtWord{ 0xcafe, 0x41d, 0x0 } });
       ops.push_back({ Swt::Operation::Read, { 50 } });
       ops.push_back({ Swt::Operation::Error, {} });

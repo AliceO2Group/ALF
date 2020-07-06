@@ -66,16 +66,24 @@ class Swt
 
   /// External constructor
   /// \param cardId The card ID for which to get the SWT handle.
-  /// \param linkId The link ID for which to get the SWT handle.
-  Swt(const roc::Parameters::CardIdType& cardId, int linkId);
+  /// \param linkId The link ID to set the channel to (optional).
+  Swt(const roc::Parameters::CardIdType& cardId, int linkId = -1);
 
   /// External constructor
   /// \param cardId The card ID for which to get the SWT handle.
-  /// \param linkId The link ID for which to get the SWT handle.
-  Swt(std::string cardId, int linkId);
+  /// \param linkId The link ID to set the channel to (optional).
+  Swt(std::string cardId, int linkId = -1);
 
   /// Resets the SWT channel selected
   void reset();
+
+  /// Sets the SWT channel
+  /// \param gbtChannel The channel to set
+  void setChannel(int gbtChannel);
+
+  /// Checks if an SWT channel has been selected
+  /// \throws o2::alf::SwtException if no SWT channel selected
+  void checkChannelSet();
 
   /// Writes an SWT word
   /// \param swtWord The SWT word to write
@@ -108,7 +116,6 @@ class Swt
 
  private:
   void init(const roc::Parameters::CardIdType& cardId, int linkId);
-  void setChannel(int gbtChannel);
   void barWrite(uint32_t offset, uint32_t data);
   uint32_t barRead(uint32_t index);
 
