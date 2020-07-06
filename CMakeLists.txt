@@ -30,6 +30,9 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # Set CMAKE_INSTALL_LIBDIR explicitly to lib (to avoid lib64 on CC7)
 set(CMAKE_INSTALL_LIBDIR lib)
 
+# Used only for debugging
+# set(CMAKE_BUILD_TYPE "Debug")
+
 # Set the default build type to "RelWithDebInfo"
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set(CMAKE_BUILD_TYPE "RelWithDebInfo"
@@ -98,18 +101,25 @@ target_compile_features(ALF PUBLIC cxx_std_17)
 ####################################
 # Executables
 ####################################
-
-set(EXE_SRCS
+set (EXE_SRCS
   Alf.cxx
-  AlfClient.cxx
-  AlfLibClient.cxx
-)
+  )
 
-set(EXE_NAMES
+set (EXE_NAMES
   o2-alf
-  o2-alf-client
-  o2-alf-lib-client
-)
+  )
+
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  list(APPEND EXE_SRCS
+    AlfClient.cxx
+    AlfLibClient.cxx
+    )
+
+  list(APPEND EXE_NAMES
+    o2-alf-client
+    o2-alf-lib-client
+    )
+endif()
 
 list(LENGTH EXE_SRCS count)
 math(EXPR count "${count}-1")
