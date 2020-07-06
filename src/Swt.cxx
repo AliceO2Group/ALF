@@ -82,7 +82,7 @@ void Swt::init(const roc::Parameters::CardIdType& cardId, int linkId)
 void Swt::setChannel(int gbtChannel)
 {
   mLink.linkId = gbtChannel;
-  barWrite(sc_regs::SC_LINK.index, gbtChannel);
+  barWrite(sc_regs::SC_LINK.index, mLink.linkId);
 }
 
 void Swt::reset()

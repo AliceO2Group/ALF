@@ -76,6 +76,7 @@ class AlfLibClient : public AliceO2::Common::Program
 
       std::cout << "Running an SCA sequence" << std::endl;
       std::vector<std::pair<Sca::Operation, Sca::Data>> ops;
+      sca.setChannel(1);
       ops.push_back({ Sca::Operation::Command, Sca::CommandData{ 0x00100002, 0xff000000 } });
       ops.push_back({ Sca::Operation::Command, Sca::CommandData{ 0x00100003, 0xff000000 } });
       ops.push_back({ Sca::Operation::Wait, 100 });
@@ -127,7 +128,6 @@ class AlfLibClient : public AliceO2::Common::Program
       ops.push_back({ Swt::Operation::Write, SwtWord{ 0xb00f, 0x42, 0x88, SwtWord::Size::Low } });
       ops.push_back({ Swt::Operation::Write, SwtWord{ 0xcafe, 0x41d, 0x0 } });
       ops.push_back({ Swt::Operation::Read, {} });
-      swt.setChannel(0);
       ops.push_back({ Swt::Operation::Write, SwtWord{ 0x42, 0x0, 0x0, SwtWord::Size::Low } });
       ops.push_back({ Swt::Operation::Write, SwtWord{ 0xbad, 0x88, 0x43, SwtWord::Size::Low } });
       ops.push_back({ Swt::Operation::Write, SwtWord{ 0xcafe, 0x41d, 0x0 } });
