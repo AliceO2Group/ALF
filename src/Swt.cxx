@@ -182,7 +182,6 @@ std::vector<std::pair<Swt::Operation, Swt::Data>> Swt::executeSequence(std::vect
     Data data = it.second;
     try {
       if (operation == Operation::Read) {
-        std::this_thread::sleep_for(std::chrono::seconds(13));
         int timeOut;
         try {
           timeOut = boost::get<TimeOut>(data);
@@ -190,7 +189,7 @@ std::vector<std::pair<Swt::Operation, Swt::Data>> Swt::executeSequence(std::vect
           data = DEFAULT_SWT_TIMEOUT_MS;
           timeOut = boost::get<TimeOut>(data);
         }
-        auto results = read(SwtWord::Size::High, timeOut);
+        auto results = read(SwtWord::Size::Low, timeOut);
 
         for (const auto& result : results) {
           ret.push_back({ Operation::Read, result });

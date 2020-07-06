@@ -87,7 +87,7 @@ class Swt
   /// \param msTimeOut Timeout of the read operation in ms
   /// \return A vector of SWT words read
   /// \throws o2::alf::SwtException in case of no SWT words in FIFO, or timeout exceeded
-  std::vector<SwtWord> read(SwtWord::Size wordSize = SwtWord::Size::High, TimeOut msTimeOut = DEFAULT_SWT_TIMEOUT_MS);
+  std::vector<SwtWord> read(SwtWord::Size wordSize = SwtWord::Size::Low, TimeOut msTimeOut = DEFAULT_SWT_TIMEOUT_MS);
 
   /// Executes an SWT sequence
   /// \param sequence A vector of Operation and Data pairs
