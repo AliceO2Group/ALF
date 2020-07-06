@@ -46,7 +46,6 @@ Sca::Sca(AlfLink link)
 
   barWrite(sc_regs::SC_RESET.index, 0x1);
   barWrite(sc_regs::SC_RESET.index, 0x0);
-  barWrite(sc_regs::SC_LINK.index, mLink.linkId);
 
   mLlaSession = std::make_unique<LlaSession>("DDT", mLink.cardSequence);
 }
@@ -74,7 +73,23 @@ void Sca::init(const roc::Parameters::CardIdType& cardId, int linkId)
     roc::CardType::Cru
   };
 
+  barWrite(sc_regs::SC_RESET.index, 0x1);
+  barWrite(sc_regs::SC_RESET.index, 0x0);
+
   mLlaSession = std::make_unique<LlaSession>("DDT", card.sequenceId);
+}
+
+void Sca::setChannel(int gbtChannel)
+{
+  mLink.linkId = gbtChannel;
+  barWrite(sc_regs::SC_LINK.index, mLink.linkId);
+}
+
+void Sca::checkChannelSet()
+{
+  if (mLink.linkId == -1) {
+    BOOST_THROW_EXCEPTION(ScaException() << ErrorInfo::Message("No SCA channel selected"));
+  }
 }
 
 Sca::CommandData Sca::executeCommand(uint32_t command, uint32_t data, bool lock)
@@ -82,6 +97,8 @@ Sca::CommandData Sca::executeCommand(uint32_t command, uint32_t data, bool lock)
   if (lock) {
     mLlaSession->start();
   }
+
+  checkChannelSet();
 
   CommandData result;
   try {

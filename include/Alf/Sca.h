@@ -61,13 +61,21 @@ class Sca
 
   /// External constructor
   /// \param cardId The card ID for which to get the SCA handle.
-  /// \param linkId The link ID for which to get the SCA handle.
-  Sca(const roc::Parameters::CardIdType& cardId, int linkId);
+  /// \param linkId The link ID to set the channel to (optional).
+  Sca(const roc::Parameters::CardIdType& cardId, int linkId = -1);
 
   /// External constructor
   /// \param cardId The card ID for which to get the SCA handle.
-  /// \param linkId The link ID for which to get the SCA handle.
-  Sca(std::string cardId, int linkId);
+  /// \param linkId The link ID to set the channel to (optional).
+  Sca(std::string cardId, int linkId = -1);
+
+  /// Sets the SCA channel
+  /// \param gbtChannel The channel to set
+  void setChannel(int gbtChannel);
+
+  /// Checks if an SCA channel has been selected
+  /// \throws o2::alf::ScaException if no SCA channel selected
+  void checkChannelSet();
 
   /// Executes an SCA command
   /// \param commandData SCA command, data pair
