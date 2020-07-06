@@ -40,9 +40,9 @@ class SwtWord
     Low
   };
 
-  SwtWord(SwtWord::Size size = SwtWord::Size::High);
-  SwtWord(uint32_t low, uint32_t med, uint16_t high, SwtWord::Size size = SwtWord::Size::High);
-  SwtWord(uint64_t swtInt, SwtWord::Size size = SwtWord::Size::High);
+  SwtWord(SwtWord::Size size = SwtWord::Size::Low);
+  SwtWord(uint32_t low, uint32_t med, uint16_t high, SwtWord::Size size = SwtWord::Size::Low);
+  SwtWord(uint64_t swtInt, SwtWord::Size size = SwtWord::Size::Low);
 
   bool operator==(const SwtWord& swtWord);
   bool operator!=(const SwtWord& swtWord);

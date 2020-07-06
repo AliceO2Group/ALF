@@ -104,7 +104,7 @@ class AlfLibClient : public AliceO2::Common::Program
         swt.write({ 0xcafe, 0x41d, 0x0 });
         swt.write({ 0xb00f, 0x42, 0x88 });
         swt.write({ 0xb00f, 0x42, 0x88 });
-        swt.write({ 0xbe0f, 0x0, 0x0 });
+        swt.write({ 0xbe0f, 0x0, 0x0, SwtWord::Size::High });
         swt.write({ 0xb00f, 0x42, 0x21, SwtWord::Size::Low });
         auto wordsRead = swt.read(SwtWord::Size::Medium, 50);
         for (const auto& word : wordsRead) {
@@ -121,12 +121,12 @@ class AlfLibClient : public AliceO2::Common::Program
       ops.push_back({ Swt::Operation::Write, SwtWord{ 0xb00f, 0x42, 0x88, SwtWord::Size::High } });
       ops.push_back({ Swt::Operation::Write, SwtWord{ 0xb00f, 0x42, 0x88 } });
       ops.push_back({ Swt::Operation::Read, {} });
-      ops.push_back({ Swt::Operation::Write, SwtWord{ 0x0, 0x0, 0x0 } });
+      ops.push_back({ Swt::Operation::Write, SwtWord{ 0x1, 0x0, 0x0, SwtWord::Size::Low } });
       ops.push_back({ Swt::Operation::Write, SwtWord{ 0xb00f, 0x42, 0x88, SwtWord::Size::Low } });
       ops.push_back({ Swt::Operation::Write, SwtWord{ 0xcafe, 0x41d, 0x0 } });
       ops.push_back({ Swt::Operation::Read, { 50 } });
       ops.push_back({ Swt::Operation::Error, {} });
-      auto output = swt.executeSequence(ops, true);
+      auto output = swt.executeSequence(ops, true); // execute the sequence atomically
       for (const auto& out : output) {
         if (out.first == Swt::Operation::Write) {
           std::cout << "Write | " << boost::get<SwtWord>(out.second) << std::endl;
