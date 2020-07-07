@@ -188,7 +188,6 @@ class AlfLibClient : public AliceO2::Common::Program
     }
 
     std::cout << "Exiting..." << std::endl;
-    ;
   }
 
  private:
