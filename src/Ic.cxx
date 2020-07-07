@@ -88,7 +88,9 @@ void Ic::init(const roc::Parameters::CardIdType& cardId, int linkId)
 
   mLlaSession = std::make_unique<LlaSession>("DDT", card.sequenceId);
 
-  setChannel(mLink.linkId);
+  if (mLink.linkId != -1) {
+    setChannel(mLink.linkId);
+  }
   reset();
 
   // Set CFG to 0x3 by default
@@ -97,7 +99,15 @@ void Ic::init(const roc::Parameters::CardIdType& cardId, int linkId)
 
 void Ic::setChannel(int gbtChannel)
 {
-  barWrite(sc_regs::SC_LINK.index, gbtChannel);
+  mLink.linkId = gbtChannel;
+  barWrite(sc_regs::SC_LINK.index, mLink.linkId);
+}
+
+void Ic::checkChannelSet()
+{
+  if (mLink.linkId == -1) {
+    BOOST_THROW_EXCEPTION(IcException() << ErrorInfo::Message("No IC channel selected"));
+  }
 }
 
 void Ic::reset()
@@ -108,6 +118,8 @@ void Ic::reset()
 
 uint32_t Ic::read(uint32_t address)
 {
+  checkChannelSet();
+
   address = address & 0xffff;
   uint32_t data = 0;
 
@@ -138,6 +150,8 @@ uint32_t Ic::read(uint32_t address)
 
 uint32_t Ic::write(uint32_t address, uint32_t data)
 {
+  checkChannelSet();
+
   uint32_t echo = data;
   address = address & 0xffff;
   data = (data & 0xff) << 16;

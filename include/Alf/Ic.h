@@ -63,12 +63,20 @@ class Ic
   /// External constructor
   /// \param cardId The card ID for which to get the IC handle.
   /// \param linkId The link ID for which to get the IC handle.
-  Ic(const roc::Parameters::CardIdType& cardId, int linkId);
+  Ic(const roc::Parameters::CardIdType& cardId, int linkId = -1);
 
   /// External constructor
   /// \param cardId The card ID for which to get the IC handle.
   /// \param linkId The link ID for which to get the IC handle.
-  Ic(std::string cardId, int linkId);
+  Ic(std::string cardId, int linkId = -1);
+
+  /// Sets the IC channel
+  /// \param gbtChannel The IC channel to set.
+  void setChannel(int gbtChannel);
+
+  /// Checks if an IC channel is selected
+  /// \throws o2::alf::IcException if no IC channel selected
+  void checkChannelSet();
 
   /// Performs an IC read
   /// \param address IC address to read from
@@ -124,7 +132,6 @@ class Ic
  private:
   void init(const roc::Parameters::CardIdType& cardId, int linkId);
   void reset();
-  void setChannel(int gbtChannel);
   void barWrite(uint32_t offset, uint32_t data);
   uint32_t barRead(uint32_t index);
 
