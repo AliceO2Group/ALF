@@ -13,7 +13,7 @@
 ///
 /// \author Kostas Alexopoulos (kostas.alexopoulos@cern.ch)
 
-#include "Lla.h"
+#include "Alf/Lla.h"
 
 namespace o2
 {
