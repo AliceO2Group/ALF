@@ -25,7 +25,7 @@
 #include "ReadoutCard/Parameters.h"
 
 #include "Common.h"
-#include "Lla.h"
+#include "Alf/Lla.h"
 #include "Util.h"
 
 namespace roc = AliceO2::roc;
