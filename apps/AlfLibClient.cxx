@@ -19,6 +19,7 @@
 #include "Common/Program.h"
 #include "Alf/Alf.h"
 #include "Logger.h"
+#include "Util.h"
 
 namespace po = boost::program_options;
 

@@ -26,7 +26,6 @@
 
 #include "Common.h"
 #include "Alf/Lla.h"
-#include "Util.h"
 
 namespace roc = AliceO2::roc;
 

@@ -5,6 +5,8 @@ include(CMakeFindDependencyMacro)
 
 set(Common_CMAKE_DIR @Common_DIR@)
 set(InfoLogger_CMAKE_DIR @InfoLogger_ROOT@)
+set(LLA_CMAKE_DIR @LLA_ROOT@)
+set(ReadoutCard_CMAKE_DIR @ReadoutCard_ROOT@)
 
 #if(NOT APPLE)
 #  find_package(Python3 3.6 COMPONENTS Development)
@@ -20,6 +22,9 @@ set(InfoLogger_CMAKE_DIR @InfoLogger_ROOT@)
 
 find_dependency(Common CONFIG HINTS ${Common_CMAKE_DIR})
 find_dependency(InfoLogger CONFIG HINTS ${InfoLogger_CMAKE_DIR})
+find_dependency(LLA CONFIG HINTS ${LLA_CMAKE_DIR})
+find_dependency(ReadoutCard CONFIG HINTS ${ReadoutCard_CMAKE_DIR})
+find_dependency(Boost)
 
 # find package must be used as Common already looks for boost and set Boost_FOUND
 #find_package(Boost QUIET
@@ -30,7 +35,7 @@ find_dependency(InfoLogger CONFIG HINTS ${InfoLogger_CMAKE_DIR})
 #  REQUIRED
 #)
 
-if(NOT TARGET AliceO2::ALF)
+if(NOT TARGET o2::ALF)
   include("${ALF_CMAKE_DIR}/ALFTargets.cmake")
 endif()
 

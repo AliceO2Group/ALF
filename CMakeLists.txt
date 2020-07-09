@@ -3,6 +3,7 @@
 ####################################
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.5.2 FATAL_ERROR)
+set(BUILD_SHARED_LIBS ON)
 
 # Set cmake policy by version: https://cmake.org/cmake/help/latest/manual/cmake-policies.7.html
 if(${CMAKE_VERSION} VERSION_LESS 3.12)
@@ -49,6 +50,7 @@ endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
+find_package(Boost 1.56 REQUIRED)
 find_package(Common REQUIRED)
 find_package(InfoLogger REQUIRED)
 find_package(ReadoutCard REQUIRED)
@@ -60,14 +62,17 @@ find_package(LLA REQUIRED)
 ####################################
 
 add_library(ALF SHARED
-  src/AlfServer.cxx
-  src/DimServices/DimServices.cxx
-  src/DimServices/ServiceNames.cxx
   src/Ic.cxx
   src/Lla.cxx
   src/Sca.cxx
   src/Swt.cxx
   src/SwtWord.cxx
+)
+
+target_sources(ALF PRIVATE
+  src/AlfServer.cxx
+  src/DimServices/DimServices.cxx
+  src/DimServices/ServiceNames.cxx
 )
 
 target_include_directories(ALF
@@ -134,6 +139,7 @@ foreach(i RANGE ${count})
   target_link_libraries(${name}
     PRIVATE
       ALF
+      AliceO2::ReadoutCard
   )
 endforeach()
 
