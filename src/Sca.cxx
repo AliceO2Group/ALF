@@ -26,8 +26,10 @@
 #include "ReadoutCard/Cru.h"
 
 #include "Alf/Exception.h"
-#include "Logger.h"
 #include "Alf/Sca.h"
+
+#include "Logger.h"
+#include "Util.h"
 
 namespace sc_regs = AliceO2::roc::Cru::ScRegisters;
 
