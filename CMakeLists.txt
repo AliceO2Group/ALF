@@ -4,6 +4,7 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.5.2 FATAL_ERROR)
 set(BUILD_SHARED_LIBS ON)
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 # Set cmake policy by version: https://cmake.org/cmake/help/latest/manual/cmake-policies.7.html
 if(${CMAKE_VERSION} VERSION_LESS 3.12)
@@ -32,7 +33,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_INSTALL_LIBDIR lib)
 
 # Used only for debugging
-# set(CMAKE_BUILD_TYPE "Debug")
+set(CMAKE_BUILD_TYPE "Debug")
 
 # Set the default build type to "RelWithDebInfo"
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -54,8 +55,8 @@ find_package(Boost 1.56 REQUIRED)
 find_package(Common REQUIRED)
 find_package(InfoLogger REQUIRED)
 find_package(ReadoutCard REQUIRED)
-find_package(DIM REQUIRED)
 find_package(LLA REQUIRED)
+find_package(DIM REQUIRED)
 
 ####################################
 # Module, library and executable definition
@@ -83,13 +84,19 @@ target_include_directories(ALF
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
+set(LINK_LIBS
+    o2::LLA
+    AliceO2::ReadoutCard
+    AliceO2::Common
+    AliceO2::InfoLogger
+    Boost::boost
+)
+
 # Link targets
 target_link_libraries(ALF
   PUBLIC
-    AliceO2::Common
-    AliceO2::InfoLogger
-    AliceO2::ReadoutCard
-    o2::LLA
+    ${LINK_LIBS}
+  PRIVATE
     dim::dim
 )
 
@@ -139,7 +146,7 @@ foreach(i RANGE ${count})
   target_link_libraries(${name}
     PRIVATE
       ALF
-      AliceO2::ReadoutCard
+      dim::dim
   )
 endforeach()
 
