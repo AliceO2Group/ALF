@@ -20,10 +20,10 @@ set(ReadoutCard_CMAKE_DIR @ReadoutCard_ROOT@)
 #  endif()
 #endif()
 
-find_dependency(Common CONFIG HINTS ${Common_CMAKE_DIR})
-find_dependency(InfoLogger CONFIG HINTS ${InfoLogger_CMAKE_DIR})
 find_dependency(LLA CONFIG HINTS ${LLA_CMAKE_DIR})
 find_dependency(ReadoutCard CONFIG HINTS ${ReadoutCard_CMAKE_DIR})
+find_dependency(Common CONFIG HINTS ${Common_CMAKE_DIR})
+find_dependency(InfoLogger CONFIG HINTS ${InfoLogger_CMAKE_DIR})
 find_dependency(Boost)
 
 # find package must be used as Common already looks for boost and set Boost_FOUND
