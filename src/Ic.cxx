@@ -204,6 +204,15 @@ std::vector<std::pair<Ic::Operation, Ic::Data>> Ic::executeSequence(std::vector<
     mLlaSession->start();
   }
 
+  // force set the channel within the atomic part of the sequence
+  // to be changed as soon as FW provides set channel
+  try {
+    checkChannelSet();
+  } catch (const IcException& e) {
+    return { { Operation::Error, e.what() } };
+  }
+  setChannel(mLink.linkId);
+
   std::vector<std::pair<Ic::Operation, Ic::Data>> ret;
   for (const auto& it : ops) {
     Operation operation = it.first;
