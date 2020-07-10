@@ -189,6 +189,15 @@ std::vector<std::pair<Swt::Operation, Swt::Data>> Swt::executeSequence(std::vect
     mLlaSession->start();
   }
 
+  // force set the channel within the atomic part of the sequence
+  // to be changed as soon as FW provides set channel
+  try {
+    checkChannelSet();
+  } catch (const SwtException& e) {
+    return { { Operation::Error, e.what() } };
+  }
+  setChannel(mLink.linkId);
+
   std::vector<std::pair<Operation, Data>> ret;
 
   for (const auto& it : sequence) {
