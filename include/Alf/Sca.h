@@ -76,6 +76,9 @@ class Sca
   /// \throws o2::alf::ScaException if no SCA channel selected
   void checkChannelSet();
 
+  /// Executes an SC reset
+  void reset();
+
   /// Executes an SCA command
   /// \param commandData SCA command, data pair
   /// \param lock Boolean enabling implicit locking

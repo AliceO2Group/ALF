@@ -87,8 +87,6 @@ void Ic::init(const roc::Parameters::CardIdType& cardId, int linkId)
 
   mLlaSession = std::make_unique<LlaSession>("DDT", card.sequenceId);
 
-  reset();
-
   // Set CFG to 0x3 by default
   barWrite(ic_regs::IC_WR_CFG.index, 0x3);
 }
