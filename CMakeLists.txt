@@ -74,6 +74,7 @@ target_sources(ALF PRIVATE
   src/AlfServer.cxx
   src/DimServices/DimServices.cxx
   src/DimServices/ServiceNames.cxx
+  src/Logger.cxx
 )
 
 target_include_directories(ALF

@@ -18,7 +18,6 @@
 
 #include "Common/Program.h"
 #include "Alf/Alf.h"
-#include "Logger.h"
 #include "Util.h"
 
 namespace po = boost::program_options;
@@ -27,8 +26,6 @@ namespace o2
 {
 namespace alf
 {
-
-AliceO2::InfoLogger::InfoLogger logger;
 
 class AlfLibClient : public AliceO2::Common::Program
 {

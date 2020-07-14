@@ -92,8 +92,8 @@ void StringRpcServer::rpcHandler()
     auto returnValue = mCallback(std::string(getString()));
     setDataString(makeSuccessString(returnValue), *this);
   } catch (const std::exception& e) {
-    getLogger() << AliceO2::InfoLogger::InfoLogger::Error << mServiceName << ": " << boost::diagnostic_information(e, true)
-                << endm;
+    Logger::get().log() << AliceO2::InfoLogger::InfoLogger::Error << mServiceName << ": " << boost::diagnostic_information(e, true)
+                        << endm;
     setDataString(makeFailureString(e.what()), *this);
   }
 }

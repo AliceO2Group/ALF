@@ -295,7 +295,7 @@ std::vector<std::pair<Sca::Operation, Sca::Data>> Sca::executeSequence(const std
       } else {
         meaningfulMessage = (boost::format("SCA_SEQUENCE UNKNOWN cardSequence=%d link=%d error='%s'") % mLink.cardSequence % mLink.linkId % e.what()).str();
       }
-      getErrorLogger() << meaningfulMessage << endm;
+      Logger::get().err() << meaningfulMessage << endm;
       ret.push_back({ Operation::Error, meaningfulMessage });
       break;
     }
@@ -321,7 +321,7 @@ std::string Sca::writeSequence(const std::vector<std::pair<Operation, Data>>& op
       resultBuffer << data << "\n"; // "[time]\n"
     } else if (operation == Operation::Error) {
       resultBuffer << data; // "[error_msg]"
-      getErrorLogger() << data << endm;
+      Logger::get().err() << data << endm;
       BOOST_THROW_EXCEPTION(ScaException() << ErrorInfo::Message(resultBuffer.str()));
       break;
     }
