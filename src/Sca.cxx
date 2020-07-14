@@ -46,9 +46,6 @@ Sca::Sca(AlfLink link)
       ScaException() << ErrorInfo::Message("Maximum link number exceeded"));
   }
 
-  barWrite(sc_regs::SC_RESET.index, 0x1);
-  barWrite(sc_regs::SC_RESET.index, 0x0);
-
   mLlaSession = std::make_unique<LlaSession>("DDT", link.cardSequence);
 }
 
@@ -75,9 +72,6 @@ void Sca::init(const roc::Parameters::CardIdType& cardId, int linkId)
     roc::CardType::Cru
   };
 
-  barWrite(sc_regs::SC_RESET.index, 0x1);
-  barWrite(sc_regs::SC_RESET.index, 0x0);
-
   mLlaSession = std::make_unique<LlaSession>("DDT", card.sequenceId);
 }
 
@@ -98,6 +92,12 @@ void Sca::checkChannelSet()
   if (channel != mLink.linkId) {
     setChannel(mLink.linkId);
   }
+}
+
+void Sca::reset()
+{
+  barWrite(sc_regs::SC_RESET.index, 0x1);
+  barWrite(sc_regs::SC_RESET.index, 0x0);
 }
 
 Sca::CommandData Sca::executeCommand(uint32_t command, uint32_t data, bool lock)

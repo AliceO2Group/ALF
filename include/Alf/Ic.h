@@ -78,6 +78,9 @@ class Ic
   /// \throws o2::alf::IcException if no IC channel selected
   void checkChannelSet();
 
+  /// Executes an SC reset
+  void reset();
+
   /// Performs an IC read
   /// \param address IC address to read from
   /// \return IC data requested
@@ -131,7 +134,6 @@ class Ic
 
  private:
   void init(const roc::Parameters::CardIdType& cardId, int linkId);
-  void reset();
   void barWrite(uint32_t offset, uint32_t data);
   uint32_t barRead(uint32_t index);
 

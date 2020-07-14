@@ -63,6 +63,7 @@ class AlfLibClient : public AliceO2::Common::Program
     if (mOptions.sca) {
       std::cout << "Running SCA test" << std::endl;
       auto sca = Sca(mOptions.cardId, mOptions.link);
+      sca.reset();
 
       std::cout << "Running simple SCA operation" << std::endl;
       try {
@@ -150,6 +151,7 @@ class AlfLibClient : public AliceO2::Common::Program
     if (mOptions.ic) {
       std::cout << "Running IC test" << std::endl;
       auto ic = Ic(mOptions.cardId, mOptions.link);
+      ic.reset();
 
       std::cout << "Running Simple IC operations" << std::endl;
       try {

@@ -74,9 +74,6 @@ class Swt
   /// \param linkId The link ID to set the channel to (optional).
   Swt(std::string cardId, int linkId = -1);
 
-  /// Resets the SWT channel selected
-  void reset();
-
   /// Sets the SWT channel
   /// \param gbtChannel The channel to set
   void setChannel(int gbtChannel);
@@ -84,6 +81,9 @@ class Swt
   /// Checks if an SWT channel has been selected
   /// \throws o2::alf::SwtException if no SWT channel selected
   void checkChannelSet();
+
+  /// Executes an SC reset
+  void reset();
 
   /// Writes an SWT word
   /// \param swtWord The SWT word to write
