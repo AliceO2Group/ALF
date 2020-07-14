@@ -44,7 +44,6 @@ namespace sc_regs = AliceO2::roc::Cru::ScRegisters;
 
 Swt::Swt(AlfLink link) : mBar2(link.bar), mLink(link)
 {
-  setChannel(mLink.linkId); // TODO: Decouple this from the class?
   mLlaSession = std::make_unique<LlaSession>("DDT", link.cardSequence);
 }
 
@@ -73,10 +72,6 @@ void Swt::init(const roc::Parameters::CardIdType& cardId, int linkId)
   };
 
   mLlaSession = std::make_unique<LlaSession>("DDT", card.sequenceId);
-
-  if (mLink.linkId != -1) {
-    setChannel(mLink.linkId);
-  }
 }
 
 void Swt::setChannel(int gbtChannel)
@@ -96,6 +91,12 @@ void Swt::checkChannelSet()
 {
   if (mLink.linkId == -1) {
     BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("No SWT channel selected"));
+  }
+
+  uint32_t channel = (barRead(sc_regs::SWT_MON.index) >> 8) & 0xff;
+
+  if (channel != mLink.linkId) {
+    setChannel(mLink.linkId);
   }
 }
 
@@ -189,14 +190,11 @@ std::vector<std::pair<Swt::Operation, Swt::Data>> Swt::executeSequence(std::vect
     mLlaSession->start();
   }
 
-  // force set the channel within the atomic part of the sequence
-  // to be changed as soon as FW provides set channel
   try {
     checkChannelSet();
   } catch (const SwtException& e) {
     return { { Operation::Error, e.what() } };
   }
-  setChannel(mLink.linkId);
 
   std::vector<std::pair<Operation, Data>> ret;
 

@@ -54,7 +54,6 @@ static constexpr roc::Register IC_RD_DATA(IC_BASE.address + 0x30);
 
 Ic::Ic(AlfLink link) : mBar2(link.bar), mLink(link)
 {
-  setChannel(mLink.linkId);
   reset();
 
   // Set CFG to 0x3 by default
@@ -88,9 +87,6 @@ void Ic::init(const roc::Parameters::CardIdType& cardId, int linkId)
 
   mLlaSession = std::make_unique<LlaSession>("DDT", card.sequenceId);
 
-  if (mLink.linkId != -1) {
-    setChannel(mLink.linkId);
-  }
   reset();
 
   // Set CFG to 0x3 by default
@@ -107,6 +103,12 @@ void Ic::checkChannelSet()
 {
   if (mLink.linkId == -1) {
     BOOST_THROW_EXCEPTION(IcException() << ErrorInfo::Message("No IC channel selected"));
+  }
+
+  uint32_t channel = (barRead(sc_regs::SWT_MON.index) >> 8) & 0xff;
+
+  if (channel != mLink.linkId) {
+    setChannel(mLink.linkId);
   }
 }
 
@@ -211,7 +213,6 @@ std::vector<std::pair<Ic::Operation, Ic::Data>> Ic::executeSequence(std::vector<
   } catch (const IcException& e) {
     return { { Operation::Error, e.what() } };
   }
-  setChannel(mLink.linkId);
 
   std::vector<std::pair<Ic::Operation, Ic::Data>> ret;
   for (const auto& it : ops) {
