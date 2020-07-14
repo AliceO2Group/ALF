@@ -54,8 +54,6 @@ static constexpr roc::Register IC_RD_DATA(IC_BASE.address + 0x30);
 
 Ic::Ic(AlfLink link) : mBar2(link.bar), mLink(link)
 {
-  mLlaSession = std::make_unique<LlaSession>("DDT", link.cardSequence);
-
   setChannel(mLink.linkId);
   reset();
 
