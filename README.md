@@ -26,7 +26,14 @@ o2-alf-client is the binary of an ALF client used solely for testing purposes. O
 o2-alf-client --dim-dns-node thedimdns.cern.ch --alf-id thealfserver --card-sequence 0 --link 4
 `
 
-## Services
+### o2-alf-lib-client
+o2-alf-lib-client is the binary of an ALF SC library client used solely for testing purposes. It expects parameters for the SC modules to test, the card and link ID (run with `--help` for the different options).
+
+`
+o2-alf-lib-client --card-id=#1 --link-id=0 --swt
+`
+
+## DIM Services
 
 Service names are identified by the server's hostname, the card's sequence number (as reported during ALF's startup) and the link, as follows:
 
@@ -188,3 +195,64 @@ The services are DIM RPC services. Every RPC is called with a string and expects
 * Example:
   * DIM input `0xf00d\n0x0000f00d, 0x0000beef\n0x0000f00d`
   * DIM output `0xcafe\n0\n0xbeef\n`
+
+## Slow Control library
+ALF can also be used as a C++ library to access the Slow Control interface of the CRU. The three available interfaces (IC, SCA & SWT) can be accessed through single operations, or sequences of operations.
+
+For each Slow Control (SC) class a handle can be acquired by passing the card ID as an `std::string` argument and, optionally, the SC channel to use as an `int`. Constructors have no side-effects; an SC reset would need to be performed manually before starting operations (e.g. `swt.reset()`).
+
+### Single operations
+Depending on the type, an SC class offers a different interface for single operation execution. `SWT` and `IC` offer `read()` and `write()` standalone operations, while `SCA` only offers `executeCommand()`.
+
+All the above offer **no implicit locking** and should be manually locked through the use of the [LLA](https://github.com/AliceO2Group/LLA) library, if needed. The recommended way to execute atomic operations in one go is the one described in the following paragraph.
+
+### Sequences of operations
+All SC classes offer a function to execute a sequence of their respective operations. This function receives an `std::vector`, consisting of an `std::pair` made up of the compatible SC operation and SC data, as these are defined in their headers.
+
+For example, `SWT` offers `Read, Write and Reset` operations which expect a `TimeOut`, an `SwtWord` and no argument, respectively.
+
+```
+typedef int TimeOut;
+
+/// Typedef for the Data type of an SWT sequence operation.
+/// Variant of TimeOut for reads, SwtWord for writes, std::string for Errors
+typedef boost::variant<boost::blank, TimeOut, SwtWord, std::string> Data;
+
+/// Enum for the different SWT operation types
+enum Operation { Read,
+                 Write,
+                 Reset,
+                 Error };
+                 
+std::vector<std::pair<Operation, Data>> executeSequence(const std::vector<std::pair<Operation, Data>>& operations, bool lock = false);
+```
+
+The above function also optionally accepts a boolean, enabling atomic execution. This should not be used with an explicit LLA session started, as it will lead to a deadlock due to the lack of communication between the ALF library and the aforementioned LLA session instance.
+
+
+More details and examples on the API can be found in the doxygen docs in the header files or in [this](apps/AlfLibClient.cxx) code example.
+
+### Using ALF as a library
+
+To use ALF as a library the "Alf/Alf.h" convenience header may be used, as seen in [this](src/example.cxx) example. To build, it is necessary to load the alisw environment (`aliswmod enter ALF`) and run the following g++ command:
+
+```
+g++ -Wall \
+  -I ../sw/slc7_x86-64/ALF/latest/include \
+  -I ../sw/slc7_x86-64/Common-O2/latest/include/ \
+  -I ../sw/slc7_x86-64/LLA/latest/include \
+  -I ../sw/slc7_x86-64/ReadoutCard/latest/include \
+  -I ../sw/slc7_x86-64/libInfoLogger/latest/include/ \
+  -I ../sw/slc7_x86-64/boost/latest/include/ \
+  -lO2Alf \
+  -lCommon \
+  -lO2Lla \
+  -lReadoutCard \
+  -lInfoLogger \
+  -L ../sw/slc7_x86-64/ALF/latest/lib \
+  -L ../sw/slc7_x86-64/Common-O2/latest/lib \
+  -L ../sw/slc7_x86-64/LLA/latest/lib \
+  -L ../sw/slc7_x86-64/ReadoutCard/latest/lib \
+  -L ../sw/slc7_x86-64/libInfoLogger/latest/lib \
+  example.cxx -o example
+```
