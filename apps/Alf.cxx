@@ -36,8 +36,6 @@ namespace o2
 namespace alf
 {
 
-AliceO2::InfoLogger::InfoLogger logger;
-
 class Alf : public AliceO2::Common::Program
 {
  public:
@@ -64,14 +62,14 @@ class Alf : public AliceO2::Common::Program
   {
     //verbose = isVerbose();
 
-    getLogger() << "ALF server initializations..." << endm;
+    Logger::get().log() << "ALF server initializations..." << endm;
 
     if (mOptions.dimDnsNode != "") {
-      getLogger() << "Setting DIM_DNS_NODE from argument." << endm;
-      getLogger() << "DIM_DNS_NODE=" << mOptions.dimDnsNode << endm;
+      Logger::get().log() << "Setting DIM_DNS_NODE from argument." << endm;
+      Logger::get().log() << "DIM_DNS_NODE=" << mOptions.dimDnsNode << endm;
     } else if (const char* dimDnsNode = std::getenv("DIM_DNS_NODE")) {
-      getLogger() << "Picked up DIM_DMS_NODE from the environment." << endm;
-      getLogger() << "DIM_DNS_NODE=" << dimDnsNode << endm;
+      Logger::get().log() << "Picked up DIM_DMS_NODE from the environment." << endm;
+      Logger::get().log() << "DIM_DNS_NODE=" << dimDnsNode << endm;
       mOptions.dimDnsNode = dimDnsNode;
     } else {
       BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("DIM_DNS_NODE env variable not set, and no relevant argument provided.")); // InfoLogger and errors?
@@ -80,7 +78,7 @@ class Alf : public AliceO2::Common::Program
     std::string alfId = ip::host_name();
     boost::to_upper(alfId);
 
-    getLogger() << "Starting the DIM Server" << endm;
+    Logger::get().log() << "Starting the DIM Server" << endm;
     DimServer::setDnsNode(mOptions.dimDnsNode.c_str(), 2505);
     DimServer::start(("ALF_" + alfId).c_str());
 
@@ -98,7 +96,7 @@ class Alf : public AliceO2::Common::Program
         try {
           roc::FirmwareChecker().checkFirmwareCompatibility(card.pciAddress);
         } catch (const roc::Exception& e) {
-          getWarningLogger() << boost::diagnostic_information(e) << endm;
+          Logger::get().warn() << boost::diagnostic_information(e) << endm;
           continue;
         }
       }
@@ -107,25 +105,25 @@ class Alf : public AliceO2::Common::Program
 
       if (card.cardType == roc::CardType::Cru) {
 
-        getLogger() << "CRU #" << cardSequence << " : " << card.pciAddress << endm;
+        Logger::get().log() << "CRU #" << cardSequence << " : " << card.pciAddress << endm;
         bar = roc::ChannelFactory().getBar(card.pciAddress, 2);
         for (int linkId = 0; linkId < CRU_NUM_LINKS; linkId++) {
           links.push_back({ alfId, cardSequence, linkId, bar, roc::CardType::Cru });
         }
 
       } else if (card.cardType == roc::CardType::Crorc) {
-        getLogger() << "CRORC #" << cardSequence << " : " << card.pciAddress << endm;
+        Logger::get().log() << "CRORC #" << cardSequence << " : " << card.pciAddress << endm;
         for (int linkId = 0; linkId < CRORC_NUM_LINKS; linkId++) {
           bar = roc::ChannelFactory().getBar(card.pciAddress, linkId);
           links.push_back({ alfId, cardSequence, linkId, bar, roc::CardType::Crorc });
         }
       } else {
-        getLogger() << AliceO2::InfoLogger::InfoLogger::Severity::Warning << card.pciAddress << " is not a CRU or a CRORC. Skipping..." << endm;
+        Logger::get().log() << AliceO2::InfoLogger::InfoLogger::Severity::Warning << card.pciAddress << " is not a CRU or a CRORC. Skipping..." << endm;
       }
 
       if (isVerbose()) {
         for (auto const& link : links) {
-          getLogger() << link.alfId << " " << link.cardSequence << " " << link.linkId << endm;
+          Logger::get().log() << link.alfId << " " << link.cardSequence << " " << link.linkId << endm;
         }
       }
 

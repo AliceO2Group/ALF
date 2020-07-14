@@ -142,7 +142,7 @@ std::vector<SwtWord> Swt::read(SwtWord::Size wordSize, TimeOut msTimeOut)
         BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("Timed out: not enough words in SWT READ FIFO"));
       }
 
-      getWarningLogger() << "SWT word sequence duplicate" << endm;
+      Logger::get().warn() << "SWT word sequence duplicate" << endm;
 
       mWordSequence = tempWord.getSequence(); //roll mWordSequence back by one
       numWords++;                             //will have to read one more time
@@ -239,7 +239,7 @@ std::vector<std::pair<Swt::Operation, Swt::Data>> Swt::executeSequence(std::vect
       } else {
         meaningfulMessage = (boost::format("SWT_SEQUENCE UNKNOWN cardSequence=%d link=%d,  error='%s'") % mLink.cardSequence % mLink.linkId % e.what()).str();
       }
-      getErrorLogger() << meaningfulMessage << endm;
+      Logger::get().err() << meaningfulMessage << endm;
 
       ret.push_back({ Operation::Error, meaningfulMessage });
       break;
@@ -268,7 +268,7 @@ std::string Swt::writeSequence(std::vector<std::pair<Operation, Data>> sequence,
       /* DO NOTHING */
     } else if (operation == Operation::Error) {
       resultBuffer << data;
-      getErrorLogger() << data << endm;
+      Logger::get().err() << data << endm;
       BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message(resultBuffer.str()));
       break;
     }

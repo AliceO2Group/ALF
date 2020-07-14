@@ -13,34 +13,33 @@
 ///
 /// \author Kostas Alexopoulos (kostas.alexopoulos@cern.ch)
 
-#ifndef O2_ALF_LOGGER_H_
-#define O2_ALF_LOGGER_H_
-
-#include "InfoLogger/InfoLogger.hxx"
+#include "Logger.h"
 
 namespace o2
 {
 namespace alf
 {
 
-constexpr auto endm = AliceO2::InfoLogger::InfoLogger::endm;
-
-class Logger
+Logger& Logger::get()
 {
- public:
-  static Logger& get();
-  AliceO2::InfoLogger::InfoLogger& log();
-  AliceO2::InfoLogger::InfoLogger& warn();
-  AliceO2::InfoLogger::InfoLogger& err();
+  static Logger instance;
+  return instance;
+}
 
- private:
-  Logger(){};                                // private, cannot be called
-  Logger(Logger const&) = delete;            // copy constructor private
-  Logger& operator=(Logger const&) = delete; // assignment operator private
-  AliceO2::InfoLogger::InfoLogger mLogger;
-};
+AliceO2::InfoLogger::InfoLogger& Logger::log()
+{
+  return mLogger;
+}
+
+AliceO2::InfoLogger::InfoLogger& Logger::warn()
+{
+  return mLogger << AliceO2::InfoLogger::InfoLogger::Severity::Warning;
+}
+
+AliceO2::InfoLogger::InfoLogger& Logger::err()
+{
+  return mLogger << AliceO2::InfoLogger::InfoLogger::Severity::Error;
+}
 
 } // namespace alf
 } // namespace o2
-
-#endif // O2_ALF_LOGGER_H_

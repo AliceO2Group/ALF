@@ -33,8 +33,6 @@ namespace o2
 namespace alf
 {
 
-AliceO2::InfoLogger::InfoLogger logger;
-
 class AlfClient : public AliceO2::Common::Program
 {
  public:
@@ -93,19 +91,19 @@ class AlfClient : public AliceO2::Common::Program
   virtual void run(const po::variables_map&) override
   {
     if (mOptions.alfId == "") {
-      getErrorLogger() << "Parameter alf-id is required." << endm;
+      Logger::get().err() << "Parameter alf-id is required." << endm;
       return;
     }
 
-    getLogger() << "ALF client initializations..." << endm;
+    Logger::get().log() << "ALF client initializations..." << endm;
 
     if (mOptions.dimDnsNode != "") {
-      getLogger() << "Setting DIM_DNS_NODE from argument." << endm;
-      getLogger() << "DIM_DNS_NODE=" << mOptions.dimDnsNode << endm;
+      Logger::get().log() << "Setting DIM_DNS_NODE from argument." << endm;
+      Logger::get().log() << "DIM_DNS_NODE=" << mOptions.dimDnsNode << endm;
       setenv("DIM_DNS_NODE", mOptions.dimDnsNode.c_str(), true);
     } else if (const char* dimDnsNode = std::getenv("DIM_DNS_NODE")) {
-      getLogger() << "Picked up DIM_DMS_NODE from the environment." << endm;
-      getLogger() << "DIM_DNS_NODE=" << dimDnsNode << endm;
+      Logger::get().log() << "Picked up DIM_DMS_NODE from the environment." << endm;
+      Logger::get().log() << "DIM_DNS_NODE=" << dimDnsNode << endm;
       mOptions.dimDnsNode = dimDnsNode;
     } else {
       BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("DIM_DNS_NODE env variable not set, and no relevant argument provided.")); // InfoLogger and errors?
@@ -114,7 +112,7 @@ class AlfClient : public AliceO2::Common::Program
     std::string alfId = mOptions.alfId;
     boost::to_upper(alfId);
 
-    getLogger() << "Starting the DIM Client using ALF ID=" << alfId << ", card #=" << mOptions.cardSequence << " and link=" << mOptions.link << endm;
+    Logger::get().log() << "Starting the DIM Client using ALF ID=" << alfId << ", card #=" << mOptions.cardSequence << " and link=" << mOptions.link << endm;
 
     AlfLink link = AlfLink{ alfId, mOptions.cardSequence, mOptions.link, nullptr, roc::CardType::Cru };
 
@@ -128,7 +126,7 @@ class AlfClient : public AliceO2::Common::Program
                                              std::make_pair("0x1f0", ""),
                                              std::make_pair("0x1f0", "0x00080000"),
                                              std::make_pair("0x1f0", "") });
-      getLogger() << "[REGISTER SEQUENCE] output: " << regOut << endm;
+      Logger::get().log() << "[REGISTER SEQUENCE] output: " << regOut << endm;
 
       return;
     }
@@ -151,7 +149,7 @@ class AlfClient : public AliceO2::Common::Program
     uint32_t rAddress = 0x00f0005c;
     registerWriteRpc.writeRegister(wAddress, wValue);
     uint32_t rValue = registerReadRpc.readRegister(rAddress);
-    getLogger() << "[REGISTER] Wrote: " << Util::formatValue(wValue) << " Read: " << Util::formatValue(rValue) << endm;
+    Logger::get().log() << "[REGISTER] Wrote: " << Util::formatValue(wValue) << " Read: " << Util::formatValue(rValue) << endm;
 
     if (mOptions.swt) {
       auto swtOut = swtSequence.write({ std::make_pair("0x0000000000000000000", "write"),
@@ -163,7 +161,7 @@ class AlfClient : public AliceO2::Common::Program
                                         std::make_pair("1", "read"),
                                         std::make_pair("0xbadc0ffee", "write"),
                                         std::make_pair("4", "read") });
-      getLogger() << "[SWT_SEQUENCE] output: " << swtOut << endm;
+      Logger::get().log() << "[SWT_SEQUENCE] output: " << swtOut << endm;
     }
 
     if (mOptions.swtStress) {
@@ -179,8 +177,8 @@ class AlfClient : public AliceO2::Common::Program
         swtStressPairs.push_back(std::make_pair("1000", "read"));
 
         auto swtStressOut = swtSequence.write(swtStressPairs);
-        getLogger() << "[SWT stress] cycle  " << cycle << endm;
-        //getLogger() << "[SWT stress] output:  " << swtStressOut << endm;
+        Logger::get().log() << "[SWT stress] cycle  " << cycle << endm;
+        Logger::get().log() << "[SWT stress] output:  " << swtStressOut << endm;
         std::cout << "[SWT stress] output:  " << swtStressOut << std::endl; // Infologger gets filled up here...
       }
     }
@@ -194,7 +192,7 @@ class AlfClient : public AliceO2::Common::Program
                                         std::make_pair("0x0B9601DE", "0x50000000"),
                                         std::make_pair("0x0B970471", "0x50000000"),
                                         std::make_pair("0x0B980461", "0x50000000") });
-      getLogger() << "[SCA_SEQUENCE] output: " << scaOut << endm;
+      Logger::get().log() << "[SCA_SEQUENCE] output: " << scaOut << endm;
     }
 
     if (mOptions.ic) {
@@ -206,13 +204,13 @@ class AlfClient : public AliceO2::Common::Program
         std::make_pair("0x56,0xff", "write"),
         std::make_pair("0x56", "read"),
       });
-      getLogger() << "[IC_SEQUENCE] output: " << icOut << endm;
+      Logger::get().log() << "[IC_SEQUENCE] output: " << icOut << endm;
 
       icGbtI2cWriteRpc.write(0x3);
     }
 
     if (mOptions.patternPlayer) {
-      getLogger() << "Running the pattern player" << endm;
+      Logger::get().log() << "Running the pattern player" << endm;
       auto ppOut = patternPlayerRpc.play({
         "0x23456789abcdef123456",
         "0x5678",
@@ -228,11 +226,11 @@ class AlfClient : public AliceO2::Common::Program
         "false",
         //"0xdeadbeef" // Uncomment to test more parameters than expected
       });
-      getLogger() << "Pairs test return: " << ppOut << endm;
+      Logger::get().log() << "Pairs test return: " << ppOut << endm;
     }
 
     if (mOptions.lla) {
-      getLogger() << "Running the lla" << endm;
+      Logger::get().log() << "Running the lla" << endm;
       const auto start = std::chrono::steady_clock::now();
       auto timeExceeded = [&]() { return ((std::chrono::steady_clock::now() - start) > std::chrono::milliseconds(4100)); };
 
@@ -249,7 +247,7 @@ class AlfClient : public AliceO2::Common::Program
       }
     }
 
-    getLogger() << "See ya!" << endm;
+    Logger::get().log() << "See ya!" << endm;
   }
 
  private:
