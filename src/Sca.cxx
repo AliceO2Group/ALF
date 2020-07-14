@@ -48,6 +48,8 @@ Sca::Sca(AlfLink link)
 
   barWrite(sc_regs::SC_RESET.index, 0x1);
   barWrite(sc_regs::SC_RESET.index, 0x0);
+
+  mLlaSession = std::make_unique<LlaSession>("DDT", link.cardSequence);
 }
 
 Sca::Sca(const roc::Parameters::CardIdType& cardId, int linkId)

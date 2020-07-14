@@ -24,12 +24,15 @@ LlaSession::LlaSession(std::string sessionName, int cardId)
   : mSessionName(sessionName),
     mCardId(cardId)
 {
-  mParams = lla::SessionParameters::makeParameters(mSessionName, roc::PciSequenceNumber(mCardId));
-  mSession = std::make_unique<lla::Session>(mParams);
 }
 
 void LlaSession::start()
 {
+  if (!mSession) {
+    mParams = lla::SessionParameters::makeParameters(mSessionName, roc::PciSequenceNumber(mCardId));
+    mSession = std::make_unique<lla::Session>(mParams);
+  }
+
   if (!mSession->isStarted()) {
     if (!mSession->start()) {
       BOOST_THROW_EXCEPTION(lla::LlaException()
