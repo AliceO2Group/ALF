@@ -45,6 +45,7 @@ namespace sc_regs = AliceO2::roc::Cru::ScRegisters;
 Swt::Swt(AlfLink link) : mBar2(link.bar), mLink(link)
 {
   setChannel(mLink.linkId); // TODO: Decouple this from the class?
+  mLlaSession = std::make_unique<LlaSession>("DDT", link.cardSequence);
 }
 
 Swt::Swt(const roc::Parameters::CardIdType& cardId, int linkId)

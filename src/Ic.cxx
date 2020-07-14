@@ -59,6 +59,8 @@ Ic::Ic(AlfLink link) : mBar2(link.bar), mLink(link)
 
   // Set CFG to 0x3 by default
   barWrite(ic_regs::IC_WR_CFG.index, 0x3);
+
+  mLlaSession = std::make_unique<LlaSession>("DDT", link.cardSequence);
 }
 
 Ic::Ic(const roc::Parameters::CardIdType& cardId, int linkId)
