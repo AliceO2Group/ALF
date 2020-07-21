@@ -234,25 +234,25 @@ More details and examples on the API can be found in the doxygen docs in the hea
 
 ### Using ALF as a library
 
-To use ALF as a library the "Alf/Alf.h" convenience header may be used, as seen in [this](src/example.cxx) example. To build, it is necessary to load the alisw environment (`aliswmod enter ALF`) and run the following g++ command:
+To use ALF as a library the "Alf/Alf.h" convenience header may be used, as seen in [this](src/example.cxx) example. To build, it is necessary to load the alisw environment (`aliswmod enter ALF`) and run the following g++ command. Make sure to adjust the versions according to `aliswmod list` output, when the environment is loaded.
 
 ```
 g++ -Wall \
-  -I ../sw/slc7_x86-64/ALF/latest/include \
-  -I ../sw/slc7_x86-64/Common-O2/latest/include/ \
-  -I ../sw/slc7_x86-64/LLA/latest/include \
-  -I ../sw/slc7_x86-64/ReadoutCard/latest/include \
-  -I ../sw/slc7_x86-64/libInfoLogger/latest/include/ \
-  -I ../sw/slc7_x86-64/boost/latest/include/ \
+  -I /opt/alisw/el7/ALF/v0.7.0-1/include \
+  -I /opt/alisw/el7/Common-O2/v1.4.9-27/include/ \
+  -I /opt/alisw/el7/LLA/v0.1.0-1/include \
+  -I /opt/alisw/el7/ReadoutCard/v0.21.3-1/include \
+  -I /opt/alisw/el7/libInfoLogger/v1.3.9-28/include/ \
+  -I /opt/alisw/el7/boost/v1.72.0-alice1-36/include/ \
   -lO2Alf \
   -lCommon \
   -lO2Lla \
-  -lReadoutCard \
   -lInfoLogger \
-  -L ../sw/slc7_x86-64/ALF/latest/lib \
-  -L ../sw/slc7_x86-64/Common-O2/latest/lib \
-  -L ../sw/slc7_x86-64/LLA/latest/lib \
-  -L ../sw/slc7_x86-64/ReadoutCard/latest/lib \
-  -L ../sw/slc7_x86-64/libInfoLogger/latest/lib \
-  example.cxx -o example
+  -lReadoutCard \
+  -L /opt/alisw/el7/ALF/v0.7.0-1/lib \
+  -L /opt/alisw/el7/Common-O2/v1.4.9-27/lib \
+  -L /opt/alisw/el7/LLA/v0.1.0-1/lib \
+  -L /opt/alisw/el7/libInfoLogger/v1.3.9-28/lib \
+  -L /opt/alisw/el7/ReadoutCard/v0.21.3-1/lib \
+  alf-lib-example.cxx -o ale
 ```
