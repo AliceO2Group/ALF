@@ -93,7 +93,7 @@ void Swt::checkChannelSet()
     BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("No SWT channel selected"));
   }
 
-  uint32_t channel = (barRead(sc_regs::SWT_MON.index) >> 8) & 0xff;
+  int channel = (barRead(sc_regs::SWT_MON.index) >> 8) & 0xff;
 
   if (channel != mLink.linkId) {
     setChannel(mLink.linkId);

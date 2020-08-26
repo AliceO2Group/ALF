@@ -87,7 +87,7 @@ void Sca::checkChannelSet()
     BOOST_THROW_EXCEPTION(ScaException() << ErrorInfo::Message("No SCA channel selected"));
   }
 
-  uint32_t channel = (barRead(sc_regs::SWT_MON.index) >> 8) & 0xff;
+  int channel = (barRead(sc_regs::SWT_MON.index) >> 8) & 0xff;
 
   if (channel != mLink.linkId) {
     setChannel(mLink.linkId);
