@@ -47,7 +47,7 @@ class Ic
  public:
   /// Struct holding the IC address and data pair; useful to AlfServer
   struct IcData {
-    uint32_t address;
+    uint32_t address = 0x0;
     uint32_t data = 0x0;
   };
 
@@ -115,7 +115,8 @@ class Ic
   /// Enum for the different IC operation types
   enum Operation { Read,
                    Write,
-                   Error };
+                   Error,
+                   Lock };
 
   /// Executes an IC sequence
   /// \param ops A vector of Data and Operations pairs

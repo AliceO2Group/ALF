@@ -58,7 +58,8 @@ class Swt
   enum Operation { Read,
                    Write,
                    Reset,
-                   Error };
+                   Error,
+                   Lock };
 
   /// Internal constructor for the ALF server
   /// \param link AlfLink holding useful information coming from the AlfServer class
