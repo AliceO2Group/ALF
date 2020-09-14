@@ -84,7 +84,14 @@ std::string AlfServer::scaBlobWrite(const std::string& parameter, AlfLink link)
   std::vector<std::string> stringPairs = Util::split(parameter, argumentSeparator());
   std::vector<std::pair<Sca::Operation, Sca::Data>> scaPairs = parseStringToScaPairs(stringPairs);
   Sca sca = Sca(link);
-  return sca.writeSequence(scaPairs);
+
+  bool lock = false;
+  // Check if the operation should be locked
+  if (scaPairs[0].first == Sca::Operation::Lock) {
+    scaPairs.erase(scaPairs.begin());
+    lock = true;
+  }
+  return sca.writeSequence(scaPairs, lock);
 }
 
 std::string AlfServer::swtBlobWrite(const std::string& parameter, AlfLink link)
@@ -93,7 +100,14 @@ std::string AlfServer::swtBlobWrite(const std::string& parameter, AlfLink link)
   std::vector<std::string> stringPairs = Util::split(parameter, argumentSeparator());
   std::vector<std::pair<Swt::Operation, Swt::Data>> swtPairs = parseStringToSwtPairs(stringPairs);
   Swt swt = Swt(link);
-  return swt.writeSequence(swtPairs);
+
+  bool lock = false;
+  // Check if the operation should be locked
+  if (swtPairs[0].first == Swt::Operation::Lock) {
+    swtPairs.erase(swtPairs.begin());
+    lock = true;
+  }
+  return swt.writeSequence(swtPairs, lock);
 }
 
 std::string AlfServer::icBlobWrite(const std::string& parameter, AlfLink link)
@@ -102,7 +116,14 @@ std::string AlfServer::icBlobWrite(const std::string& parameter, AlfLink link)
   std::vector<std::string> stringPairs = Util::split(parameter, argumentSeparator());
   std::vector<std::pair<Ic::Operation, Ic::Data>> icPairs = parseStringToIcPairs(stringPairs);
   Ic ic = Ic(link);
-  return ic.writeSequence(icPairs);
+
+  bool lock = false;
+  // Check if the operation should be locked
+  if (icPairs[0].first == Ic::Operation::Lock) {
+    icPairs.erase(icPairs.begin());
+    lock = true;
+  }
+  return ic.writeSequence(icPairs, lock);
 }
 
 std::string AlfServer::icGbtI2cWrite(const std::string& parameter, AlfLink link)
@@ -249,16 +270,27 @@ std::vector<uint32_t> AlfServer::stringToRegisterPair(const std::string stringPa
 std::pair<Sca::Operation, Sca::Data> AlfServer::stringToScaPair(const std::string stringPair)
 {
   std::vector<std::string> scaPair = Util::split(stringPair, pairSeparator());
-  if (scaPair.size() != 2) {
-    BOOST_THROW_EXCEPTION(
-      AlfException() << ErrorInfo::Message("SCA command-data pair not formatted correctly"));
-  }
 
   Sca::Data data;
   Sca::Operation operation;
 
-  if (scaPair[scaPair.size() - 1] == "wait") {
+  if (scaPair.size() < 1 || scaPair.size() > 2) {
+    BOOST_THROW_EXCEPTION(
+      AlfException() << ErrorInfo::Message("SCA command-data pair not formatted correctly"));
+  }
+
+  if (scaPair[scaPair.size() - 1] == "lock") {
+    operation = Sca::Operation::Lock;
+    if (scaPair.size() != 1) {
+      BOOST_THROW_EXCEPTION(
+        AlfException() << ErrorInfo::Message("Too many arguments for LOCK operation"));
+    }
+  } else if (scaPair[scaPair.size() - 1] == "wait") {
     operation = Sca::Operation::Wait;
+    if (scaPair.size() != 2) {
+      BOOST_THROW_EXCEPTION(
+        AlfException() << ErrorInfo::Message("Too few arguments for WAIT operation"));
+    }
     try {
       data = std::stoi(scaPair[0]);
     } catch (const std::exception& e) {
@@ -266,6 +298,10 @@ std::pair<Sca::Operation, Sca::Data> AlfServer::stringToScaPair(const std::strin
     }
   } else { // regular sca command
     operation = Sca::Operation::Command;
+    if (scaPair.size() != 2) {
+      BOOST_THROW_EXCEPTION(
+        AlfException() << ErrorInfo::Message("Too few arguments for SCA command-data pair"));
+    }
     Sca::CommandData commandData;
     commandData.command = Util::stringToHex(scaPair[0]);
     commandData.data = Util::stringToHex(scaPair[1]);
@@ -286,7 +322,13 @@ std::pair<Swt::Operation, Swt::Data> AlfServer::stringToSwtPair(const std::strin
 
   Swt::Operation operation;
 
-  if (swtPair[swtPair.size() - 1] == "read") {
+  if (swtPair[swtPair.size() - 1] == "lock") {
+    operation = Swt::Operation::Lock;
+    if (swtPair.size() == 2) {
+      BOOST_THROW_EXCEPTION(
+        AlfException() << ErrorInfo::Message("Too many arguments for LOCK operation"));
+    }
+  } else if (swtPair[swtPair.size() - 1] == "read") {
     operation = Swt::Operation::Read;
   } else if (swtPair[swtPair.size() - 1] == "write") {
     operation = Swt::Operation::Write;
@@ -342,15 +384,23 @@ std::pair<Swt::Operation, Swt::Data> AlfServer::stringToSwtPair(const std::strin
 std::pair<Ic::Operation, Ic::Data> AlfServer::stringToIcPair(const std::string stringPair)
 {
   std::vector<std::string> icPair = Util::split(stringPair, pairSeparator());
-  if (icPair.size() != 2 && icPair.size() != 3) {
+  if (icPair.size() < 1 || icPair.size() > 3) {
     BOOST_THROW_EXCEPTION(
       AlfException() << ErrorInfo::Message("IC pair not formatted correctly"));
   }
 
   Ic::Operation icOperation;
+  Ic::IcData icData;
 
   // Parse IC operation
-  if (icPair[icPair.size() - 1] == "read") {
+  if (icPair[icPair.size() - 1] == "lock") {
+    icOperation = Ic::Operation::Lock;
+    if (icPair.size() > 1) {
+      BOOST_THROW_EXCEPTION(
+        AlfException() << ErrorInfo::Message("Too many arguments for LOCK operation"));
+    }
+    return std::make_pair(icOperation, icData); // no data to parse, return immediately
+  } else if (icPair[icPair.size() - 1] == "read") {
     icOperation = Ic::Operation::Read;
     if (icPair.size() == 3) {
       BOOST_THROW_EXCEPTION(
@@ -397,8 +447,6 @@ std::pair<Ic::Operation, Ic::Data> AlfServer::stringToIcPair(const std::string s
       BOOST_THROW_EXCEPTION(std::out_of_range("Data parameter does not fit in 8-bit unsigned int"));
     }
   }
-
-  Ic::IcData icData;
 
   std::stringstream ss;
   ss << std::setw(4) << std::setfill('0') << hexAddress;

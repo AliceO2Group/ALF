@@ -80,11 +80,14 @@ The services are DIM RPC services. Every RPC is called with a string and expects
     * Operations may be:
     * An SCA command and data pair (e.g. `0x0000f00d,0x0000cafe`)
     * A wait operation (e.g. `30,wait`)
+    * An instruction to execute the sequence atomically (`lock` - needs to lead the sequence)
 * Returns:
   * Sequence of SCA command and SCA read pairs, and wait confirmations
+  * No entries for `lock` directives
   
 * Example:
   * DIM input: `0x00000010,0x00000011\n3\n0x000000020,0x00000021`
+  * DIM input (atomic): `lock\n0x00000010,0x00000011\n3\n0x000000020,0x00000021`
   * DIM output: `0x00000010,0x00000111\n3\n0x00000020,0x00000221\n`
 
 ##### SWT_SEQUENCE
@@ -94,14 +97,17 @@ The services are DIM RPC services. Every RPC is called with a string and expects
     * `write` with SWT prefix (e.g. `0x0000f00d,write`)
     * `reset` (without SWT word)
     * `read` with optional TimeOut prefix (e.g. `2,read`)
+    * `lock` which instructs ALF to execute the sequence atomically (needs to lead the sequence)
 * Returns:
   * Sequence of SWT output as follows:
     * `write` always retuns `0`
     * `read` returns the SWT words present in the CRU SWT FIFO
     * `reset` returns nothing
+    * `lock` returns nothing
     
 * Example:
   * DIM input `reset\n0x0000000000badc0ffee,write\nread\n0xbadf00d,write\n4,read`
+  * DIM input (atomic) `lock\nreset\n0x0000000000badc0ffee,write\nread\n0xbadf00d,write\n4,read`
   * DIM output `0\n0x0000000000badc0ffee\n0\n0x000000000000badf00d\n`
 
 ##### IC_SEQUENCE
@@ -111,13 +117,16 @@ The services are DIM RPC services. Every RPC is called with a string and expects
     * Operations may be:
     * Address, Value and `write`
     * Address and `read`
+    * `lock` which instructs ALF to execute the sequence atomically (needs to lead the sequence)
     
 * Returns:
   * Value on `write` (echo)
   * Value on `read`
+  * Nothing on `lock`
 
 * Example:
   * DIM input: `0x54,0xff,write\n0x54,read`
+  * DIM input (atomic): `lock\n0x54,0xff,write\n0x54,read`
   * DIM output: `0x000000ff\n0x000000ff\n`
   
 ##### IC_GBT_I2C_WRITE

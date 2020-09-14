@@ -52,7 +52,8 @@ class Sca
   /// Enum for the different SCA operation types as seen from DIM RPCs
   enum Operation { Command,
                    Wait,
-                   Error };
+                   Error,
+                   Lock };
 
   /// Internal constructor for the AlfServer
   /// \param link AlfLink holding useful information coming from the AlfServer class

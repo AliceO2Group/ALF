@@ -152,7 +152,8 @@ class AlfClient : public AliceO2::Common::Program
     Logger::get().log() << "[REGISTER] Wrote: " << Util::formatValue(wValue) << " Read: " << Util::formatValue(rValue) << endm;
 
     if (mOptions.swt) {
-      auto swtOut = swtSequence.write({ std::make_pair("0x0000000000000000000", "write"),
+      auto swtOut = swtSequence.write({ std::make_pair("", "lock"),
+                                        std::make_pair("0x0000000000000000000", "write"),
                                         std::make_pair("", "reset"),
                                         std::make_pair("0x0000000000000000000", "write"),
                                         std::make_pair("0x000000001234", "write"),
