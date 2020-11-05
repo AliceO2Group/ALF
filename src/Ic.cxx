@@ -238,7 +238,8 @@ std::vector<std::pair<Ic::Operation, Ic::Data>> Ic::executeSequence(std::vector<
       // the error message.
       IcData icData = boost::get<IcData>(data);
       std::string meaningfulMessage = (boost::format("ic_regs::IC_SEQUENCE address=0x%08x data=0x%08x serialId=%s link=%d, error='%s'") % icData.address % icData.data % mLink.serialId % mLink.linkId % e.what()).str();
-      Logger::get().err() << meaningfulMessage << endm;
+      //Logger::get().err() << meaningfulMessage << endm;
+
       ret.push_back({ Operation::Error, meaningfulMessage });
       break;
     }

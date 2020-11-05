@@ -95,7 +95,7 @@ class Alf : public AliceO2::Common::Program
         try {
           roc::FirmwareChecker().checkFirmwareCompatibility(card.pciAddress);
         } catch (const roc::Exception& e) {
-          Logger::get().warn() << boost::diagnostic_information(e) << endm;
+          Logger::get().warn() << e.what() << endm;
           continue;
         }
       }
