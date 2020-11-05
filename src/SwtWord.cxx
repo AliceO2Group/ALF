@@ -79,17 +79,11 @@ void SwtWord::setMed(uint32_t med)
 void SwtWord::setHigh(uint16_t high)
 {
   mHigh = high & 0xfff;
-  mSequence = (high & 0xf000) >> 12;
 }
 
 void SwtWord::setSize(Size size)
 {
   mSize = size;
-}
-
-void SwtWord::setSequence(uint16_t high)
-{
-  mSequence = (high & 0xf000) >> 12;
 }
 
 uint32_t SwtWord::getLow() const
@@ -105,11 +99,6 @@ uint32_t SwtWord::getMed() const
 uint16_t SwtWord::getHigh() const
 {
   return mHigh & 0xfff;
-}
-
-int SwtWord::getSequence() const
-{
-  return mSequence;
 }
 
 SwtWord::Size SwtWord::getSize() const

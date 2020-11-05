@@ -84,7 +84,6 @@ void Swt::reset()
 {
   barWrite(sc_regs::SC_RESET.index, 0x1);
   barWrite(sc_regs::SC_RESET.index, 0x0); //void cmd to sync clocks
-  mWordSequence = 0;
 }
 
 void Swt::checkChannelSet()
@@ -128,26 +127,8 @@ std::vector<SwtWord> Swt::read(SwtWord::Size wordSize, TimeOut msTimeOut)
       tempWord.setMed(barRead(sc_regs::SWT_RD_WORD_M.index));
     }
 
-    if (wordSize == SwtWord::Size::High) { // Sequence set with high part of the word
+    if (wordSize == SwtWord::Size::High) {
       tempWord.setHigh(barRead(sc_regs::SWT_RD_WORD_H.index));
-    } else { // Only set sequence if smaller word requested
-      tempWord.setSequence(barRead(sc_regs::SWT_RD_WORD_H.index));
-    }
-
-    mWordSequence = (mWordSequence + 1) % 16;
-
-    // If we get the same counter as before it means the FIFO wasn't updated; drop the word
-    if (tempWord.getSequence() != mWordSequence) {
-
-      if (std::chrono::steady_clock::now() > timeOut) {
-        BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("Timed out: not enough words in SWT READ FIFO"));
-      }
-
-      Logger::get().warn() << "SWT word sequence duplicate" << endm;
-
-      mWordSequence = tempWord.getSequence(); //roll mWordSequence back by one
-      numWords++;                             //will have to read one more time
-      continue;
     }
 
     //wordMonPairs.push_back(std::make_pair(tempWord, barRead(sc_regs::SWT_MON.index)));

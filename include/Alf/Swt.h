@@ -125,7 +125,6 @@ class Swt
   AlfLink mLink;
   std::unique_ptr<LlaSession> mLlaSession;
 
-  int mWordSequence = 0; //start from 0, as after the reset the counter starts at 1
   static constexpr int DEFAULT_SWT_TIMEOUT_MS = 10;
 };
 
