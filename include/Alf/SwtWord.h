@@ -49,19 +49,16 @@ class SwtWord
   void setLow(uint32_t low);
   void setMed(uint32_t med);
   void setHigh(uint16_t high);
-  void setSequence(uint16_t high);
   void setSize(Size size);
   uint32_t getLow() const;
   uint32_t getMed() const;
   uint16_t getHigh() const;
   Size getSize() const;
-  int getSequence() const;
 
  private:
   uint32_t mLow;
   uint32_t mMed;
   uint16_t mHigh;
-  int mSequence;
   Size mSize;
 };
 
