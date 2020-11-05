@@ -300,7 +300,8 @@ std::vector<std::pair<Sca::Operation, Sca::Data>> Sca::executeSequence(const std
       } else {
         meaningfulMessage = (boost::format("SCA_SEQUENCE UNKNOWN serialId=%s link=%d error='%s'") % mLink.serialId % mLink.linkId % e.what()).str();
       }
-      Logger::get().err() << meaningfulMessage << endm;
+      //Logger::get().err() << meaningfulMessage << endm;
+
       ret.push_back({ Operation::Error, meaningfulMessage });
       break;
     }

@@ -224,7 +224,7 @@ std::vector<std::pair<Swt::Operation, Swt::Data>> Swt::executeSequence(std::vect
       } else {
         meaningfulMessage = (boost::format("SWT_SEQUENCE UNKNOWN serialId=%d link=%s,  error='%s'") % mLink.serialId % mLink.linkId % e.what()).str();
       }
-      Logger::get().err() << meaningfulMessage << endm;
+      //Logger::get().err() << meaningfulMessage << endm;
 
       ret.push_back({ Operation::Error, meaningfulMessage });
       break;
