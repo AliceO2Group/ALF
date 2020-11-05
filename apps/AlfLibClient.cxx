@@ -53,16 +53,19 @@ class AlfLibClient : public AliceO2::Common::Program
     options.add_options()("swt",
                           po::bool_switch(&mOptions.swt)->default_value(false),
                           "Flag enabling the swt tests");
-    options.add_options()("id",
-                          po::value<std::string>(&mOptions.cardId)->default_value("-1"),
-                          "Card ID to use");
+    options.add_options()("serial",
+                          po::value<int>(&mOptions.serial)->default_value(-1),
+                          "Serial to use");
+    options.add_options()("endpoint",
+                          po::value<int>(&mOptions.endpoint)->default_value(0),
+                          "Endpoint to use");
   }
 
   virtual void run(const po::variables_map&) override
   {
     if (mOptions.sca) {
       std::cout << "Running SCA test" << std::endl;
-      auto sca = Sca(mOptions.cardId, mOptions.link);
+      auto sca = Sca(roc::SerialId{ mOptions.serial, mOptions.endpoint }, mOptions.link);
       sca.reset();
 
       std::cout << "Running simple SCA operation" << std::endl;
@@ -96,7 +99,7 @@ class AlfLibClient : public AliceO2::Common::Program
 
     if (mOptions.swt) {
       std::cout << "Running SWT test" << std::endl;
-      auto swt = Swt(mOptions.cardId, mOptions.link);
+      auto swt = Swt(roc::SerialId{ mOptions.serial, mOptions.endpoint }, mOptions.link);
 
       std::cout << "Running simple SWT operations" << std::endl;
       try {
@@ -116,7 +119,7 @@ class AlfLibClient : public AliceO2::Common::Program
 
       std::cout << "Running an SWT sequence" << std::endl;
       std::vector<std::pair<Swt::Operation, Swt::Data>> ops;
-      swt = Swt(mOptions.cardId);
+      swt = Swt(roc::SerialId{ mOptions.serial, mOptions.endpoint });
       swt.setChannel(1);
       ops.push_back({ Swt::Operation::Reset, {} });
       ops.push_back({ Swt::Operation::Write, SwtWord{ 0xcafe, 0x41d, 0x0 } });
@@ -150,7 +153,7 @@ class AlfLibClient : public AliceO2::Common::Program
 
     if (mOptions.ic) {
       std::cout << "Running IC test" << std::endl;
-      auto ic = Ic(mOptions.cardId, mOptions.link);
+      auto ic = Ic(roc::SerialId{ mOptions.serial, mOptions.endpoint }, mOptions.link);
       ic.reset();
 
       std::cout << "Running Simple IC operations" << std::endl;
@@ -197,7 +200,8 @@ class AlfLibClient : public AliceO2::Common::Program
     bool lla = false;
     bool sca = false;
     bool swt = false;
-    std::string cardId = "-1";
+    int serial = -1;
+    int endpoint = 0;
   } mOptions;
 };
 

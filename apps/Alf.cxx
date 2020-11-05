@@ -85,7 +85,6 @@ class Alf : public AliceO2::Common::Program
     AlfServer alfServer = AlfServer();
 
     std::vector<roc::CardDescriptor> cardsFound = roc::findCards();
-    int cardSequence = -1;
     for (auto const& card : cardsFound) {
       std::vector<AlfLink> links;
 
@@ -101,32 +100,29 @@ class Alf : public AliceO2::Common::Program
         }
       }
 
-      cardSequence++;
-
       if (card.cardType == roc::CardType::Cru) {
 
-        Logger::get().log() << "CRU #" << cardSequence << " : " << card.pciAddress << endm;
-        bar = roc::ChannelFactory().getBar(card.pciAddress, 2);
+        Logger::get().log() << "CRU " << card.serialId << endm;
+        bar = roc::ChannelFactory().getBar(card.serialId, 2);
         for (int linkId = 0; linkId < CRU_NUM_LINKS; linkId++) {
-          links.push_back({ alfId, cardSequence, linkId, bar, roc::CardType::Cru });
+          links.push_back({ alfId, card.serialId, linkId, card.serialId.getEndpoint() * 12 + linkId, bar, roc::CardType::Cru });
         }
 
       } else if (card.cardType == roc::CardType::Crorc) {
-        Logger::get().log() << "CRORC #" << cardSequence << " : " << card.pciAddress << endm;
+        Logger::get().log() << "CRORC " << card.serialId << endm;
         for (int linkId = 0; linkId < CRORC_NUM_LINKS; linkId++) {
-          bar = roc::ChannelFactory().getBar(card.pciAddress, linkId);
-          links.push_back({ alfId, cardSequence, linkId, bar, roc::CardType::Crorc });
+          bar = roc::ChannelFactory().getBar(card.serialId, linkId);
+          links.push_back({ alfId, card.serialId, linkId, -1, bar, roc::CardType::Crorc });
         }
       } else {
-        Logger::get().log() << AliceO2::InfoLogger::InfoLogger::Severity::Warning << card.pciAddress << " is not a CRU or a CRORC. Skipping..." << endm;
+        Logger::get().log() << AliceO2::InfoLogger::InfoLogger::Severity::Warning << card.serialId << " is not a CRU or a CRORC. Skipping..." << endm;
       }
 
       if (isVerbose()) {
         for (auto const& link : links) {
-          Logger::get().log() << link.alfId << " " << link.cardSequence << " " << link.linkId << endm;
+          Logger::get().log() << link.alfId << " " << link.serialId << " " << link.linkId << endm;
         }
       }
-
       alfServer.makeRpcServers(links);
     }
 

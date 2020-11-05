@@ -155,41 +155,41 @@ std::string AlfServer::patternPlayer(const std::string& parameter, std::shared_p
   return "";
 }
 
-std::string AlfServer::llaSessionStart(const std::string& parameter, int cardId)
+std::string AlfServer::llaSessionStart(const std::string& parameter, roc::SerialId serialId)
 {
   std::vector<std::string> parameters = Util::split(parameter, pairSeparator());
   if (parameters.size() < 1 || parameters.size() > 2) {
     BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("Wrong number of parameters for the LLA Session Start RPC call: " + std::to_string(parameters.size())));
   }
 
-  if (mSessions.find(cardId) == mSessions.end()) {
+  if (mSessions.find(serialId) == mSessions.end()) {
     lla::SessionParameters params = lla::SessionParameters::makeParameters()
                                       .setSessionName(parameters[0])
-                                      .setCardId(roc::PciSequenceNumber(cardId));
-    mSessions[cardId] = std::make_unique<lla::Session>(params);
+                                      .setCardId(serialId);
+    mSessions[serialId] = std::make_unique<lla::Session>(params);
   } /*else {
     // TODO: Update session name?
   }*/
 
   if (parameters.size() == 2) {
-    if (!mSessions[cardId]->timedStart(std::stoi(parameters[1]))) {
-      BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("Could not start session for serial " + std::to_string(cardId)));
+    if (!mSessions[serialId]->timedStart(std::stoi(parameters[1]))) {
+      BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("Could not start session for serial " + serialId.toString()));
     }
   } else {
-    if (!mSessions[cardId]->start()) {
-      BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("Could not start session for serial " + std::to_string(cardId)));
+    if (!mSessions[serialId]->start()) {
+      BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("Could not start session for serial " + serialId.toString()));
     }
   }
   return "";
 }
 
-std::string AlfServer::llaSessionStop(const std::string& /*parameter*/, int cardId)
+std::string AlfServer::llaSessionStop(const std::string& /*parameter*/, roc::SerialId serialId)
 {
-  if (mSessions.find(cardId) == mSessions.end()) {
-    BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("Session was not started for serial  " + std::to_string(cardId)));
+  if (mSessions.find(serialId) == mSessions.end()) {
+    BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("Session was not started for serial  " + serialId.toString()));
   }
 
-  mSessions[cardId]->stop();
+  mSessions[serialId]->stop();
   return "";
 }
 
@@ -510,7 +510,7 @@ std::vector<std::pair<Ic::Operation, Ic::Data>> AlfServer::parseStringToIcPairs(
 
 void AlfServer::makeRpcServers(std::vector<AlfLink> links)
 {
-  for (const auto& link : links) {
+  for (auto& link : links) {
 
     // Function to create RPC server
     auto makeServer = [&](std::string name, auto callback) {
@@ -521,7 +521,7 @@ void AlfServer::makeRpcServers(std::vector<AlfLink> links)
     ServiceNames names(link);
 
     // Start the RPC Servers
-    auto& servers = mRpcServers[link.cardSequence][link.linkId];
+    auto& servers = mRpcServers[link.serialId][link.linkId];
     std::shared_ptr<roc::BarInterface> bar = link.bar;
 
     if (link.cardType == roc::CardType::Cru) {
@@ -539,11 +539,11 @@ void AlfServer::makeRpcServers(std::vector<AlfLink> links)
 
         // LLA Session Start
         servers.push_back(makeServer(names.llaSessionStart(),
-                                     [link, this](auto parameter) { return llaSessionStart(parameter, link.cardSequence); }));
+                                     [link, this](auto parameter) { return llaSessionStart(parameter, link.serialId); }));
 
         // LLA Session Stop
         servers.push_back(makeServer(names.llaSessionStop(),
-                                     [link, this](auto parameter) { return llaSessionStop(parameter, link.cardSequence); }));
+                                     [link, this](auto parameter) { return llaSessionStop(parameter, link.serialId); }));
       }
 
       // SCA Sequence

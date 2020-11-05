@@ -29,7 +29,7 @@ class ServiceNames
 {
  public:
   ServiceNames(AlfLink link)
-    : mAlfId(link.alfId), mCardSequence(link.cardSequence), mLink(link.linkId)
+    : mAlfId(link.alfId), mSerialId(link.serialId), mLink(link.linkId)
   {
   }
 
@@ -48,7 +48,7 @@ class ServiceNames
   std::string formatLink(std::string name) const;
   std::string format(std::string name) const;
   std::string mAlfId;
-  const int mCardSequence;
+  const roc::SerialId mSerialId;
   const int mLink;
 };
 

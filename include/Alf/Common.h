@@ -28,7 +28,7 @@ namespace alf
 
 namespace roc = AliceO2::roc;
 
-static constexpr int CRU_NUM_LINKS(24);
+static constexpr int CRU_NUM_LINKS(12);
 static constexpr int CRORC_NUM_LINKS(6);
 
 static constexpr auto BUSY_TIMEOUT = std::chrono::milliseconds(10);
@@ -36,8 +36,9 @@ static constexpr auto CHANNEL_BUSY_TIMEOUT = std::chrono::milliseconds(10);
 
 struct AlfLink {
   std::string alfId;
-  int cardSequence;
+  roc::SerialId serialId = { -1, 0 };
   int linkId;
+  int rawLinkId;
   std::shared_ptr<roc::BarInterface> bar;
   roc::CardType::type cardType;
 };

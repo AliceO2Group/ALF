@@ -20,16 +20,16 @@ namespace o2
 namespace alf
 {
 
-LlaSession::LlaSession(std::string sessionName, int cardId)
+LlaSession::LlaSession(std::string sessionName, roc::SerialId serialId)
   : mSessionName(sessionName),
-    mCardId(cardId)
+    mSerialId(serialId)
 {
 }
 
 void LlaSession::start()
 {
   if (!mSession) {
-    mParams = lla::SessionParameters::makeParameters(mSessionName, roc::PciSequenceNumber(mCardId));
+    mParams = lla::SessionParameters::makeParameters(mSessionName, mSerialId);
     mSession = std::make_unique<lla::Session>(mParams);
   }
 
