@@ -28,7 +28,7 @@ namespace alf
 class LlaSession
 {
  public:
-  LlaSession(std::string sessionName, int cardId);
+  LlaSession(std::string sessionName, roc::SerialId serialId);
   void start();
   void stop();
 
@@ -36,7 +36,7 @@ class LlaSession
   lla::SessionParameters mParams;
   std::unique_ptr<lla::Session> mSession;
   std::string mSessionName;
-  int mCardId;
+  roc::SerialId mSerialId;
 };
 
 } // namespace alf

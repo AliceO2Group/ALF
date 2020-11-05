@@ -20,25 +20,25 @@ DIM_DNS_NODE=thedimdns.cern.ch
 `
 
 ### o2-alf-client
-o2-alf-client is the binary of an ALF client used solely for testing purposes. On top of the DIM Nameserver it expects the hostname of the node hosting the ALF server, the card's sequence number and the link number as command-line arguments. Different arguments to test different types of services are available (run with `--help`).
+o2-alf-client is the binary of an ALF client used solely for testing purposes. On top of the DIM Nameserver it expects the hostname of the node hosting the ALF server, the card's serial and endpoint, and the link number as command-line arguments. Different arguments to test different types of services are available (run with `--help`).
 
 `
-o2-alf-client --dim-dns-node thedimdns.cern.ch --alf-id thealfserver --card-sequence 0 --link 4
+o2-alf-client --dim-dns-node thedimdns.cern.ch --alf-id thealfserver --serial 1041 --endpoint 1 --link 4
 `
 
 ### o2-alf-lib-client
 o2-alf-lib-client is the binary of an ALF SC library client used solely for testing purposes. It expects parameters for the SC modules to test, the card and link ID (run with `--help` for the different options).
 
 `
-o2-alf-lib-client --card-id=#1 --link-id=0 --swt
+o2-alf-lib-client --card-id=#1 --serial=1041 --endpoint=1 --swt
 `
 
 ## DIM Services
 
-Service names are identified by the server's hostname, the card's sequence number (as reported during ALF's startup) and the link, as follows:
+Service names are identified by the server's hostname, the card's serial and endpoint pair and the link, as follows:
 
 `
-ALF_[hostname]/SERIAL_[card_sequence_number]/LINK_[link]/[service_name]
+ALF_[hostname]/SERIAL_[serial]/ENDPOINT_[endpoint]/LINK_[link]/[service_name]
 `
 
 ### DIM RPC services

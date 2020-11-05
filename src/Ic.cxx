@@ -59,7 +59,7 @@ Ic::Ic(AlfLink link) : mBar2(link.bar), mLink(link)
   // Set CFG to 0x3 by default
   barWrite(ic_regs::IC_WR_CFG.index, 0x3);
 
-  mLlaSession = std::make_unique<LlaSession>("DDT", link.cardSequence);
+  mLlaSession = std::make_unique<LlaSession>("DDT", link.serialId);
 }
 
 Ic::Ic(const roc::Parameters::CardIdType& cardId, int linkId)
@@ -74,18 +74,24 @@ Ic::Ic(std::string cardId, int linkId)
 
 void Ic::init(const roc::Parameters::CardIdType& cardId, int linkId)
 {
+  if (mLink.linkId >= CRU_NUM_LINKS) {
+    BOOST_THROW_EXCEPTION(
+      IcException() << ErrorInfo::Message("Maximum link number exceeded"));
+  }
+
   auto card = roc::findCard(cardId);
   mBar2 = roc::ChannelFactory().getBar(cardId, 2);
 
   mLink = AlfLink{
     "DDT", //TODO: From session?
-    card.sequenceId,
+    card.serialId,
     linkId,
+    card.serialId.getEndpoint() * 12 + linkId,
     mBar2,
     roc::CardType::Cru
   };
 
-  mLlaSession = std::make_unique<LlaSession>("DDT", card.sequenceId);
+  mLlaSession = std::make_unique<LlaSession>("DDT", card.serialId);
 
   // Set CFG to 0x3 by default
   barWrite(ic_regs::IC_WR_CFG.index, 0x3);
@@ -94,7 +100,8 @@ void Ic::init(const roc::Parameters::CardIdType& cardId, int linkId)
 void Ic::setChannel(int gbtChannel)
 {
   mLink.linkId = gbtChannel;
-  barWrite(sc_regs::SC_LINK.index, mLink.linkId);
+  mLink.rawLinkId = mLink.serialId.getEndpoint() * 12 + gbtChannel;
+  barWrite(sc_regs::SC_LINK.index, mLink.rawLinkId);
 }
 
 void Ic::checkChannelSet()
@@ -105,7 +112,7 @@ void Ic::checkChannelSet()
 
   int channel = (barRead(sc_regs::SWT_MON.index) >> 8) & 0xff;
 
-  if (channel != mLink.linkId) {
+  if (channel != mLink.rawLinkId) {
     setChannel(mLink.linkId);
   }
 }
@@ -230,7 +237,7 @@ std::vector<std::pair<Ic::Operation, Ic::Data>> Ic::executeSequence(std::vector<
       // If an IC error occurs, we stop executing the sequence of commands and return the results as far as we got them, plus
       // the error message.
       IcData icData = boost::get<IcData>(data);
-      std::string meaningfulMessage = (boost::format("ic_regs::IC_SEQUENCE address=0x%08x data=0x%08x cardSequence=%d link=%d, error='%s'") % icData.address % icData.data % mLink.cardSequence % mLink.linkId % e.what()).str();
+      std::string meaningfulMessage = (boost::format("ic_regs::IC_SEQUENCE address=0x%08x data=0x%08x serialId=%s link=%d, error='%s'") % icData.address % icData.data % mLink.serialId % mLink.linkId % e.what()).str();
       Logger::get().err() << meaningfulMessage << endm;
       ret.push_back({ Operation::Error, meaningfulMessage });
       break;

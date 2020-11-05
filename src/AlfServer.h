@@ -55,8 +55,8 @@ class AlfServer
   static std::string icGbtI2cWrite(const std::string& parameter, AlfLink link);
   static std::string patternPlayer(const std::string& parameter, std::shared_ptr<roc::BarInterface>);
   static std::string registerBlobWrite(const std::string& parameter, AlfLink link);
-  std::string llaSessionStart(const std::string& parameter, int cardSequence);
-  std::string llaSessionStop(const std::string& parameter, int cardSequence);
+  std::string llaSessionStart(const std::string& parameter, roc::SerialId serialId);
+  std::string llaSessionStop(const std::string& parameter, roc::SerialId serialId);
 
   static std::vector<uint32_t> stringToRegisterPair(const std::string stringPair);
   static std::pair<Sca::Operation, Sca::Data> stringToScaPair(const std::string stringPair);
@@ -68,10 +68,14 @@ class AlfServer
   static std::vector<std::pair<Ic::Operation, Ic::Data>> parseStringToIcPairs(std::vector<std::string> stringPairs);
   static roc::PatternPlayer::Info parseStringToPatternPlayerInfo(const std::vector<std::string> sringsPairs);
 
-  /// cardSequence -> link -> vector of RPC servers
-  std::map<int, std::map<int, std::vector<std::unique_ptr<StringRpcServer>>>> mRpcServers;
+  // custom comparator for the SerialId keys of the maps
+  struct serialIdComparator {
+    bool operator()(const roc::SerialId& a, const roc::SerialId& b) { return a.toString() < b.toString(); };
+  };
 
-  std::map<int, std::unique_ptr<lla::Session>> mSessions;
+  /// serialId -> link -> vector of RPC servers
+  std::map<roc::SerialId, std::map<int, std::vector<std::unique_ptr<StringRpcServer>>>, serialIdComparator> mRpcServers;
+  std::map<roc::SerialId, std::unique_ptr<lla::Session>, serialIdComparator> mSessions;
 };
 
 } // namespace alf

@@ -158,7 +158,6 @@ class RegisterSequenceRpc : DimRpcInfoWrapper
 
   std::string write(const std::string& buffer)
   {
-    std::cout << "Setting: " << buffer << std::endl;
     setString(buffer);
     std::string ret;
     try {

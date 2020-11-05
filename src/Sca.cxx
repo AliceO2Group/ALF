@@ -41,12 +41,7 @@ namespace alf
 Sca::Sca(AlfLink link)
   : mBar2(link.bar), mLink(link)
 {
-  if (mLink.linkId >= CRU_NUM_LINKS) {
-    BOOST_THROW_EXCEPTION(
-      ScaException() << ErrorInfo::Message("Maximum link number exceeded"));
-  }
-
-  mLlaSession = std::make_unique<LlaSession>("DDT", link.cardSequence);
+  mLlaSession = std::make_unique<LlaSession>("DDT", link.serialId);
 }
 
 Sca::Sca(const roc::Parameters::CardIdType& cardId, int linkId)
@@ -61,24 +56,31 @@ Sca::Sca(std::string cardId, int linkId)
 
 void Sca::init(const roc::Parameters::CardIdType& cardId, int linkId)
 {
-  auto card = roc::findCard(cardId); //TODO: Use it elsewhere??
+  if (mLink.linkId >= CRU_NUM_LINKS) {
+    BOOST_THROW_EXCEPTION(
+      ScaException() << ErrorInfo::Message("Maximum link number exceeded"));
+  }
 
+  auto card = roc::findCard(cardId);
   mBar2 = roc::ChannelFactory().getBar(cardId, 2);
+
   mLink = AlfLink{
     "DDT",
-    card.sequenceId,
+    card.serialId,
     linkId,
+    card.serialId.getEndpoint() * 12 + linkId,
     mBar2,
     roc::CardType::Cru
   };
 
-  mLlaSession = std::make_unique<LlaSession>("DDT", card.sequenceId);
+  mLlaSession = std::make_unique<LlaSession>("DDT", card.serialId);
 }
 
 void Sca::setChannel(int gbtChannel)
 {
   mLink.linkId = gbtChannel;
-  barWrite(sc_regs::SC_LINK.index, mLink.linkId);
+  mLink.rawLinkId = mLink.serialId.getEndpoint() * 12 + gbtChannel;
+  barWrite(sc_regs::SC_LINK.index, mLink.rawLinkId);
 }
 
 void Sca::checkChannelSet()
@@ -89,7 +91,7 @@ void Sca::checkChannelSet()
 
   int channel = (barRead(sc_regs::SWT_MON.index) >> 8) & 0xff;
 
-  if (channel != mLink.linkId) {
+  if (channel != mLink.rawLinkId) {
     setChannel(mLink.linkId);
   }
 }
@@ -292,11 +294,11 @@ std::vector<std::pair<Sca::Operation, Sca::Data>> Sca::executeSequence(const std
       // them, plus the error message.
       std::string meaningfulMessage;
       if (operation == Operation::Command) {
-        meaningfulMessage = (boost::format("SCA_SEQUENCE cmd=0x%08x data=0x%08x cardSequence=%d link=%d error='%s'") % boost::get<CommandData>(data).command % boost::get<CommandData>(data).data % mLink.cardSequence % mLink.linkId % e.what()).str();
+        meaningfulMessage = (boost::format("SCA_SEQUENCE cmd=0x%08x data=0x%08x serialId=%s link=%d error='%s'") % boost::get<CommandData>(data).command % boost::get<CommandData>(data).data % mLink.serialId % mLink.linkId % e.what()).str();
       } else if (operation == Operation::Wait) {
-        meaningfulMessage = (boost::format("SCA_SEQUENCE WAIT waitTime=%d cardSequence=%d link=%d error='%s'") % boost::get<WaitTime>(data) % mLink.cardSequence % mLink.linkId % e.what()).str();
+        meaningfulMessage = (boost::format("SCA_SEQUENCE WAIT waitTime=%d serialId=%s link=%d error='%s'") % boost::get<WaitTime>(data) % mLink.serialId % mLink.linkId % e.what()).str();
       } else {
-        meaningfulMessage = (boost::format("SCA_SEQUENCE UNKNOWN cardSequence=%d link=%d error='%s'") % mLink.cardSequence % mLink.linkId % e.what()).str();
+        meaningfulMessage = (boost::format("SCA_SEQUENCE UNKNOWN serialId=%s link=%d error='%s'") % mLink.serialId % mLink.linkId % e.what()).str();
       }
       Logger::get().err() << meaningfulMessage << endm;
       ret.push_back({ Operation::Error, meaningfulMessage });

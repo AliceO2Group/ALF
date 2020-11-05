@@ -44,7 +44,7 @@ namespace sc_regs = AliceO2::roc::Cru::ScRegisters;
 
 Swt::Swt(AlfLink link) : mBar2(link.bar), mLink(link)
 {
-  mLlaSession = std::make_unique<LlaSession>("DDT", link.cardSequence);
+  mLlaSession = std::make_unique<LlaSession>("DDT", link.serialId);
 }
 
 Swt::Swt(const roc::Parameters::CardIdType& cardId, int linkId)
@@ -59,25 +59,31 @@ Swt::Swt(std::string cardId, int linkId)
 
 void Swt::init(const roc::Parameters::CardIdType& cardId, int linkId)
 {
-  auto card = roc::findCard(cardId); //TODO: Use it elsewhere??
+  if (mLink.linkId >= CRU_NUM_LINKS) {
+    BOOST_THROW_EXCEPTION(
+      SwtException() << ErrorInfo::Message("Maximum link number exceeded"));
+  }
 
-  mBar2 = roc::ChannelFactory().getBar(card.pciAddress, 2);
+  auto card = roc::findCard(cardId);
+  mBar2 = roc::ChannelFactory().getBar(cardId, 2);
 
   mLink = AlfLink{
     "DDT", //TODO: From session?
-    card.sequenceId,
+    card.serialId,
     linkId,
+    card.serialId.getEndpoint() * 12 + linkId,
     mBar2,
     roc::CardType::Cru
   };
 
-  mLlaSession = std::make_unique<LlaSession>("DDT", card.sequenceId);
+  mLlaSession = std::make_unique<LlaSession>("DDT", card.serialId);
 }
 
 void Swt::setChannel(int gbtChannel)
 {
   mLink.linkId = gbtChannel;
-  barWrite(sc_regs::SC_LINK.index, mLink.linkId);
+  mLink.rawLinkId = mLink.serialId.getEndpoint() * 12 + gbtChannel;
+  barWrite(sc_regs::SC_LINK.index, mLink.rawLinkId);
 }
 
 void Swt::reset()
@@ -94,7 +100,7 @@ void Swt::checkChannelSet()
 
   int channel = (barRead(sc_regs::SWT_MON.index) >> 8) & 0xff;
 
-  if (channel != mLink.linkId) {
+  if (channel != mLink.rawLinkId) {
     setChannel(mLink.linkId);
   }
 }
@@ -210,13 +216,13 @@ std::vector<std::pair<Swt::Operation, Swt::Data>> Swt::executeSequence(std::vect
     } catch (const SwtException& e) {
       std::string meaningfulMessage;
       if (operation == Operation::Read) {
-        meaningfulMessage = (boost::format("SWT_SEQUENCE READ timeout=%d cardSequence=%d link=%d, error='%s'") % boost::get<TimeOut>(data) % mLink.cardSequence % mLink.linkId % e.what()).str();
+        meaningfulMessage = (boost::format("SWT_SEQUENCE READ timeout=%d serialId=%s link=%d, error='%s'") % boost::get<TimeOut>(data) % mLink.serialId % mLink.linkId % e.what()).str();
       } else if (operation == Operation::Write) {
-        meaningfulMessage = (boost::format("SWT_SEQUENCE WRITE data=%s cardSequence=%d link=%d, error='%s'") % boost::get<SwtWord>(data) % mLink.cardSequence % mLink.linkId % e.what()).str();
+        meaningfulMessage = (boost::format("SWT_SEQUENCE WRITE data=%s serialId=%s link=%d, error='%s'") % boost::get<SwtWord>(data) % mLink.serialId % mLink.linkId % e.what()).str();
       } else if (operation == Operation::Reset) {
-        meaningfulMessage = (boost::format("SWT_SEQUENCE RESET cardSequence=%d link=%d, error='%s'") % mLink.cardSequence % mLink.linkId % e.what()).str();
+        meaningfulMessage = (boost::format("SWT_SEQUENCE RESET serialId=%d link=%s, error='%s'") % mLink.serialId % mLink.linkId % e.what()).str();
       } else {
-        meaningfulMessage = (boost::format("SWT_SEQUENCE UNKNOWN cardSequence=%d link=%d,  error='%s'") % mLink.cardSequence % mLink.linkId % e.what()).str();
+        meaningfulMessage = (boost::format("SWT_SEQUENCE UNKNOWN serialId=%d link=%s,  error='%s'") % mLink.serialId % mLink.linkId % e.what()).str();
       }
       Logger::get().err() << meaningfulMessage << endm;
 

@@ -50,9 +50,12 @@ class AlfClient : public AliceO2::Common::Program
     options.add_options()("dim-dns-node",
                           po::value<std::string>(&mOptions.dimDnsNode)->default_value(""),
                           "The DIM DNS node to connect to if the env var is not set");
-    options.add_options()("card-sequence",
-                          po::value<int>(&mOptions.cardSequence),
-                          "Card sequence number");
+    options.add_options()("serial",
+                          po::value<int>(&mOptions.serial),
+                          "Card serial number");
+    options.add_options()("endpoint",
+                          po::value<int>(&mOptions.endpoint),
+                          "Card endpoint");
     options.add_options()("link",
                           po::value<int>(&mOptions.link),
                           "Link number");
@@ -112,9 +115,9 @@ class AlfClient : public AliceO2::Common::Program
     std::string alfId = mOptions.alfId;
     boost::to_upper(alfId);
 
-    Logger::get().log() << "Starting the DIM Client using ALF ID=" << alfId << ", card #=" << mOptions.cardSequence << " and link=" << mOptions.link << endm;
+    Logger::get().log() << "Starting the DIM Client using ALF ID=" << alfId << ", card=" << mOptions.serial << ":" << mOptions.endpoint << " and link=" << mOptions.link << endm;
 
-    AlfLink link = AlfLink{ alfId, mOptions.cardSequence, mOptions.link, nullptr, roc::CardType::Cru };
+    AlfLink link = AlfLink{ alfId, roc::SerialId(mOptions.serial, mOptions.endpoint), mOptions.link, mOptions.endpoint * 12 + mOptions.link, nullptr, roc::CardType::Cru };
 
     ServiceNames names(link);
 
@@ -254,7 +257,8 @@ class AlfClient : public AliceO2::Common::Program
  private:
   struct OptionsStruct {
     std::string dimDnsNode = "";
-    int cardSequence = -1;
+    int serial = -1;
+    int endpoint = 0;
     int link = -1;
     std::string alfId = "";
     bool crorc = false;
