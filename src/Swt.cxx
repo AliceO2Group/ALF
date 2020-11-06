@@ -210,6 +210,16 @@ std::vector<std::pair<Swt::Operation, Swt::Data>> Swt::executeSequence(std::vect
       } else if (operation == Operation::Reset) {
         reset();
         ret.push_back({ Operation::Reset, {} });
+      } else if (operation == Operation::Wait) {
+        int waitTime;
+        try {
+          waitTime = boost::get<WaitTime>(data);
+        } catch (...) { // no timeout was provided
+          data = DEFAULT_SWT_WAIT_TIME_MS;
+          waitTime = boost::get<WaitTime>(data);
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
+        ret.push_back({ operation, waitTime });
       } else {
         BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("SWT operation type unknown"));
       }
@@ -221,6 +231,8 @@ std::vector<std::pair<Swt::Operation, Swt::Data>> Swt::executeSequence(std::vect
         meaningfulMessage = (boost::format("SWT_SEQUENCE WRITE data=%s serialId=%s link=%d, error='%s'") % boost::get<SwtWord>(data) % mLink.serialId % mLink.linkId % e.what()).str();
       } else if (operation == Operation::Reset) {
         meaningfulMessage = (boost::format("SWT_SEQUENCE RESET serialId=%d link=%s, error='%s'") % mLink.serialId % mLink.linkId % e.what()).str();
+      } else if (operation == Operation::Wait) {
+        meaningfulMessage = (boost::format("SWT_SEQUENCE WAIT waitTime=%d serialId=%s link=%d error='%s'") % boost::get<WaitTime>(data) % mLink.serialId % mLink.linkId % e.what()).str();
       } else {
         meaningfulMessage = (boost::format("SWT_SEQUENCE UNKNOWN serialId=%d link=%s,  error='%s'") % mLink.serialId % mLink.linkId % e.what()).str();
       }
@@ -251,6 +263,8 @@ std::string Swt::writeSequence(std::vector<std::pair<Operation, Data>> sequence,
       resultBuffer << "0\n";
     } else if (operation == Operation::Reset) {
       /* DO NOTHING */
+    } else if (operation == Operation::Wait) {
+      resultBuffer << std::dec << data << "\n";
     } else if (operation == Operation::Error) {
       resultBuffer << data;
       Logger::get().err() << data << endm;

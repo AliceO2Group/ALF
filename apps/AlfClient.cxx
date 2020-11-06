@@ -161,6 +161,7 @@ class AlfClient : public AliceO2::Common::Program
                                         std::make_pair("0x0000000000000000000", "write"),
                                         std::make_pair("0x000000001234", "write"),
                                         std::make_pair("", "read"),
+                                        std::make_pair("200", "wait"),
                                         std::make_pair("0xdeadbeef", "write"),
                                         std::make_pair("1", "read"),
                                         std::make_pair("0xbadc0ffee", "write"),

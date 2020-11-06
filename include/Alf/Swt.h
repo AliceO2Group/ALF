@@ -48,16 +48,17 @@ namespace alf
 class Swt
 {
  public:
-  typedef int TimeOut;
+  typedef int TimeOut, WaitTime;
 
   /// Typedef for the Data type of an SWT sequence operation.
   /// Variant of TimeOut for reads, SwtWord for writes, std::string for Errors
-  typedef boost::variant<boost::blank, TimeOut, SwtWord, std::string> Data;
+  typedef boost::variant<boost::blank, TimeOut, WaitTime, SwtWord, std::string> Data;
 
   /// Enum for the different SWT operation types
   enum Operation { Read,
                    Write,
                    Reset,
+                   Wait,
                    Error,
                    Lock };
 
@@ -125,6 +126,7 @@ class Swt
   AlfLink mLink;
   std::unique_ptr<LlaSession> mLlaSession;
 
+  static constexpr int DEFAULT_SWT_WAIT_TIME_MS = 3;
   static constexpr int DEFAULT_SWT_TIMEOUT_MS = 10;
 };
 

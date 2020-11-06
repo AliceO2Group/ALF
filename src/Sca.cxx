@@ -324,7 +324,7 @@ std::string Sca::writeSequence(const std::vector<std::pair<Operation, Data>>& op
     if (operation == Operation::Command) {
       resultBuffer << data << "\n"; // "[cmd],[data]\n"
     } else if (operation == Operation::Wait) {
-      resultBuffer << data << "\n"; // "[time]\n"
+      resultBuffer << std::dec << data << "\n"; // "[time]\n"
     } else if (operation == Operation::Error) {
       resultBuffer << data; // "[error_msg]"
       Logger::get().err() << data << endm;
