@@ -88,7 +88,7 @@ class AlfLibClient : public AliceO2::Common::Program
         if (out.first == Sca::Operation::Command) {
           std::cout << "Command: " << boost::get<Sca::CommandData>(out.second) << std::endl;
         } else if (out.first == Sca::Operation::Wait) {
-          std::cout << "Wait: " << boost::get<Sca::WaitTime>(out.second) << std::endl;
+          std::cout << "Wait: " << std::dec << boost::get<Sca::WaitTime>(out.second) << std::endl;
         } else if (out.first == Sca::Operation::Error) {
           std::cout << "Error: " << boost::get<std::string>(out.second) << std::endl;
         } else {
@@ -126,6 +126,7 @@ class AlfLibClient : public AliceO2::Common::Program
       ops.push_back({ Swt::Operation::Write, SwtWord{ 0xb00f, 0x42, 0x88, SwtWord::Size::High } });
       ops.push_back({ Swt::Operation::Write, SwtWord{ 0xb00f, 0x42, 0x88 } });
       ops.push_back({ Swt::Operation::Read, {} });
+      ops.push_back({ Swt::Operation::Wait, 100 });
       ops.push_back({ Swt::Operation::Write, SwtWord{ 0x1, 0x0, 0x0, SwtWord::Size::Low } });
       ops.push_back({ Swt::Operation::Write, SwtWord{ 0xb00f, 0x42, 0x88, SwtWord::Size::Low } });
       ops.push_back({ Swt::Operation::Write, SwtWord{ 0xcafe, 0x41d, 0x0 } });
@@ -143,6 +144,8 @@ class AlfLibClient : public AliceO2::Common::Program
           std::cout << "Read  | " << boost::get<SwtWord>(out.second) << std::endl;
         } else if (out.first == Swt::Operation::Reset) {
           std::cout << "Reset |" /* boost::blank here */ << std::endl;
+        } else if (out.first == Swt::Operation::Wait) {
+          std::cout << "Wait  | " << std::dec << boost::get<int>(out.second) << std::endl;
         } else if (out.first == Swt::Operation::Error) {
           std::cout << "Error | " << boost::get<std::string>(out.second) << std::endl;
         } else {

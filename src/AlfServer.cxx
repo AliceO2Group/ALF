@@ -342,6 +342,8 @@ std::pair<Swt::Operation, Swt::Data> AlfServer::stringToSwtPair(const std::strin
       BOOST_THROW_EXCEPTION(
         AlfException() << ErrorInfo::Message("Too many arguments for RESET operation"));
     }
+  } else if (swtPair[swtPair.size() - 1] == "wait") {
+    operation = Swt::Operation::Wait;
   } else {
     BOOST_THROW_EXCEPTION(std::out_of_range("Parameter for SWT operation unkown"));
   }
@@ -375,6 +377,12 @@ std::pair<Swt::Operation, Swt::Data> AlfServer::stringToSwtPair(const std::strin
       data = std::stoi(swtPair[0]);
     } catch (const std::exception& e) {
       BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("SWT Read Timeout provided cannot be converted to int"));
+    }
+  } else if (operation == Swt::Operation::Wait && swtPair.size() == 2) {
+    try {
+      data = std::stoi(swtPair[0]);
+    } catch (const std::exception& e) {
+      BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("SWT WaitTime provided cannot be converted to int"));
     }
   }
 

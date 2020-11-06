@@ -79,7 +79,7 @@ The services are DIM RPC services. Every RPC is called with a string and expects
   * Sequence of SCA operations as follows:
     * Operations may be:
     * An SCA command and data pair (e.g. `0x0000f00d,0x0000cafe`)
-    * A wait operation (e.g. `30,wait`)
+    * A wait operation (e.g. `30,wait`) in ms, defaults to 3
     * An instruction to execute the sequence atomically (`lock` - needs to lead the sequence)
 * Returns:
   * Sequence of SCA command and SCA read pairs, and wait confirmations
@@ -97,12 +97,14 @@ The services are DIM RPC services. Every RPC is called with a string and expects
     * `write` with SWT prefix (e.g. `0x0000f00d,write`)
     * `reset` (without SWT word)
     * `read` with optional TimeOut prefix (e.g. `2,read`)
+    * `wait` with optional WaitTime prefix in ms (e.g. `5,wait`), defaults to 3
     * `lock` which instructs ALF to execute the sequence atomically (needs to lead the sequence)
 * Returns:
   * Sequence of SWT output as follows:
     * `write` always retuns `0`
     * `read` returns the SWT words present in the CRU SWT FIFO
     * `reset` returns nothing
+    * `wait` returns time waited
     * `lock` returns nothing
     
 * Example:
@@ -218,7 +220,7 @@ All the above offer **no implicit locking** and should be manually locked throug
 ### Sequences of operations
 All SC classes offer a function to execute a sequence of their respective operations. This function receives an `std::vector`, consisting of an `std::pair` made up of the compatible SC operation and SC data, as these are defined in their headers.
 
-For example, `SWT` offers `Read, Write and Reset` operations which expect a `TimeOut`, an `SwtWord` and no argument, respectively.
+For example, `SWT` offers `Read, Write, Wait, and Reset` operations which expect a `TimeOut`, an `SwtWord`, a `WaitTime`, and no argument, respectively.
 
 ```
 typedef int TimeOut;
@@ -230,6 +232,7 @@ typedef boost::variant<boost::blank, TimeOut, SwtWord, std::string> Data;
 /// Enum for the different SWT operation types
 enum Operation { Read,
                  Write,
+                 WaitTime,
                  Reset,
                  Error };
                  
