@@ -189,7 +189,9 @@ class AlfClient : public AliceO2::Common::Program
     }
 
     if (mOptions.sca) {
-      auto scaOut = scaSequence.write({ std::make_pair("1000", "wait"),
+      auto scaOut = scaSequence.write({ std::make_pair("", "reset"),
+                                        std::make_pair("", "connect"),
+                                        std::make_pair("1000", "wait"),
                                         std::make_pair("0x00010002", "0xff000000"),
                                         std::make_pair("0x00020004", "0xff000000"),
                                         std::make_pair("0x00030006", "0xff000000"),

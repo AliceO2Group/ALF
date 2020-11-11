@@ -68,8 +68,9 @@ class AlfLibClient : public AliceO2::Common::Program
       auto sca = Sca(roc::SerialId{ mOptions.serial, mOptions.endpoint }, mOptions.link);
       sca.reset();
 
-      std::cout << "Running simple SCA operation" << std::endl;
+      std::cout << "Running simple SCA operations" << std::endl;
       try {
+        sca.connect();
         auto scaOut = sca.executeCommand({ 0x00010002, 0xff000000 });
         std::cout << scaOut.command << " " << scaOut.data << std::endl;
       } catch (const ScaException& e) {
@@ -79,6 +80,8 @@ class AlfLibClient : public AliceO2::Common::Program
       std::cout << "Running an SCA sequence" << std::endl;
       std::vector<std::pair<Sca::Operation, Sca::Data>> ops;
       sca.setChannel(1);
+      ops.push_back({ Sca::Operation::Reset , {} });
+      ops.push_back({ Sca::Operation::Connect, {} });
       ops.push_back({ Sca::Operation::Command, Sca::CommandData{ 0x00100002, 0xff000000 } });
       ops.push_back({ Sca::Operation::Command, Sca::CommandData{ 0x00100003, 0xff000000 } });
       ops.push_back({ Sca::Operation::Wait, 100 });
@@ -89,6 +92,10 @@ class AlfLibClient : public AliceO2::Common::Program
           std::cout << "Command: " << boost::get<Sca::CommandData>(out.second) << std::endl;
         } else if (out.first == Sca::Operation::Wait) {
           std::cout << "Wait: " << std::dec << boost::get<Sca::WaitTime>(out.second) << std::endl;
+        } else if (out.first == Sca::Operation::Reset) {
+          std::cout << "Reset" << std::endl;
+        } else if (out.first == Sca::Operation::Connect) {
+          std::cout << "Connect " << std::endl;
         } else if (out.first == Sca::Operation::Error) {
           std::cout << "Error: " << boost::get<std::string>(out.second) << std::endl;
         } else {
