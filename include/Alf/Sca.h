@@ -52,6 +52,7 @@ class Sca
   /// Enum for the different SCA operation types as seen from DIM RPCs
   enum Operation { Command,
                    Wait,
+                   SCReset,
                    Reset,
                    Connect,
                    Error,
@@ -78,6 +79,9 @@ class Sca
   /// Checks if an SCA channel has been selected
   /// \throws o2::alf::ScaException if no SCA channel selected
   void checkChannelSet();
+
+  /// Executes a global SC reset
+  void scReset();
 
   /// Executes an SCA reset
   void reset();

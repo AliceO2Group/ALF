@@ -86,7 +86,7 @@ void Swt::setChannel(int gbtChannel)
   barWrite(sc_regs::SC_LINK.index, mLink.rawLinkId);
 }
 
-void Swt::reset()
+void Swt::scReset()
 {
   barWrite(sc_regs::SC_RESET.index, 0x1);
   barWrite(sc_regs::SC_RESET.index, 0x0); //void cmd to sync clocks
@@ -207,9 +207,9 @@ std::vector<std::pair<Swt::Operation, Swt::Data>> Swt::executeSequence(std::vect
         write(word);
         ret.push_back({ Operation::Write, word });
         //ret.push_back({ Operation::Write, {} }); // TODO: Is it better to return {} ?
-      } else if (operation == Operation::Reset) {
-        reset();
-        ret.push_back({ Operation::Reset, {} });
+      } else if (operation == Operation::SCReset) {
+        scReset();
+        ret.push_back({ Operation::SCReset, {} });
       } else if (operation == Operation::Wait) {
         int waitTime;
         try {
@@ -229,8 +229,8 @@ std::vector<std::pair<Swt::Operation, Swt::Data>> Swt::executeSequence(std::vect
         meaningfulMessage = (boost::format("SWT_SEQUENCE READ timeout=%d serialId=%s link=%d, error='%s'") % boost::get<TimeOut>(data) % mLink.serialId % mLink.linkId % e.what()).str();
       } else if (operation == Operation::Write) {
         meaningfulMessage = (boost::format("SWT_SEQUENCE WRITE data=%s serialId=%s link=%d, error='%s'") % boost::get<SwtWord>(data) % mLink.serialId % mLink.linkId % e.what()).str();
-      } else if (operation == Operation::Reset) {
-        meaningfulMessage = (boost::format("SWT_SEQUENCE RESET serialId=%d link=%s, error='%s'") % mLink.serialId % mLink.linkId % e.what()).str();
+      } else if (operation == Operation::SCReset) {
+        meaningfulMessage = (boost::format("SWT_SEQUENCE SC RESET serialId=%d link=%s, error='%s'") % mLink.serialId % mLink.linkId % e.what()).str();
       } else if (operation == Operation::Wait) {
         meaningfulMessage = (boost::format("SWT_SEQUENCE WAIT waitTime=%d serialId=%s link=%d error='%s'") % boost::get<WaitTime>(data) % mLink.serialId % mLink.linkId % e.what()).str();
       } else {
@@ -261,7 +261,7 @@ std::string Swt::writeSequence(std::vector<std::pair<Operation, Data>> sequence,
       resultBuffer << data << "\n";
     } else if (operation == Operation::Write) {
       resultBuffer << "0\n";
-    } else if (operation == Operation::Reset) {
+    } else if (operation == Operation::SCReset) {
       /* DO NOTHING */
     } else if (operation == Operation::Wait) {
       resultBuffer << std::dec << data << "\n";

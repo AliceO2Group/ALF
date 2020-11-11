@@ -157,7 +157,7 @@ class AlfClient : public AliceO2::Common::Program
     if (mOptions.swt) {
       auto swtOut = swtSequence.write({ std::make_pair("", "lock"),
                                         std::make_pair("0x0000000000000000000", "write"),
-                                        std::make_pair("", "reset"),
+                                        std::make_pair("", "sc_reset"),
                                         std::make_pair("0x0000000000000000000", "write"),
                                         std::make_pair("0x000000001234", "write"),
                                         std::make_pair("", "read"),
@@ -189,7 +189,8 @@ class AlfClient : public AliceO2::Common::Program
     }
 
     if (mOptions.sca) {
-      auto scaOut = scaSequence.write({ std::make_pair("", "reset"),
+      auto scaOut = scaSequence.write({ std::make_pair("", "sc_reset"),
+                                        std::make_pair("", "reset"),
                                         std::make_pair("", "connect"),
                                         std::make_pair("1000", "wait"),
                                         std::make_pair("0x00010002", "0xff000000"),

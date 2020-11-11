@@ -79,7 +79,7 @@ class Ic
   void checkChannelSet();
 
   /// Executes an SC reset
-  void reset();
+  void scReset();
 
   /// Performs an IC read
   /// \param address IC address to read from

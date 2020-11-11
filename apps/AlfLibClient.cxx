@@ -66,10 +66,11 @@ class AlfLibClient : public AliceO2::Common::Program
     if (mOptions.sca) {
       std::cout << "Running SCA test" << std::endl;
       auto sca = Sca(roc::SerialId{ mOptions.serial, mOptions.endpoint }, mOptions.link);
-      sca.reset();
+      sca.scReset();
 
       std::cout << "Running simple SCA operations" << std::endl;
       try {
+        sca.reset();
         sca.connect();
         auto scaOut = sca.executeCommand({ 0x00010002, 0xff000000 });
         std::cout << scaOut.command << " " << scaOut.data << std::endl;
@@ -80,7 +81,8 @@ class AlfLibClient : public AliceO2::Common::Program
       std::cout << "Running an SCA sequence" << std::endl;
       std::vector<std::pair<Sca::Operation, Sca::Data>> ops;
       sca.setChannel(1);
-      ops.push_back({ Sca::Operation::Reset , {} });
+      ops.push_back({ Sca::Operation::SCReset, {} });
+      ops.push_back({ Sca::Operation::Reset, {} });
       ops.push_back({ Sca::Operation::Connect, {} });
       ops.push_back({ Sca::Operation::Command, Sca::CommandData{ 0x00100002, 0xff000000 } });
       ops.push_back({ Sca::Operation::Command, Sca::CommandData{ 0x00100003, 0xff000000 } });
@@ -94,6 +96,8 @@ class AlfLibClient : public AliceO2::Common::Program
           std::cout << "Wait: " << std::dec << boost::get<Sca::WaitTime>(out.second) << std::endl;
         } else if (out.first == Sca::Operation::Reset) {
           std::cout << "Reset" << std::endl;
+        } else if (out.first == Sca::Operation::SCReset) {
+          std::cout << "SC Reset" << std::endl;
         } else if (out.first == Sca::Operation::Connect) {
           std::cout << "Connect " << std::endl;
         } else if (out.first == Sca::Operation::Error) {
@@ -110,7 +114,7 @@ class AlfLibClient : public AliceO2::Common::Program
 
       std::cout << "Running simple SWT operations" << std::endl;
       try {
-        swt.reset();
+        swt.scReset();
         swt.write({ 0xcafe, 0x41d, 0x0 });
         swt.write({ 0xb00f, 0x42, 0x88 });
         swt.write({ 0xb00f, 0x42, 0x88 });
@@ -128,7 +132,7 @@ class AlfLibClient : public AliceO2::Common::Program
       std::vector<std::pair<Swt::Operation, Swt::Data>> ops;
       swt = Swt(roc::SerialId{ mOptions.serial, mOptions.endpoint });
       swt.setChannel(1);
-      ops.push_back({ Swt::Operation::Reset, {} });
+      ops.push_back({ Swt::Operation::SCReset, {} });
       ops.push_back({ Swt::Operation::Write, SwtWord{ 0xcafe, 0x41d, 0x0 } });
       ops.push_back({ Swt::Operation::Write, SwtWord{ 0xb00f, 0x42, 0x88, SwtWord::Size::High } });
       ops.push_back({ Swt::Operation::Write, SwtWord{ 0xb00f, 0x42, 0x88 } });
@@ -149,8 +153,8 @@ class AlfLibClient : public AliceO2::Common::Program
           std::cout << "Write | " << boost::get<SwtWord>(out.second) << std::endl;
         } else if (out.first == Swt::Operation::Read) {
           std::cout << "Read  | " << boost::get<SwtWord>(out.second) << std::endl;
-        } else if (out.first == Swt::Operation::Reset) {
-          std::cout << "Reset |" /* boost::blank here */ << std::endl;
+        } else if (out.first == Swt::Operation::SCReset) {
+          std::cout << "SC Reset |" /* boost::blank here */ << std::endl;
         } else if (out.first == Swt::Operation::Wait) {
           std::cout << "Wait  | " << std::dec << boost::get<int>(out.second) << std::endl;
         } else if (out.first == Swt::Operation::Error) {
@@ -164,7 +168,7 @@ class AlfLibClient : public AliceO2::Common::Program
     if (mOptions.ic) {
       std::cout << "Running IC test" << std::endl;
       auto ic = Ic(roc::SerialId{ mOptions.serial, mOptions.endpoint }, mOptions.link);
-      ic.reset();
+      ic.scReset();
 
       std::cout << "Running Simple IC operations" << std::endl;
       try {

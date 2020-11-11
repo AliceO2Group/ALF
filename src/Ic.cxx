@@ -54,7 +54,7 @@ static constexpr roc::Register IC_RD_DATA(IC_BASE.address + 0x30);
 
 Ic::Ic(AlfLink link) : mBar2(link.bar), mLink(link)
 {
-  reset();
+  scReset();
 
   // Set CFG to 0x3 by default
   barWrite(ic_regs::IC_WR_CFG.index, 0x3);
@@ -117,7 +117,7 @@ void Ic::checkChannelSet()
   }
 }
 
-void Ic::reset()
+void Ic::scReset()
 {
   barWrite(sc_regs::SC_RESET.index, 0x1);
   barWrite(sc_regs::SC_RESET.index, 0x0); //void cmd to sync clocks
