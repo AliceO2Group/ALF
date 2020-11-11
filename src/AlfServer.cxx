@@ -302,6 +302,12 @@ std::pair<Sca::Operation, Sca::Data> AlfServer::stringToScaPair(const std::strin
       BOOST_THROW_EXCEPTION(
         AlfException() << ErrorInfo::Message("Too many arguments for RESET operation"));
     }
+  } else if (scaPair[scaPair.size() - 1] == "sc_reset") {
+    operation = Sca::Operation::SCReset;
+    if (scaPair.size() != 1) {
+      BOOST_THROW_EXCEPTION(
+        AlfException() << ErrorInfo::Message("Too many arguments for SC RESET operation"));
+    }
   } else if (scaPair[scaPair.size() - 1] == "connect") {
     operation = Sca::Operation::Connect;
     if (scaPair.size() != 1) {
@@ -348,11 +354,11 @@ std::pair<Swt::Operation, Swt::Data> AlfServer::stringToSwtPair(const std::strin
       BOOST_THROW_EXCEPTION(
         AlfException() << ErrorInfo::Message("Too few arguments for WRITE operation"));
     }
-  } else if (swtPair[swtPair.size() - 1] == "reset") {
-    operation = Swt::Operation::Reset;
+  } else if (swtPair[swtPair.size() - 1] == "sc_reset") {
+    operation = Swt::Operation::SCReset;
     if (swtPair.size() == 2) {
       BOOST_THROW_EXCEPTION(
-        AlfException() << ErrorInfo::Message("Too many arguments for RESET operation"));
+        AlfException() << ErrorInfo::Message("Too many arguments for SC RESET operation"));
     }
   } else if (swtPair[swtPair.size() - 1] == "wait") {
     operation = Swt::Operation::Wait;

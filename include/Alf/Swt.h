@@ -57,7 +57,7 @@ class Swt
   /// Enum for the different SWT operation types
   enum Operation { Read,
                    Write,
-                   Reset,
+                   SCReset,
                    Wait,
                    Error,
                    Lock };
@@ -85,7 +85,7 @@ class Swt
   void checkChannelSet();
 
   /// Executes an SC reset
-  void reset();
+  void scReset();
 
   /// Writes an SWT word
   /// \param swtWord The SWT word to write

@@ -81,15 +81,15 @@ The services are DIM RPC services. Every RPC is called with a string and expects
     * An SCA command and data pair (e.g. `0x0000f00d,0x0000cafe`)
     * A wait operation (e.g. `30,wait`) in ms, defaults to 3
     * An SCA connect operation (e.g. `connect`)
-    * An SCA reset operation (e.g. `reset`)
+    * An SCA reset operation (`reset`)
+    * An SC global reset operation (`sc_reset`)
     * An instruction to execute the sequence atomically (`lock` - needs to lead the sequence)
 * Returns:
   * Sequence of SCA output as follows: 
     * SCA command and SCA read pairs
     * Wait confirmations with time waited
     * Connect confirmations made up of a "connect" string
-    * No entries for `reset` directives
-    * No entries for `lock` directives
+    * No entries for `reset`, `sc_reset`, and `lock` directives
   
 * Example:
   * DIM input: `0x00000010,0x00000011\n3\n0x000000020,0x00000021`
@@ -101,7 +101,7 @@ The services are DIM RPC services. Every RPC is called with a string and expects
   * Sequence of SWT word and operation pairs as follows:
     * Operations may be:
     * `write` with SWT prefix (e.g. `0x0000f00d,write`)
-    * `reset` (without SWT word)
+    * `sc_reset` without prefix, is global
     * `read` with optional TimeOut prefix (e.g. `2,read`)
     * `wait` with optional WaitTime prefix in ms (e.g. `5,wait`), defaults to 3
     * `lock` which instructs ALF to execute the sequence atomically (needs to lead the sequence)
@@ -109,13 +109,13 @@ The services are DIM RPC services. Every RPC is called with a string and expects
   * Sequence of SWT output as follows:
     * `write` always retuns `0`
     * `read` returns the SWT words present in the CRU SWT FIFO
-    * `reset` returns nothing
+    * `sc_reset` returns nothing
     * `wait` returns time waited
     * `lock` returns nothing
     
 * Example:
-  * DIM input `reset\n0x0000000000badc0ffee,write\nread\n0xbadf00d,write\n4,read`
-  * DIM input (atomic) `lock\nreset\n0x0000000000badc0ffee,write\nread\n0xbadf00d,write\n4,read`
+  * DIM input `sc_reset\n0x0000000000badc0ffee,write\nread\n0xbadf00d,write\n4,read`
+  * DIM input (atomic) `lock\nsc_reset\n0x0000000000badc0ffee,write\nread\n0xbadf00d,write\n4,read`
   * DIM output `0\n0x0000000000badc0ffee\n0\n0x000000000000badf00d\n`
 
 ##### IC_SEQUENCE
@@ -216,7 +216,7 @@ The services are DIM RPC services. Every RPC is called with a string and expects
 ## Slow Control library
 ALF can also be used as a C++ library to access the Slow Control interface of the CRU. The three available interfaces (IC, SCA & SWT) can be accessed through single operations, or sequences of operations.
 
-For each Slow Control (SC) class a handle can be acquired by passing the card ID as an `std::string` argument and, optionally, the SC channel to use as an `int`. Constructors have no side-effects; an SC reset would need to be performed manually before starting operations (e.g. `swt.reset()`).
+For each Slow Control (SC) class a handle can be acquired by passing the card ID as an `std::string` argument and, optionally, the SC channel to use as an `int`. Constructors have no side-effects; an SC reset would need to be performed manually before starting operations (e.g. `swt.scReset()`).
 
 ### Single operations
 Depending on the type, an SC class offers a different interface for single operation execution. `SWT` and `IC` offer `read()` and `write()` standalone operations, while `SCA` only offers `executeCommand()`.
@@ -226,7 +226,7 @@ All the above offer **no implicit locking** and should be manually locked throug
 ### Sequences of operations
 All SC classes offer a function to execute a sequence of their respective operations. This function receives an `std::vector`, consisting of an `std::pair` made up of the compatible SC operation and SC data, as these are defined in their headers.
 
-For example, `SWT` offers `Read, Write, Wait, and Reset` operations which expect a `TimeOut`, an `SwtWord`, a `WaitTime`, and no argument, respectively.
+For example, `SWT` offers `Read, Write, Wait, and SCReset` operations which expect a `TimeOut`, an `SwtWord`, a `WaitTime`, and no argument, respectively.
 
 ```
 typedef int TimeOut;
@@ -239,7 +239,7 @@ typedef boost::variant<boost::blank, TimeOut, WaitTime, SwtWord, std::string> Da
 enum Operation { Read,
                  Write,
                  Wait,
-                 Reset,
+                 SCReset,
                  Error };
                  
 std::vector<std::pair<Operation, Data>> executeSequence(const std::vector<std::pair<Operation, Data>>& operations, bool lock = false);

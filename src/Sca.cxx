@@ -96,20 +96,22 @@ void Sca::checkChannelSet()
   }
 }
 
+void Sca::scReset()
+{
+  barWrite(sc_regs::SC_RESET.index, 0x1);
+  barWrite(sc_regs::SC_RESET.index, 0x0); //void cmd to sync clocks
+}
+
 void Sca::reset()
 {
   barWrite(sc_regs::SCA_WR_CTRL.index, 0x1);
   barWrite(sc_regs::SCA_WR_CTRL.index, 0x0);
-  /* DO I NEED THIS?
-  waitOnBusyClear(); */
 }
 
 void Sca::connect()
 {
   barWrite(sc_regs::SCA_WR_CTRL.index, 0x2);
   barWrite(sc_regs::SCA_WR_CTRL.index, 0x0);
-  /* DO I NEED THIS?
-  waitOnBusyClear(); */
 }
 
 Sca::CommandData Sca::executeCommand(uint32_t command, uint32_t data, bool lock)
@@ -299,6 +301,9 @@ std::vector<std::pair<Sca::Operation, Sca::Data>> Sca::executeSequence(const std
       } else if (operation == Operation::Reset) {
         reset();
         ret.push_back({ Operation::Reset, {} });
+      } else if (operation == Operation::SCReset) {
+        scReset();
+        ret.push_back({ Operation::SCReset, {} });
       } else if (operation == Operation::Connect) {
         connect();
         ret.push_back({ Operation::Connect, {} });
@@ -315,6 +320,8 @@ std::vector<std::pair<Sca::Operation, Sca::Data>> Sca::executeSequence(const std
         meaningfulMessage = (boost::format("SCA_SEQUENCE WAIT waitTime=%d serialId=%s link=%d error='%s'") % boost::get<WaitTime>(data) % mLink.serialId % mLink.linkId % e.what()).str();
       } else if (operation == Operation::Reset) {
         meaningfulMessage = (boost::format("SCA_SEQUENCE RESET serialId=%s link=%d error='%s'") % mLink.serialId % mLink.linkId % e.what()).str();
+      } else if (operation == Operation::SCReset) {
+        meaningfulMessage = (boost::format("SCA_SEQUENCE SC RESET serialId=%s link=%d error='%s'") % mLink.serialId % mLink.linkId % e.what()).str();
       } else if (operation == Operation::Connect) {
         meaningfulMessage = (boost::format("SCA_SEQUENCE CONNECT serialId=%s link=%d error='%s'") % mLink.serialId % mLink.linkId % e.what()).str();
       } else {
@@ -345,7 +352,7 @@ std::string Sca::writeSequence(const std::vector<std::pair<Operation, Data>>& op
       resultBuffer << data << "\n"; // "[cmd],[data]\n"
     } else if (operation == Operation::Wait) {
       resultBuffer << std::dec << data << "\n"; // "[time]\n"
-    } else if (operation == Operation::Reset) {
+    } else if (operation == Operation::Reset || operation == Operation::SCReset) {
       /* DO NOTHING */
     } else if (operation == Operation::Connect) {
       resultBuffer << "connect\n"; // echo
