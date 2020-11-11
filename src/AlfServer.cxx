@@ -296,6 +296,18 @@ std::pair<Sca::Operation, Sca::Data> AlfServer::stringToScaPair(const std::strin
     } catch (const std::exception& e) {
       BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("SCA Wait Time provided cannot be converted to int"));
     }
+  } else if (scaPair[scaPair.size() - 1] == "reset") {
+    operation = Sca::Operation::Reset;
+    if (scaPair.size() != 1) {
+      BOOST_THROW_EXCEPTION(
+        AlfException() << ErrorInfo::Message("Too many arguments for RESET operation"));
+    }
+  } else if (scaPair[scaPair.size() - 1] == "connect") {
+    operation = Sca::Operation::Connect;
+    if (scaPair.size() != 1) {
+      BOOST_THROW_EXCEPTION(
+        AlfException() << ErrorInfo::Message("Too many arguments for CONNECT operation"));
+    }
   } else { // regular sca command
     operation = Sca::Operation::Command;
     if (scaPair.size() != 2) {

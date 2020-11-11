@@ -80,10 +80,16 @@ The services are DIM RPC services. Every RPC is called with a string and expects
     * Operations may be:
     * An SCA command and data pair (e.g. `0x0000f00d,0x0000cafe`)
     * A wait operation (e.g. `30,wait`) in ms, defaults to 3
+    * An SCA connect operation (e.g. `connect`)
+    * An SCA reset operation (e.g. `reset`)
     * An instruction to execute the sequence atomically (`lock` - needs to lead the sequence)
 * Returns:
-  * Sequence of SCA command and SCA read pairs, and wait confirmations
-  * No entries for `lock` directives
+  * Sequence of SCA output as follows: 
+    * SCA command and SCA read pairs
+    * Wait confirmations with time waited
+    * Connect confirmations made up of a "connect" string
+    * No entries for `reset` directives
+    * No entries for `lock` directives
   
 * Example:
   * DIM input: `0x00000010,0x00000011\n3\n0x000000020,0x00000021`
@@ -227,12 +233,12 @@ typedef int TimeOut;
 
 /// Typedef for the Data type of an SWT sequence operation.
 /// Variant of TimeOut for reads, SwtWord for writes, std::string for Errors
-typedef boost::variant<boost::blank, TimeOut, SwtWord, std::string> Data;
+typedef boost::variant<boost::blank, TimeOut, WaitTime, SwtWord, std::string> Data;
 
 /// Enum for the different SWT operation types
 enum Operation { Read,
                  Write,
-                 WaitTime,
+                 Wait,
                  Reset,
                  Error };
                  
