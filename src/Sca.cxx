@@ -102,13 +102,13 @@ void Sca::scReset()
   barWrite(sc_regs::SC_RESET.index, 0x0); //void cmd to sync clocks
 }
 
-void Sca::reset()
+void Sca::svlReset()
 {
   barWrite(sc_regs::SCA_WR_CTRL.index, 0x1);
   barWrite(sc_regs::SCA_WR_CTRL.index, 0x0);
 }
 
-void Sca::connect()
+void Sca::svlConnect()
 {
   barWrite(sc_regs::SCA_WR_CTRL.index, 0x2);
   barWrite(sc_regs::SCA_WR_CTRL.index, 0x0);
@@ -298,15 +298,15 @@ std::vector<std::pair<Sca::Operation, Sca::Data>> Sca::executeSequence(const std
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
         ret.push_back({ operation, waitTime });
-      } else if (operation == Operation::Reset) {
-        reset();
-        ret.push_back({ Operation::Reset, {} });
+      } else if (operation == Operation::SVLReset) {
+        svlReset();
+        ret.push_back({ Operation::SVLReset, {} });
       } else if (operation == Operation::SCReset) {
         scReset();
         ret.push_back({ Operation::SCReset, {} });
-      } else if (operation == Operation::Connect) {
-        connect();
-        ret.push_back({ Operation::Connect, {} });
+      } else if (operation == Operation::SVLConnect) {
+        svlConnect();
+        ret.push_back({ Operation::SVLConnect, {} });
       } else {
         BOOST_THROW_EXCEPTION(ScaException() << ErrorInfo::Message("SCA operation type unknown"));
       }
@@ -318,12 +318,12 @@ std::vector<std::pair<Sca::Operation, Sca::Data>> Sca::executeSequence(const std
         meaningfulMessage = (boost::format("SCA_SEQUENCE cmd=0x%08x data=0x%08x serialId=%s link=%d error='%s'") % boost::get<CommandData>(data).command % boost::get<CommandData>(data).data % mLink.serialId % mLink.linkId % e.what()).str();
       } else if (operation == Operation::Wait) {
         meaningfulMessage = (boost::format("SCA_SEQUENCE WAIT waitTime=%d serialId=%s link=%d error='%s'") % boost::get<WaitTime>(data) % mLink.serialId % mLink.linkId % e.what()).str();
-      } else if (operation == Operation::Reset) {
-        meaningfulMessage = (boost::format("SCA_SEQUENCE RESET serialId=%s link=%d error='%s'") % mLink.serialId % mLink.linkId % e.what()).str();
+      } else if (operation == Operation::SVLReset) {
+        meaningfulMessage = (boost::format("SCA_SEQUENCE SVL RESET serialId=%s link=%d error='%s'") % mLink.serialId % mLink.linkId % e.what()).str();
       } else if (operation == Operation::SCReset) {
         meaningfulMessage = (boost::format("SCA_SEQUENCE SC RESET serialId=%s link=%d error='%s'") % mLink.serialId % mLink.linkId % e.what()).str();
-      } else if (operation == Operation::Connect) {
-        meaningfulMessage = (boost::format("SCA_SEQUENCE CONNECT serialId=%s link=%d error='%s'") % mLink.serialId % mLink.linkId % e.what()).str();
+      } else if (operation == Operation::SVLConnect) {
+        meaningfulMessage = (boost::format("SCA_SEQUENCE SVL CONNECT serialId=%s link=%d error='%s'") % mLink.serialId % mLink.linkId % e.what()).str();
       } else {
         meaningfulMessage = (boost::format("SCA_SEQUENCE UNKNOWN serialId=%s link=%d error='%s'") % mLink.serialId % mLink.linkId % e.what()).str();
       }
@@ -352,10 +352,10 @@ std::string Sca::writeSequence(const std::vector<std::pair<Operation, Data>>& op
       resultBuffer << data << "\n"; // "[cmd],[data]\n"
     } else if (operation == Operation::Wait) {
       resultBuffer << std::dec << data << "\n"; // "[time]\n"
-    } else if (operation == Operation::Reset || operation == Operation::SCReset) {
+    } else if (operation == Operation::SVLReset || operation == Operation::SCReset) {
       /* DO NOTHING */
-    } else if (operation == Operation::Connect) {
-      resultBuffer << "connect\n"; // echo
+    } else if (operation == Operation::SVLConnect) {
+      resultBuffer << "svl_connect\n"; // echo
     } else if (operation == Operation::Error) {
       resultBuffer << data; // "[error_msg]"
       Logger::get().err() << data << endm;
