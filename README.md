@@ -80,16 +80,16 @@ The services are DIM RPC services. Every RPC is called with a string and expects
     * Operations may be:
     * An SCA command and data pair (e.g. `0x0000f00d,0x0000cafe`)
     * A wait operation (e.g. `30,wait`) in ms, defaults to 3
-    * An SCA connect operation (e.g. `connect`)
-    * An SCA reset operation (`reset`)
+    * An SCA supervisory level connect operation (e.g. `svl_connect`)
+    * An SCA supervisory level reset operation (`svl_reset`)
     * An SC global reset operation (`sc_reset`)
     * An instruction to execute the sequence atomically (`lock` - needs to lead the sequence)
 * Returns:
   * Sequence of SCA output as follows: 
     * SCA command and SCA read pairs
     * Wait confirmations with time waited
-    * Connect confirmations made up of a "connect" string
-    * No entries for `reset`, `sc_reset`, and `lock` directives
+    * Connect confirmations made up of a "svl_connect" string
+    * No entries for `svl_reset`, `sc_reset`, and `lock` directives
   
 * Example:
   * DIM input: `0x00000010,0x00000011\n3\n0x000000020,0x00000021`

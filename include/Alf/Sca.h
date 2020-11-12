@@ -53,8 +53,8 @@ class Sca
   enum Operation { Command,
                    Wait,
                    SCReset,
-                   Reset,
-                   Connect,
+                   SVLReset,
+                   SVLConnect,
                    Error,
                    Lock };
 
@@ -84,10 +84,10 @@ class Sca
   void scReset();
 
   /// Executes an SCA reset
-  void reset();
+  void svlReset();
 
   /// Executes an SCA connect
-  void connect();
+  void svlConnect();
 
   /// Executes an SCA command
   /// \param commandData SCA command, data pair
