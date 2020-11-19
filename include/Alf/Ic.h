@@ -58,7 +58,7 @@ class Ic
 
   /// Internal constructor for the ALF server
   /// \param link AlfLink holding useful information coming from the AlfServer class
-  Ic(AlfLink link);
+  Ic(AlfLink link, std::shared_ptr<lla::Session> llaSession);
 
   /// External constructor
   /// \param cardId The card ID for which to get the IC handle.

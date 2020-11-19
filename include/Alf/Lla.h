@@ -28,15 +28,16 @@ namespace alf
 class LlaSession
 {
  public:
+  LlaSession(std::shared_ptr<lla::Session> llaSession);
   LlaSession(std::string sessionName, roc::SerialId serialId);
   void start();
   void stop();
 
  private:
   lla::SessionParameters mParams;
-  std::unique_ptr<lla::Session> mSession;
+  std::shared_ptr<lla::Session> mSession;
   std::string mSessionName;
-  roc::SerialId mSerialId;
+  roc::SerialId mSerialId = -1;
 };
 
 } // namespace alf

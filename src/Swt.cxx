@@ -42,9 +42,9 @@ namespace alf
 
 namespace sc_regs = AliceO2::roc::Cru::ScRegisters;
 
-Swt::Swt(AlfLink link) : mBar2(link.bar), mLink(link)
+Swt::Swt(AlfLink link, std::shared_ptr<lla::Session> llaSession) : mBar2(link.bar), mLink(link)
 {
-  mLlaSession = std::make_unique<LlaSession>("DDT", link.serialId);
+  mLlaSession = std::make_unique<LlaSession>(llaSession);
 }
 
 Swt::Swt(const roc::Parameters::CardIdType& cardId, int linkId)

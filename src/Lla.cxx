@@ -20,6 +20,11 @@ namespace o2
 namespace alf
 {
 
+LlaSession::LlaSession(std::shared_ptr<lla::Session> llaSession)
+  : mSession(llaSession)
+{
+}
+
 LlaSession::LlaSession(std::string sessionName, roc::SerialId serialId)
   : mSessionName(sessionName),
     mSerialId(serialId)
@@ -30,7 +35,7 @@ void LlaSession::start()
 {
   if (!mSession) {
     mParams = lla::SessionParameters::makeParameters(mSessionName, mSerialId);
-    mSession = std::make_unique<lla::Session>(mParams);
+    mSession = std::make_shared<lla::Session>(mParams);
   }
 
   if (!mSession->isStarted()) {
