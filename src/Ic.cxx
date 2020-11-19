@@ -52,14 +52,14 @@ static constexpr roc::Register IC_WR_CMD(IC_BASE.address + 0x28);
 static constexpr roc::Register IC_RD_DATA(IC_BASE.address + 0x30);
 } // namespace ic_regs
 
-Ic::Ic(AlfLink link) : mBar2(link.bar), mLink(link)
+Ic::Ic(AlfLink link, std::shared_ptr<lla::Session> llaSession) : mBar2(link.bar), mLink(link)
 {
   scReset();
 
   // Set CFG to 0x3 by default
   barWrite(ic_regs::IC_WR_CFG.index, 0x3);
 
-  mLlaSession = std::make_unique<LlaSession>("DDT", link.serialId);
+  mLlaSession = std::make_unique<LlaSession>(llaSession);
 }
 
 Ic::Ic(const roc::Parameters::CardIdType& cardId, int linkId)

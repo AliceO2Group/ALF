@@ -60,7 +60,7 @@ class Sca
 
   /// Internal constructor for the AlfServer
   /// \param link AlfLink holding useful information coming from the AlfServer class
-  Sca(AlfLink link);
+  Sca(AlfLink link, std::shared_ptr<lla::Session> llaSession);
 
   /// External constructor
   /// \param cardId The card ID for which to get the SCA handle.

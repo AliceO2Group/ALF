@@ -83,7 +83,7 @@ std::string AlfServer::scaBlobWrite(const std::string& parameter, AlfLink link)
 {
   std::vector<std::string> stringPairs = Util::split(parameter, argumentSeparator());
   std::vector<std::pair<Sca::Operation, Sca::Data>> scaPairs = parseStringToScaPairs(stringPairs);
-  Sca sca = Sca(link);
+  Sca sca = Sca(link, mSessions[link.serialId]);
 
   bool lock = false;
   // Check if the operation should be locked
@@ -99,7 +99,7 @@ std::string AlfServer::swtBlobWrite(const std::string& parameter, AlfLink link)
 
   std::vector<std::string> stringPairs = Util::split(parameter, argumentSeparator());
   std::vector<std::pair<Swt::Operation, Swt::Data>> swtPairs = parseStringToSwtPairs(stringPairs);
-  Swt swt = Swt(link);
+  Swt swt = Swt(link, mSessions[link.serialId]);
 
   bool lock = false;
   // Check if the operation should be locked
@@ -115,7 +115,7 @@ std::string AlfServer::icBlobWrite(const std::string& parameter, AlfLink link)
 
   std::vector<std::string> stringPairs = Util::split(parameter, argumentSeparator());
   std::vector<std::pair<Ic::Operation, Ic::Data>> icPairs = parseStringToIcPairs(stringPairs);
-  Ic ic = Ic(link);
+  Ic ic = Ic(link, mSessions[link.serialId]);
 
   bool lock = false;
   // Check if the operation should be locked
@@ -136,7 +136,7 @@ std::string AlfServer::icGbtI2cWrite(const std::string& parameter, AlfLink link)
 
   uint32_t value = Util::stringToHex(params[0]);
 
-  Ic ic = Ic(link);
+  Ic ic = Ic(link, mSessions[link.serialId]);
   ic.writeGbtI2c(value);
   return "";
 }
@@ -163,10 +163,7 @@ std::string AlfServer::llaSessionStart(const std::string& parameter, roc::Serial
   }
 
   if (mSessions.find(serialId) == mSessions.end()) {
-    lla::SessionParameters params = lla::SessionParameters::makeParameters()
-                                      .setSessionName(parameters[0])
-                                      .setCardId(serialId);
-    mSessions[serialId] = std::make_unique<lla::Session>(params);
+    BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("Session not initialized for serial  " + serialId.toString()));
   } /*else {
     // TODO: Update session name?
   }*/
@@ -572,19 +569,24 @@ void AlfServer::makeRpcServers(std::vector<AlfLink> links)
                                      [link, this](auto parameter) { return llaSessionStop(parameter, link.serialId); }));
       }
 
+      lla::SessionParameters params = lla::SessionParameters::makeParameters()
+                                        .setSessionName("ALF")
+                                        .setCardId(link.serialId);
+      mSessions[link.serialId] = std::make_shared<lla::Session>(params);
+
       // SCA Sequence
       servers.push_back(makeServer(names.scaSequence(),
-                                   [link](auto parameter) { return scaBlobWrite(parameter, link); }));
+                                   [link, this](auto parameter) { return scaBlobWrite(parameter, link); }));
       // SWT Sequence
       servers.push_back(makeServer(names.swtSequence(),
-                                   [link](auto parameter) { return swtBlobWrite(parameter, link); }));
+                                   [link, this](auto parameter) { return swtBlobWrite(parameter, link); }));
       // IC Sequence
       servers.push_back(makeServer(names.icSequence(),
-                                   [link](auto parameter) { return icBlobWrite(parameter, link); }));
+                                   [link, this](auto parameter) { return icBlobWrite(parameter, link); }));
 
       // IC GBT I2C write
       servers.push_back(makeServer(names.icGbtI2cWrite(),
-                                   [link](auto parameter) { return icGbtI2cWrite(parameter, link); }));
+                                   [link, this](auto parameter) { return icGbtI2cWrite(parameter, link); }));
 
     } else if (link.cardType == roc::CardType::Crorc) {
       // Register Sequence

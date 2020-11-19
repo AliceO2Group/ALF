@@ -38,10 +38,10 @@ namespace o2
 namespace alf
 {
 
-Sca::Sca(AlfLink link)
+Sca::Sca(AlfLink link, std::shared_ptr<lla::Session> llaSession)
   : mBar2(link.bar), mLink(link)
 {
-  mLlaSession = std::make_unique<LlaSession>("DDT", link.serialId);
+  mLlaSession = std::make_unique<LlaSession>(llaSession);
 }
 
 Sca::Sca(const roc::Parameters::CardIdType& cardId, int linkId)

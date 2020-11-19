@@ -64,7 +64,7 @@ class Swt
 
   /// Internal constructor for the ALF server
   /// \param link AlfLink holding useful information coming from the AlfServer class
-  Swt(AlfLink link);
+  Swt(AlfLink link, std::shared_ptr<lla::Session> llaSession);
 
   /// External constructor
   /// \param cardId The card ID for which to get the SWT handle.
