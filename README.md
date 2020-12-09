@@ -35,7 +35,15 @@ o2-alf-lib-client --card-id=#1 --serial=1041 --endpoint=1 --swt
 
 ## DIM Services
 
-Service names are identified by the server's hostname, the card's serial and endpoint pair and the link, as follows:
+Service names may refer to the card or the link level, depending on the functionality published.
+
+Card-level services are identified by the server's hostname, and the card's serial:
+
+`
+ALF_[hostname]/SERIAL_[serial]/[service_name]
+`
+
+Link-level services are identified by the server's hostname, the card's serial and endpoint pair, and the link, as follows:
 
 `
 ALF_[hostname]/SERIAL_[serial]/ENDPOINT_[endpoint]/LINK_[link]/[service_name]
