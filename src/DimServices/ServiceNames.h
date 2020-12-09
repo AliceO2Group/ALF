@@ -46,7 +46,7 @@ class ServiceNames
 
  private:
   std::string formatLink(std::string name) const;
-  std::string format(std::string name) const;
+  std::string formatCard(std::string name) const;
   std::string mAlfId;
   const roc::SerialId mSerialId;
   const int mLink;
