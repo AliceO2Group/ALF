@@ -58,6 +58,18 @@ find_package(ReadoutCard REQUIRED)
 find_package(LLA REQUIRED)
 find_package(DIM REQUIRED)
 
+if(NOT APPLE)
+  find_package(Python3 3.6 COMPONENTS Interpreter Development)
+  if(Python3_FOUND)
+    set(boost_python_component "python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}")
+  else()
+    # Backwards compatible. Can be removed once the Python3 recipe is stable
+    message(WARNING "Python 3 was not found: falling back to Python 2")
+    find_package(Python2 2.7 COMPONENTS Development REQUIRED)
+    set(boost_python_component "python27")
+  endif()
+endif()
+
 ####################################
 # Module, library and executable definition
 ####################################
@@ -75,6 +87,8 @@ target_sources(ALF PRIVATE
   src/DimServices/DimServices.cxx
   src/DimServices/ServiceNames.cxx
   src/Logger.cxx
+  $<$<BOOL:${Python2_FOUND}>:src/PythonInterface.cxx>
+  $<$<BOOL:${Python3_FOUND}>:src/PythonInterface.cxx>
 )
 
 target_include_directories(ALF
@@ -91,6 +105,10 @@ set(LINK_LIBS
     AliceO2::Common
     AliceO2::InfoLogger
     Boost::boost
+    $<$<BOOL:${Python2_FOUND}>:Boost::python27>
+    $<$<BOOL:${Python2_FOUND}>:Python2::Python>
+    $<$<BOOL:${Python3_FOUND}>:Boost::python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR}>
+    $<$<BOOL:${Python3_FOUND}>:Python3::Python>
 )
 
 # Link targets

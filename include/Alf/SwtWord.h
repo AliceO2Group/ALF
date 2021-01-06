@@ -50,6 +50,7 @@ class SwtWord
   void setMed(uint32_t med);
   void setHigh(uint16_t high);
   void setSize(Size size);
+  void setSize(std::string size);
   uint32_t getLow() const;
   uint32_t getMed() const;
   uint16_t getHigh() const;

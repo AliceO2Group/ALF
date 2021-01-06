@@ -277,5 +277,33 @@ std::string Ic::writeSequence(std::vector<std::pair<Operation, Data>> ops, bool 
   return resultBuffer.str();
 }
 
+std::string Ic::IcOperationToString(Ic::Operation op) {
+  if (op == Ic::Operation::Read) {
+    return "read";
+  } else if (op == Ic::Operation::Write) {
+    return "write";
+  } else if (op == Ic::Operation::Error) {
+    return "error";
+  } else if (op == Ic::Operation::Lock) {
+    return "lock";
+  }
+
+  BOOST_THROW_EXCEPTION(IcException() << ErrorInfo::Message("Cannot convert Ic operation to string"));
+}
+
+Ic::Operation Ic::StringToIcOperation(std::string op) {
+  if (op == "read") {
+    return Ic::Operation::Read;
+  } else if (op == "write") {
+    return Ic::Operation::Write;
+  } else if (op == "error") {
+    return Ic::Operation::Error;
+  } else if (op == "lock") {
+    return Ic::Operation::Lock;
+  }
+
+  BOOST_THROW_EXCEPTION(IcException() << ErrorInfo::Message("Cannot convert IC operation to string " + op));
+}
+
 } // namespace alf
 } // namespace o2
