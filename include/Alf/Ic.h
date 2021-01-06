@@ -74,10 +74,6 @@ class Ic
   /// \param gbtChannel The IC channel to set.
   void setChannel(int gbtChannel);
 
-  /// Checks if an IC channel is selected
-  /// \throws o2::alf::IcException if no IC channel selected
-  void checkChannelSet();
-
   /// Executes an SC reset
   void scReset();
 
@@ -133,8 +129,16 @@ class Ic
   ///         o2::lla::LlaException on lock fail
   std::string writeSequence(std::vector<std::pair<Operation, Data>> ops, bool lock = false);
 
+  static std::string IcOperationToString(Operation op);
+  static Ic::Operation StringToIcOperation(std::string op);
+
  private:
   void init(const roc::Parameters::CardIdType& cardId, int linkId);
+
+  /// Checks if an IC channel is selected
+  /// \throws o2::alf::IcException if no IC channel selected
+  void checkChannelSet();
+
   void barWrite(uint32_t offset, uint32_t data);
   uint32_t barRead(uint32_t index);
 

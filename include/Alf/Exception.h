@@ -31,6 +31,8 @@ struct SwtException : AliceO2::Common::Exception {
 };
 struct IcException : AliceO2::Common::Exception {
 };
+struct PythonException : AliceO2::Common::Exception {
+};
 
 namespace ErrorInfo
 {

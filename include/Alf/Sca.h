@@ -76,10 +76,6 @@ class Sca
   /// \param gbtChannel The channel to set
   void setChannel(int gbtChannel);
 
-  /// Checks if an SCA channel has been selected
-  /// \throws o2::alf::ScaException if no SCA channel selected
-  void checkChannelSet();
-
   /// Executes a global SC reset
   void scReset();
 
@@ -124,8 +120,15 @@ class Sca
   ///         o2::alf::ScaException on invalid operation or error
   std::string writeSequence(const std::vector<std::pair<Operation, Data>>& operations, bool lock = false);
 
+  static std::string ScaOperationToString(Operation op);
+  static Sca::Operation StringToScaOperation(std::string op);
+
  private:
   void init(const roc::Parameters::CardIdType& cardId, int linkId);
+
+  /// Checks if an SCA channel has been selected
+  /// \throws o2::alf::ScaException if no SCA channel selected
+  void checkChannelSet();
 
   uint32_t barRead(uint32_t index);
   void barWrite(uint32_t index, uint32_t data);

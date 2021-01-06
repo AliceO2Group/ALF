@@ -80,10 +80,6 @@ class Swt
   /// \param gbtChannel The channel to set
   void setChannel(int gbtChannel);
 
-  /// Checks if an SWT channel has been selected
-  /// \throws o2::alf::SwtException if no SWT channel selected
-  void checkChannelSet();
-
   /// Executes an SC reset
   void scReset();
 
@@ -116,8 +112,18 @@ class Swt
   ///         o2::alf::SwtException on invalid operation or error
   std::string writeSequence(std::vector<std::pair<Operation, Data>> sequence, bool lock = false);
 
+  static std::string SwtOperationToString(Operation op);
+  static Operation StringToSwtOperation(std::string op);
+
+  static constexpr int DEFAULT_SWT_TIMEOUT_MS = 10;
+
  private:
   void init(const roc::Parameters::CardIdType& cardId, int linkId);
+
+  /// Checks if an SWT channel has been selected
+  /// \throws o2::alf::SwtException if no SWT channel selected
+  void checkChannelSet();
+
   void barWrite(uint32_t offset, uint32_t data);
   uint32_t barRead(uint32_t index);
 
@@ -127,7 +133,6 @@ class Swt
   std::unique_ptr<LlaSession> mLlaSession;
 
   static constexpr int DEFAULT_SWT_WAIT_TIME_MS = 3;
-  static constexpr int DEFAULT_SWT_TIMEOUT_MS = 10;
 };
 
 } // namespace alf

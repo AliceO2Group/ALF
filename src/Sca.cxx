@@ -372,6 +372,46 @@ std::string Sca::writeSequence(const std::vector<std::pair<Operation, Data>>& op
   return resultBuffer.str();
 }
 
+std::string Sca::ScaOperationToString(Sca::Operation op) {
+  if (op == Sca::Operation::Command) {
+    return "command";
+  } else if (op == Sca::Operation::Wait) {
+    return "wait";
+  } else if (op == Sca::Operation::SCReset) {
+    return "sc_reset";
+  } else if (op == Sca::Operation::SVLReset) {
+    return "svl_reset";
+  } else if (op == Sca::Operation::SVLConnect) {
+    return "svl_connect";
+  } else if (op == Sca::Operation::Lock) {
+    return "lock";
+  } else if (op == Sca::Operation::Error) {
+    return "error";
+  }
+
+  BOOST_THROW_EXCEPTION(ScaException() << ErrorInfo::Message("Cannot convert SCA operation to string"));
+}
+
+Sca::Operation Sca::StringToScaOperation(std::string op) {
+  if (op == "command") {
+    return Sca::Operation::Command;
+  } else if (op == "wait") {
+    return Sca::Operation::Wait;
+  } else if (op == "sc_reset") {
+    return Sca::Operation::SCReset;
+  } else if (op == "svl_reset") {
+    return Sca::Operation::SVLReset;
+  } else if (op == "svl_connect") {
+    return Sca::Operation::SVLConnect;
+  } else if (op == "lock") {
+    return Sca::Operation::Lock;
+  } else if (op == "error") {
+    return Sca::Operation::Error;
+  }
+
+  BOOST_THROW_EXCEPTION(ScaException() << ErrorInfo::Message("Cannot convert SCA operation to string " + op));
+}
+
 std::ostream& operator<<(std::ostream& output, const Sca::CommandData& commandData)
 {
   output << Util::formatValue(commandData.command) << "," << Util::formatValue(commandData.data);

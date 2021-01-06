@@ -281,5 +281,41 @@ std::string Swt::writeSequence(std::vector<std::pair<Operation, Data>> sequence,
   return resultBuffer.str();
 }
 
+std::string Swt::SwtOperationToString(Swt::Operation op) {
+  if (op == Swt::Operation::Read) {
+    return "read";
+  } else if (op == Swt::Operation::Write) {
+    return "write";
+  } else if (op == Swt::Operation::SCReset) {
+    return "sc_reset";
+  } else if (op == Swt::Operation::Wait) {
+    return "wait";
+  } else if (op == Swt::Operation::Lock) {
+    return "lock";
+  } else if (op == Swt::Operation::Error) {
+    return "error";
+  }
+
+  BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("Cannot convert SWT operation to string"));
+}
+
+Swt::Operation Swt::StringToSwtOperation(std::string op) {
+  if (op == "read") {
+    return Swt::Operation::Read;
+  } else if (op == "write") {
+    return Swt::Operation::Write;
+  } else if (op == "sc_reset") {
+    return Swt::Operation::SCReset;
+  } else if (op == "wait") {
+    return Swt::Operation::Wait;
+  } else if (op == "lock") {
+    return Swt::Operation::Lock;
+  } else if (op == "error") {
+    return Swt::Operation::Error;
+  }
+
+  BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("Cannot convert operation to SWT string " + op));
+}
+
 } // namespace alf
 } // namespace o2
