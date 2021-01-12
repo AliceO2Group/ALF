@@ -56,7 +56,7 @@ Sca::Sca(std::string cardId, int linkId)
 
 void Sca::init(const roc::Parameters::CardIdType& cardId, int linkId)
 {
-  if (mLink.linkId >= CRU_NUM_LINKS) {
+  if (linkId >= CRU_NUM_LINKS) {
     BOOST_THROW_EXCEPTION(
       ScaException() << ErrorInfo::Message("Maximum link number exceeded"));
   }
