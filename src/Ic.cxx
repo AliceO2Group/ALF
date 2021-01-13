@@ -230,11 +230,11 @@ std::vector<std::pair<Ic::Operation, Ic::Data>> Ic::executeSequence(std::vector<
     Data data = it.second;
     try {
       if (operation == Operation::Read) {
-        auto out = read(boost::get<IcData>(data));
+        auto out = read(boost::get<uint32_t>(data));
         ret.push_back({ operation, out });
       } else if (operation == Operation::Write) {
-        auto out = write(boost::get<IcData>(data));
-        ret.push_back({ operation, out });
+        write(boost::get<IcData>(data));
+        ret.push_back({ operation, IcData{ boost::get<IcData>(data) }});
       } else {
         BOOST_THROW_EXCEPTION(IcException() << ErrorInfo::Message("IC operation type unknown"));
       }
