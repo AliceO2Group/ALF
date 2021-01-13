@@ -78,6 +78,11 @@ void Sca::init(const roc::Parameters::CardIdType& cardId, int linkId)
 
 void Sca::setChannel(int gbtChannel)
 {
+  if (gbtChannel >= CRU_NUM_LINKS) {
+    BOOST_THROW_EXCEPTION(
+      ScaException() << ErrorInfo::Message("Maximum link number exceeded"));
+  }
+
   mLink.linkId = gbtChannel;
   mLink.rawLinkId = mLink.serialId.getEndpoint() * 12 + gbtChannel;
   barWrite(sc_regs::SC_LINK.index, mLink.rawLinkId);
