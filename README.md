@@ -260,7 +260,7 @@ More details and examples on the API can be found in the doxygen docs in the hea
 
 ### Using ALF as a library
 
-To use ALF as a library the "Alf/Alf.h" convenience header may be used, as seen in [this](src/example.cxx) example. To build, it is necessary to load the alisw environment (`aliswmod enter ALF`) and run the following g++ command. Make sure to adjust the versions according to `aliswmod list` output, when the environment is loaded.
+To use ALF as a library the "Alf/Alf.h" convenience header may be used, as seen in [this](src/example.cxx) example. To build, it is necessary to load the ALF environment (`module load ALF`) and run the following g++ command. Make sure to adjust the versions according to `module list` output, when the environment is loaded.
 
 ```
 g++ -Wall \
@@ -282,3 +282,14 @@ g++ -Wall \
   -L /opt/alisw/el7/ReadoutCard/v0.21.3-1/lib \
   alf-lib-example.cxx -o ale
 ```
+
+### Python bindings
+The ALF library also offers a python interface through the use of `Boost.Python`. To use it the ALF environment needs to be loaded and the `libO2Alf` library imported. 
+
+To read the documentation for the python bindings:
+```
+module load ALF
+python -c "import libO2Alf; help(libO2Alf)"
+```
+
+Non-exhaustive examples on usage may be found in the [test](test) directory.
