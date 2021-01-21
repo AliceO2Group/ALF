@@ -551,22 +551,22 @@ void AlfServer::makeRpcServers(std::vector<AlfLink> links)
       if (link.linkId == 0 && link.serialId.getEndpoint() == 0) { // Services per card
         // Register Read
         servers.push_back(makeServer(names.registerRead(),
-              [bar](auto parameter) { return registerRead(parameter, bar); }));
+                                     [bar](auto parameter) { return registerRead(parameter, bar); }));
         // Register Write
         servers.push_back(makeServer(names.registerWrite(),
-              [bar](auto parameter) { return registerWrite(parameter, bar); }));
+                                     [bar](auto parameter) { return registerWrite(parameter, bar); }));
 
         // Pattern Player
         servers.push_back(makeServer(names.patternPlayer(),
-              [bar](auto parameter) { return patternPlayer(parameter, bar); }));
+                                     [bar](auto parameter) { return patternPlayer(parameter, bar); }));
 
         // LLA Session Start
         servers.push_back(makeServer(names.llaSessionStart(),
-              [link, this](auto parameter) { return llaSessionStart(parameter, link.serialId); }));
+                                     [link, this](auto parameter) { return llaSessionStart(parameter, link.serialId); }));
 
         // LLA Session Stop
         servers.push_back(makeServer(names.llaSessionStop(),
-              [link, this](auto parameter) { return llaSessionStop(parameter, link.serialId); }));
+                                     [link, this](auto parameter) { return llaSessionStop(parameter, link.serialId); }));
       }
 
       lla::SessionParameters params = lla::SessionParameters::makeParameters()

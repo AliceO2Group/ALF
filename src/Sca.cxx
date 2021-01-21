@@ -41,6 +41,7 @@ namespace alf
 Sca::Sca(AlfLink link, std::shared_ptr<lla::Session> llaSession)
   : mBar2(link.bar), mLink(link)
 {
+  Logger::setFacility("ALF/SCA");
   mLlaSession = std::make_unique<LlaSession>(llaSession);
 }
 
@@ -56,6 +57,7 @@ Sca::Sca(std::string cardId, int linkId)
 
 void Sca::init(const roc::Parameters::CardIdType& cardId, int linkId)
 {
+  Logger::setFacility("ALF/SCA");
   if (linkId >= CRU_NUM_LINKS) {
     BOOST_THROW_EXCEPTION(
       ScaException() << ErrorInfo::Message("Maximum link number exceeded"));
@@ -363,7 +365,7 @@ std::string Sca::writeSequence(const std::vector<std::pair<Operation, Data>>& op
       resultBuffer << "svl_connect\n"; // echo
     } else if (operation == Operation::Error) {
       resultBuffer << data; // "[error_msg]"
-      Logger::get().err() << data << endm;
+      Logger::get() << data << LogErrorDevel << endm;
       BOOST_THROW_EXCEPTION(ScaException() << ErrorInfo::Message(resultBuffer.str()));
       break;
     }
@@ -372,7 +374,8 @@ std::string Sca::writeSequence(const std::vector<std::pair<Operation, Data>>& op
   return resultBuffer.str();
 }
 
-std::string Sca::ScaOperationToString(Sca::Operation op) {
+std::string Sca::ScaOperationToString(Sca::Operation op)
+{
   if (op == Sca::Operation::Command) {
     return "command";
   } else if (op == Sca::Operation::Wait) {
@@ -392,7 +395,8 @@ std::string Sca::ScaOperationToString(Sca::Operation op) {
   BOOST_THROW_EXCEPTION(ScaException() << ErrorInfo::Message("Cannot convert SCA operation to string"));
 }
 
-Sca::Operation Sca::StringToScaOperation(std::string op) {
+Sca::Operation Sca::StringToScaOperation(std::string op)
+{
   if (op == "command") {
     return Sca::Operation::Command;
   } else if (op == "wait") {

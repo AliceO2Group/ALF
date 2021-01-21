@@ -44,6 +44,7 @@ namespace sc_regs = AliceO2::roc::Cru::ScRegisters;
 
 Swt::Swt(AlfLink link, std::shared_ptr<lla::Session> llaSession) : mBar2(link.bar), mLink(link)
 {
+  Logger::setFacility("ALF/SWT");
   mLlaSession = std::make_unique<LlaSession>(llaSession);
 }
 
@@ -59,6 +60,7 @@ Swt::Swt(std::string cardId, int linkId)
 
 void Swt::init(const roc::Parameters::CardIdType& cardId, int linkId)
 {
+  Logger::setFacility("ALF/SWT");
   if (linkId >= CRU_NUM_LINKS) {
     BOOST_THROW_EXCEPTION(
       SwtException() << ErrorInfo::Message("Maximum link number exceeded"));
@@ -272,7 +274,7 @@ std::string Swt::writeSequence(std::vector<std::pair<Operation, Data>> sequence,
       resultBuffer << std::dec << data << "\n";
     } else if (operation == Operation::Error) {
       resultBuffer << data;
-      Logger::get().err() << data << endm;
+      Logger::get() << data << LogErrorDevel << endm;
       BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message(resultBuffer.str()));
       break;
     }
@@ -281,7 +283,8 @@ std::string Swt::writeSequence(std::vector<std::pair<Operation, Data>> sequence,
   return resultBuffer.str();
 }
 
-std::string Swt::SwtOperationToString(Swt::Operation op) {
+std::string Swt::SwtOperationToString(Swt::Operation op)
+{
   if (op == Swt::Operation::Read) {
     return "read";
   } else if (op == Swt::Operation::Write) {
@@ -299,7 +302,8 @@ std::string Swt::SwtOperationToString(Swt::Operation op) {
   BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("Cannot convert SWT operation to string"));
 }
 
-Swt::Operation Swt::StringToSwtOperation(std::string op) {
+Swt::Operation Swt::StringToSwtOperation(std::string op)
+{
   if (op == "read") {
     return Swt::Operation::Read;
   } else if (op == "write") {

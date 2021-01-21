@@ -53,7 +53,6 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 find_package(Boost 1.56 REQUIRED)
 find_package(Common REQUIRED)
-find_package(InfoLogger REQUIRED)
 find_package(ReadoutCard REQUIRED)
 find_package(LLA REQUIRED)
 find_package(DIM REQUIRED)
@@ -86,7 +85,6 @@ target_sources(ALF PRIVATE
   src/AlfServer.cxx
   src/DimServices/DimServices.cxx
   src/DimServices/ServiceNames.cxx
-  src/Logger.cxx
   $<$<BOOL:${Python2_FOUND}>:src/PythonInterface.cxx>
   $<$<BOOL:${Python3_FOUND}>:src/PythonInterface.cxx>
 )
@@ -103,7 +101,6 @@ set(LINK_LIBS
     o2::LLA
     AliceO2::ReadoutCard
     AliceO2::Common
-    AliceO2::InfoLogger
     Boost::boost
     $<$<BOOL:${Python2_FOUND}>:Boost::python27>
     $<$<BOOL:${Python2_FOUND}>:Python2::Python>

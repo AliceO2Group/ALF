@@ -29,48 +29,49 @@ namespace python
 namespace bp = boost::python;
 
 struct pairConverter {
-  template<typename T1, typename T2>
-    pairConverter&
+  template <typename T1, typename T2>
+  pairConverter&
     fromPython()
-    {
-      bp::converter::registry::push_back(
-          &pairConverter::convertible,
-          &pairConverter::construct<T1, T2>,
-          bp::type_id<std::pair<T1, T2>>());
+  {
+    bp::converter::registry::push_back(
+      &pairConverter::convertible,
+      &pairConverter::construct<T1, T2>,
+      bp::type_id<std::pair<T1, T2>>());
 
-      return *this;
-    }
+    return *this;
+  }
 
   static void* convertible(PyObject* obj)
   {
-    if (!PyTuple_CheckExact(obj)) return 0;
-    if (PyTuple_Size(obj) != 2) return 0;
+    if (!PyTuple_CheckExact(obj))
+      return 0;
+    if (PyTuple_Size(obj) != 2)
+      return 0;
     return obj;
   }
 
-  template<typename T1, typename T2>
-    static void construct(PyObject* obj, bp::converter::rvalue_from_python_stage1_data* data)
-    {
-      bp::tuple tuple(bp::borrowed(obj));
-      void* storage = ((bp::converter::rvalue_from_python_storage<std::pair<T1, T2>>*) data)->storage.bytes;
-      new (storage) std::pair<T1, T2>(bp::extract<T1>(tuple[0]), bp::extract<T2>(tuple[1]));
-      data->convertible = storage;
-    }
+  template <typename T1, typename T2>
+  static void construct(PyObject* obj, bp::converter::rvalue_from_python_stage1_data* data)
+  {
+    bp::tuple tuple(bp::borrowed(obj));
+    void* storage = ((bp::converter::rvalue_from_python_storage<std::pair<T1, T2>>*)data)->storage.bytes;
+    new (storage) std::pair<T1, T2>(bp::extract<T1>(tuple[0]), bp::extract<T2>(tuple[1]));
+    data->convertible = storage;
+  }
 };
 
-struct iterableConverter
-{
+struct iterableConverter {
   template <typename T>
-    iterableConverter&
+  iterableConverter&
     fromPython()
-    {
-      bp::converter::registry::push_back(
-          &iterableConverter::convertible,
-          &iterableConverter::construct<T>,
-          bp::type_id<T>());
+  {
+    bp::converter::registry::push_back(
+      &iterableConverter::convertible,
+      &iterableConverter::construct<T>,
+      bp::type_id<T>());
 
-      return *this;
-    }
+    return *this;
+  }
 
   static void* convertible(PyObject* object)
   {
@@ -78,22 +79,22 @@ struct iterableConverter
   }
 
   template <typename T>
-    static void construct(
-        PyObject* object,
-        bp::converter::rvalue_from_python_stage1_data* data)
-    {
-      bp::handle<> handle(bp::borrowed(object));
+  static void construct(
+    PyObject* object,
+    bp::converter::rvalue_from_python_stage1_data* data)
+  {
+    bp::handle<> handle(bp::borrowed(object));
 
-      typedef bp::converter::rvalue_from_python_storage<T> storage_type;
-      void* storage = reinterpret_cast<storage_type*>(data)->storage.bytes;
+    typedef bp::converter::rvalue_from_python_storage<T> storage_type;
+    void* storage = reinterpret_cast<storage_type*>(data)->storage.bytes;
 
-      typedef bp::stl_input_iterator<typename T::value_type> iterator;
+    typedef bp::stl_input_iterator<typename T::value_type> iterator;
 
-      new (storage) T(
-          iterator(bp::object(handle)),
-          iterator());
-      data->convertible = storage;
-    }
+    new (storage) T(
+      iterator(bp::object(handle)),
+      iterator());
+    data->convertible = storage;
+  }
 };
 
 BOOST_PYTHON_MODULE(libO2Alf)
