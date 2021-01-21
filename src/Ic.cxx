@@ -54,6 +54,7 @@ static constexpr roc::Register IC_RD_DATA(IC_BASE.address + 0x30);
 
 Ic::Ic(AlfLink link, std::shared_ptr<lla::Session> llaSession) : mBar2(link.bar), mLink(link)
 {
+  Logger::setFacility("ALF/IC");
   scReset();
 
   // Set CFG to 0x3 by default
@@ -74,6 +75,7 @@ Ic::Ic(std::string cardId, int linkId)
 
 void Ic::init(const roc::Parameters::CardIdType& cardId, int linkId)
 {
+  Logger::setFacility("ALF/IC");
   if (linkId >= CRU_NUM_LINKS) {
     BOOST_THROW_EXCEPTION(
       IcException() << ErrorInfo::Message("Maximum link number exceeded"));
@@ -234,7 +236,7 @@ std::vector<std::pair<Ic::Operation, Ic::Data>> Ic::executeSequence(std::vector<
         ret.push_back({ operation, out });
       } else if (operation == Operation::Write) {
         write(boost::get<IcData>(data));
-        ret.push_back({ operation, IcData{ boost::get<IcData>(data) }});
+        ret.push_back({ operation, IcData{ boost::get<IcData>(data) } });
       } else {
         BOOST_THROW_EXCEPTION(IcException() << ErrorInfo::Message("IC operation type unknown"));
       }
@@ -269,7 +271,7 @@ std::string Ic::writeSequence(std::vector<std::pair<Operation, Data>> ops, bool 
     } else if (operation == Operation::Error) {
       std::string errMessage = boost::get<std::string>(data);
       resultBuffer << errMessage;
-      Logger::get().err() << errMessage << endm;
+      Logger::get() << errMessage << LogErrorDevel << endm;
       BOOST_THROW_EXCEPTION(IcException() << ErrorInfo::Message(resultBuffer.str()));
     }
   }
@@ -277,7 +279,8 @@ std::string Ic::writeSequence(std::vector<std::pair<Operation, Data>> ops, bool 
   return resultBuffer.str();
 }
 
-std::string Ic::IcOperationToString(Ic::Operation op) {
+std::string Ic::IcOperationToString(Ic::Operation op)
+{
   if (op == Ic::Operation::Read) {
     return "read";
   } else if (op == Ic::Operation::Write) {
@@ -291,7 +294,8 @@ std::string Ic::IcOperationToString(Ic::Operation op) {
   BOOST_THROW_EXCEPTION(IcException() << ErrorInfo::Message("Cannot convert Ic operation to string"));
 }
 
-Ic::Operation Ic::StringToIcOperation(std::string op) {
+Ic::Operation Ic::StringToIcOperation(std::string op)
+{
   if (op == "read") {
     return Ic::Operation::Read;
   } else if (op == "write") {

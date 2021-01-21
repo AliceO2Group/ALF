@@ -50,7 +50,7 @@ class RegisterReadRpc : DimRpcInfoWrapper
       toConvert = stripPrefix(getString());
       converted = Util::stringToHex(toConvert);
     } catch (const AlfException& e) {
-      Logger::get().err() << "RegisterReadRpc: " << boost::diagnostic_information(e, true) << endm;
+      Logger::get() << "RegisterReadRpc: " << boost::diagnostic_information(e, true) << LogErrorDevel << endm;
       return errHex;
     }
 
@@ -72,7 +72,7 @@ class RegisterWriteRpc : DimRpcInfoWrapper
     try {
       getString();
     } catch (const AlfException& e) {
-      Logger::get().err() << "RegisterWriteRpc: " << boost::diagnostic_information(e, true) << endm;
+      Logger::get() << "RegisterWriteRpc: " << boost::diagnostic_information(e, true) << LogErrorDevel << endm;
     }
   }
 };
@@ -91,7 +91,7 @@ class PatternPlayerRpc : DimRpcInfoWrapper
     try {
       ret = getString();
     } catch (const AlfException& e) {
-      Logger::get().err() << "PatternPlayerRpc: " << boost::diagnostic_information(e, true) << endm;
+      Logger::get() << "PatternPlayerRpc: " << boost::diagnostic_information(e, true) << LogErrorDevel << endm;
       return errString;
     }
     return ret;
@@ -125,7 +125,7 @@ class ScaSequenceRpc : DimRpcInfoWrapper
     try {
       ret = getString();
     } catch (const AlfException& e) {
-      Logger::get().err() << "ScaSequence: " << boost::diagnostic_information(e, true) << endm;
+      Logger::get() << "ScaSequence: " << boost::diagnostic_information(e, true) << LogErrorDevel << endm;
       return errString;
     }
     return ret;
@@ -163,7 +163,7 @@ class RegisterSequenceRpc : DimRpcInfoWrapper
     try {
       ret = getString();
     } catch (const AlfException& e) {
-      Logger::get().err() << "RegisterSequence: " << boost::diagnostic_information(e, true) << endm;
+      Logger::get() << "RegisterSequence: " << boost::diagnostic_information(e, true) << LogErrorDevel << endm;
       return errString;
     }
     return ret;
@@ -201,7 +201,7 @@ class SwtSequenceRpc : DimRpcInfoWrapper
     try {
       ret = getString();
     } catch (const AlfException& e) {
-      Logger::get().err() << "SwtSequence: " << boost::diagnostic_information(e, true) << endm;
+      Logger::get() << "SwtSequence: " << boost::diagnostic_information(e, true) << LogErrorDevel << endm;
       return errString;
     }
     return ret;
@@ -239,7 +239,7 @@ class IcSequenceRpc : DimRpcInfoWrapper
     try {
       ret = getString();
     } catch (const AlfException& e) {
-      Logger::get().err() << "IcSequence: " << boost::diagnostic_information(e, true) << endm;
+      Logger::get() << "IcSequence: " << boost::diagnostic_information(e, true) << LogErrorDevel << endm;
       return errString;
     }
     return ret;
@@ -276,7 +276,7 @@ class IcGbtI2cWriteRpc : DimRpcInfoWrapper
     try {
       getString();
     } catch (const AlfException& e) {
-      Logger::get().err() << "IcGbtI2cWriteRpc: " << boost::diagnostic_information(e, true) << endm;
+      Logger::get() << "IcGbtI2cWriteRpc: " << boost::diagnostic_information(e, true) << LogErrorDevel << endm;
     }
   }
 };
@@ -296,7 +296,7 @@ class LlaSessionStartRpc : DimRpcInfoWrapper
     try {
       ret = getString();
     } catch (const AlfException& e) {
-      Logger::get().err() << "LlaSessionStart: " << boost::diagnostic_information(e, true) << endm;
+      Logger::get() << "LlaSessionStart: " << boost::diagnostic_information(e, true) << LogErrorDevel << endm;
       return errString;
     }
     return ret;
@@ -329,7 +329,7 @@ class LlaSessionStopRpc : DimRpcInfoWrapper
     try {
       ret = getString();
     } catch (const AlfException& e) {
-      Logger::get().err() << "LlaSessionStop: " << boost::diagnostic_information(e, true) << endm;
+      Logger::get() << "LlaSessionStop: " << boost::diagnostic_information(e, true) << LogErrorDevel << endm;
       return errString;
     }
     return ret;

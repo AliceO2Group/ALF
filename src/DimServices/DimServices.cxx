@@ -92,7 +92,7 @@ void StringRpcServer::rpcHandler()
     auto returnValue = mCallback(std::string(getString()));
     setDataString(makeSuccessString(returnValue), *this);
   } catch (const std::exception& e) {
-    Logger::get().err() << mServiceName << ": " << e.what() << endm;
+    Logger::get() << mServiceName << ": " << e.what() << LogErrorDevel << endm;
     setDataString(makeFailureString(e.what()), *this);
   }
 }

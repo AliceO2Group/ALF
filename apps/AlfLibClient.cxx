@@ -63,6 +63,8 @@ class AlfLibClient : public AliceO2::Common::Program
 
   virtual void run(const po::variables_map&) override
   {
+    Logger::enableInfoLogger(false);
+    Logger::setFacility("ALF/LibClient");
     if (mOptions.sca) {
       std::cout << "Running SCA test" << std::endl;
       auto sca = Sca(roc::SerialId{ mOptions.serial, mOptions.endpoint }, mOptions.link);
@@ -133,7 +135,7 @@ class AlfLibClient : public AliceO2::Common::Program
       swt = Swt(roc::SerialId{ mOptions.serial, mOptions.endpoint });
       swt.setChannel(1);
       ops.push_back({ Swt::Operation::SCReset, {} });
-      ops.push_back({ Swt::Operation::Write, SwtWord{ 0xcafe, 0x41d, 0x0 } });
+      ops.push_back({ Swt::Operation::Write, SwtWord{ 0xcaff, 0x41d, 0x0 } });
       ops.push_back({ Swt::Operation::Write, SwtWord{ 0xb00f, 0x42, 0x88, SwtWord::Size::High } });
       ops.push_back({ Swt::Operation::Write, SwtWord{ 0xb00f, 0x42, 0x88 } });
       ops.push_back({ Swt::Operation::Read, {} });
