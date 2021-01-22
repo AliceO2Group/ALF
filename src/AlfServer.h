@@ -70,7 +70,7 @@ class AlfServer
 
   // custom comparator for the SerialId keys of the maps
   struct serialIdComparator {
-    bool operator()(const roc::SerialId& a, const roc::SerialId& b) { return a.toString() < b.toString(); };
+    bool operator()(const roc::SerialId& a, const roc::SerialId& b) const { return a.toString() < b.toString(); };
   };
 
   /// serialId -> link -> vector of RPC servers
