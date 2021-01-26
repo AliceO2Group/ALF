@@ -29,6 +29,8 @@ struct ScException : AliceO2::Common::Exception {
 };
 struct ScaException : AliceO2::Common::Exception {
 };
+struct ScaMftPsuException : AliceO2::Common::Exception {
+};
 struct SwtException : AliceO2::Common::Exception {
 };
 struct IcException : AliceO2::Common::Exception {

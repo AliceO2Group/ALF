@@ -104,6 +104,18 @@ The services are DIM RPC services. Every RPC is called with a string and expects
   * DIM input (atomic): `lock\n0x00000010,0x00000011\n3\n0x000000020,0x00000021`
   * DIM output: `0x00000010,0x00000111\n3\n0x00000020,0x00000221\n`
 
+##### SCA_MFT_PSU_SEQUENCE
+
+This service is uniquely registered for the MFT PSU CRU.
+It extends the `SCA_SEQUENCE` to add the following functionality:
+* Parameters:
+  * Operations:
+    * Select master (e.g. `master`)
+    * Select slave (e.g. `slave`)
+
+* Returns:
+  * Echo for both `master` & `slave`
+ 
 ##### SWT_SEQUENCE
 * Parameters:
   * Sequence of SWT word and operation pairs as follows:

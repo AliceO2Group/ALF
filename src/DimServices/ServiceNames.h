@@ -36,6 +36,7 @@ class ServiceNames
   std::string registerRead() const;
   std::string registerWrite() const;
   std::string scaSequence() const;
+  std::string scaMftPsuSequence() const;
   std::string swtSequence() const;
   std::string icSequence() const;
   std::string icGbtI2cWrite() const;

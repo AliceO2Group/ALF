@@ -94,6 +94,21 @@ std::string AlfServer::scaBlobWrite(const std::string& parameter, AlfLink link)
   return sca.writeSequence(scaPairs, lock);
 }
 
+std::string AlfServer::scaMftPsuBlobWrite(const std::string& parameter, AlfLink link)
+{
+  std::vector<std::string> stringPairs = Util::split(parameter, argumentSeparator());
+  std::vector<std::pair<Sca::Operation, Sca::Data>> scaPairs = parseStringToScaPairs(stringPairs);
+  ScaMftPsu sca = ScaMftPsu(link, mSessions[link.serialId]);
+
+  bool lock = false;
+  // Check if the operation should be locked
+  if (scaPairs[0].first == Sca::Operation::Lock) {
+    scaPairs.erase(scaPairs.begin());
+    lock = true;
+  }
+  return sca.writeSequence(scaPairs, lock);
+}
+
 std::string AlfServer::swtBlobWrite(const std::string& parameter, AlfLink link)
 {
 
@@ -310,6 +325,18 @@ std::pair<Sca::Operation, Sca::Data> AlfServer::stringToScaPair(const std::strin
     if (scaPair.size() != 1) {
       BOOST_THROW_EXCEPTION(
         AlfException() << ErrorInfo::Message("Too many arguments for SC RESET operation"));
+    }
+  } else if (scaPair[scaPair.size() - 1] == "master") {
+    operation = Sca::Operation::Master;
+    if (scaPair.size() != 1) {
+      BOOST_THROW_EXCEPTION(
+        AlfException() << ErrorInfo::Message("Too many arguments for MASTER operation"));
+    }
+  } else if (scaPair[scaPair.size() - 1] == "slave") {
+    operation = Sca::Operation::Slave;
+    if (scaPair.size() != 1) {
+      BOOST_THROW_EXCEPTION(
+        AlfException() << ErrorInfo::Message("Too many arguments for SLAVE operation"));
     }
   } else { // regular sca command
     operation = Sca::Operation::Command;
@@ -548,6 +575,18 @@ void AlfServer::makeRpcServers(std::vector<AlfLink> links)
     std::shared_ptr<roc::BarInterface> bar = link.bar;
 
     if (link.cardType == roc::CardType::Cru) {
+      lla::SessionParameters params = lla::SessionParameters::makeParameters()
+                                        .setSessionName("ALF")
+                                        .setCardId(link.serialId);
+      mSessions[link.serialId] = std::make_shared<lla::Session>(params);
+
+      if (kMftPsuSerials.find(link.serialId.getSerial()) != kMftPsuSerials.end()) {
+        // SCA MFT PSU Sequence
+        servers.push_back(makeServer(names.scaMftPsuSequence(),
+                                     [link, this](auto parameter) { return scaMftPsuBlobWrite(parameter, link); }));
+        continue;
+      }
+
       if (link.linkId == 0 && link.serialId.getEndpoint() == 0) { // Services per card
         // Register Read
         servers.push_back(makeServer(names.registerRead(),
@@ -568,11 +607,6 @@ void AlfServer::makeRpcServers(std::vector<AlfLink> links)
         servers.push_back(makeServer(names.llaSessionStop(),
                                      [link, this](auto parameter) { return llaSessionStop(parameter, link.serialId); }));
       }
-
-      lla::SessionParameters params = lla::SessionParameters::makeParameters()
-                                        .setSessionName("ALF")
-                                        .setCardId(link.serialId);
-      mSessions[link.serialId] = std::make_shared<lla::Session>(params);
 
       // SCA Sequence
       servers.push_back(makeServer(names.scaSequence(),

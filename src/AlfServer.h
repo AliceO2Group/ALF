@@ -21,12 +21,14 @@
 #include <chrono>
 #include <iomanip>
 #include <thread>
+#include <unordered_set>
 
 #include "Alf/Exception.h"
 #include "DimServices/DimServices.h"
 #include "Alf/Common.h"
 #include "Alf/Ic.h"
 #include "Alf/Sca.h"
+#include "Alf/ScaMftPsu.h"
 #include "Alf/Swt.h"
 
 #include "Lla/Lla.h"
@@ -50,6 +52,7 @@ class AlfServer
   static std::string registerRead(const std::string& parameter, std::shared_ptr<roc::BarInterface>);
   static std::string registerWrite(const std::string& parameter, std::shared_ptr<roc::BarInterface>);
   std::string scaBlobWrite(const std::string& parameter, AlfLink link);
+  std::string scaMftPsuBlobWrite(const std::string& parameter, AlfLink link);
   std::string swtBlobWrite(const std::string& parameter, AlfLink link);
   std::string icBlobWrite(const std::string& parameter, AlfLink link);
   std::string icGbtI2cWrite(const std::string& parameter, AlfLink link);
@@ -76,6 +79,8 @@ class AlfServer
   /// serialId -> link -> vector of RPC servers
   std::map<roc::SerialId, std::map<int, std::vector<std::unique_ptr<StringRpcServer>>>, serialIdComparator> mRpcServers;
   std::map<roc::SerialId, std::shared_ptr<lla::Session>, serialIdComparator> mSessions;
+
+  const std::unordered_set<int> kMftPsuSerials = { 0000, 0553 };
 };
 
 } // namespace alf
