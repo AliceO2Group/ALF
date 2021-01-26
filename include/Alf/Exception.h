@@ -25,6 +25,8 @@ namespace alf
 
 struct AlfException : AliceO2::Common::Exception {
 };
+struct ScException : AliceO2::Common::Exception {
+};
 struct ScaException : AliceO2::Common::Exception {
 };
 struct SwtException : AliceO2::Common::Exception {

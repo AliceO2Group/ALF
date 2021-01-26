@@ -33,6 +33,7 @@
 
 #include "Common.h"
 #include "Alf/Lla.h"
+#include "Alf/ScBase.h"
 
 namespace roc = AliceO2::roc;
 
@@ -42,7 +43,7 @@ namespace alf
 {
 
 /// Class for IC Transactions with the CRU
-class Ic
+class Ic : public ScBase
 {
  public:
   /// Struct holding the IC address and data pair; useful to AlfServer
@@ -69,13 +70,6 @@ class Ic
   /// \param cardId The card ID for which to get the IC handle.
   /// \param linkId The link ID for which to get the IC handle.
   Ic(std::string cardId, int linkId = -1);
-
-  /// Sets the IC channel
-  /// \param gbtChannel The IC channel to set.
-  void setChannel(int gbtChannel);
-
-  /// Executes an SC reset
-  void scReset();
 
   /// Performs an IC read
   /// \param address IC address to read from
@@ -131,21 +125,6 @@ class Ic
 
   static std::string IcOperationToString(Operation op);
   static Ic::Operation StringToIcOperation(std::string op);
-
- private:
-  void init(const roc::Parameters::CardIdType& cardId, int linkId);
-
-  /// Checks if an IC channel is selected
-  /// \throws o2::alf::IcException if no IC channel selected
-  void checkChannelSet();
-
-  void barWrite(uint32_t offset, uint32_t data);
-  uint32_t barRead(uint32_t index);
-
-  std::shared_ptr<roc::BarInterface> mBar2;
-
-  AlfLink mLink;
-  std::unique_ptr<LlaSession> mLlaSession;
 };
 
 } // namespace alf

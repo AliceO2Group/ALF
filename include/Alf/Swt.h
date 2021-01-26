@@ -33,9 +33,10 @@
 #include "ReadoutCard/BarInterface.h"
 #include "ReadoutCard/Parameters.h"
 
-#include "Alf/SwtWord.h"
 #include "Common.h"
 #include "Alf/Lla.h"
+#include "Alf/ScBase.h"
+#include "Alf/SwtWord.h"
 
 namespace roc = AliceO2::roc;
 
@@ -45,7 +46,7 @@ namespace alf
 {
 
 /// Class for Single Word Transactions with the CRU
-class Swt
+class Swt : public ScBase
 {
  public:
   typedef int TimeOut, WaitTime;
@@ -75,13 +76,6 @@ class Swt
   /// \param cardId The card ID for which to get the SWT handle.
   /// \param linkId The link ID to set the channel to (optional).
   Swt(std::string cardId, int linkId = -1);
-
-  /// Sets the SWT channel
-  /// \param gbtChannel The channel to set
-  void setChannel(int gbtChannel);
-
-  /// Executes an SC reset
-  void scReset();
 
   /// Writes an SWT word
   /// \param swtWord The SWT word to write
@@ -118,20 +112,6 @@ class Swt
   static constexpr int DEFAULT_SWT_TIMEOUT_MS = 10;
 
  private:
-  void init(const roc::Parameters::CardIdType& cardId, int linkId);
-
-  /// Checks if an SWT channel has been selected
-  /// \throws o2::alf::SwtException if no SWT channel selected
-  void checkChannelSet();
-
-  void barWrite(uint32_t offset, uint32_t data);
-  uint32_t barRead(uint32_t index);
-
-  std::shared_ptr<roc::BarInterface> mBar2;
-
-  AlfLink mLink;
-  std::unique_ptr<LlaSession> mLlaSession;
-
   static constexpr int DEFAULT_SWT_WAIT_TIME_MS = 3;
 };
 

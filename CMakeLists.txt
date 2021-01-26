@@ -77,6 +77,7 @@ add_library(ALF SHARED
   src/Ic.cxx
   src/Lla.cxx
   src/Sca.cxx
+  src/ScBase.cxx
   src/Swt.cxx
   src/SwtWord.cxx
 )

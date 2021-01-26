@@ -42,74 +42,22 @@ namespace alf
 
 namespace sc_regs = AliceO2::roc::Cru::ScRegisters;
 
-Swt::Swt(AlfLink link, std::shared_ptr<lla::Session> llaSession) : mBar2(link.bar), mLink(link)
+Swt::Swt(AlfLink link, std::shared_ptr<lla::Session> llaSession)
+  : ScBase(link, llaSession)
 {
   Logger::setFacility("ALF/SWT");
-  mLlaSession = std::make_unique<LlaSession>(llaSession);
 }
 
 Swt::Swt(const roc::Parameters::CardIdType& cardId, int linkId)
+  : ScBase(cardId, linkId)
 {
-  init(cardId, linkId);
+  Logger::setFacility("ALF/SWT");
 }
 
 Swt::Swt(std::string cardId, int linkId)
-{
-  init(roc::Parameters::cardIdFromString(cardId), linkId);
-}
-
-void Swt::init(const roc::Parameters::CardIdType& cardId, int linkId)
+  : ScBase(cardId, linkId)
 {
   Logger::setFacility("ALF/SWT");
-  if (linkId >= CRU_NUM_LINKS) {
-    BOOST_THROW_EXCEPTION(
-      SwtException() << ErrorInfo::Message("Maximum link number exceeded"));
-  }
-
-  auto card = roc::findCard(cardId);
-  mBar2 = roc::ChannelFactory().getBar(cardId, 2);
-
-  mLink = AlfLink{
-    "DDT", //TODO: From session?
-    card.serialId,
-    linkId,
-    card.serialId.getEndpoint() * 12 + linkId,
-    mBar2,
-    roc::CardType::Cru
-  };
-
-  mLlaSession = std::make_unique<LlaSession>("DDT", card.serialId);
-}
-
-void Swt::setChannel(int gbtChannel)
-{
-  if (gbtChannel >= CRU_NUM_LINKS) {
-    BOOST_THROW_EXCEPTION(
-      SwtException() << ErrorInfo::Message("Maximum link number exceeded"));
-  }
-
-  mLink.linkId = gbtChannel;
-  mLink.rawLinkId = mLink.serialId.getEndpoint() * 12 + gbtChannel;
-  barWrite(sc_regs::SC_LINK.index, mLink.rawLinkId);
-}
-
-void Swt::scReset()
-{
-  barWrite(sc_regs::SC_RESET.index, 0x1);
-  barWrite(sc_regs::SC_RESET.index, 0x0); //void cmd to sync clocks
-}
-
-void Swt::checkChannelSet()
-{
-  if (mLink.linkId == -1) {
-    BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("No SWT channel selected"));
-  }
-
-  int channel = (barRead(sc_regs::SWT_MON.index) >> 8) & 0xff;
-
-  if (channel != mLink.rawLinkId) {
-    setChannel(mLink.linkId);
-  }
 }
 
 std::vector<SwtWord> Swt::read(SwtWord::Size wordSize, TimeOut msTimeOut)
@@ -165,17 +113,6 @@ void Swt::write(const SwtWord& swtWord)
   barWrite(sc_regs::SWT_WR_WORD_L.index, swtWord.getLow()); // The LOW bar write, triggers the write operation
 
   //return barRead(sc_regs::SWT_MON.index);
-}
-
-void Swt::barWrite(uint32_t index, uint32_t data)
-{
-  mBar2->writeRegister(index, data);
-}
-
-uint32_t Swt::barRead(uint32_t index)
-{
-  uint32_t read = mBar2->readRegister(index);
-  return read;
 }
 
 std::vector<std::pair<Swt::Operation, Swt::Data>> Swt::executeSequence(std::vector<std::pair<Operation, Data>> sequence, bool lock)

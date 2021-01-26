@@ -26,6 +26,7 @@
 
 #include "Common.h"
 #include "Alf/Lla.h"
+#include "Alf/ScBase.h"
 
 namespace roc = AliceO2::roc;
 
@@ -35,7 +36,7 @@ namespace alf
 {
 
 /// Class for interfacing with the C-RORC's(?) and CRU's Slow-Control Adapter (SCA)
-class Sca
+class Sca : public ScBase
 {
  public:
   /// Struct holding the command and data pair of an SCA command
@@ -71,13 +72,6 @@ class Sca
   /// \param cardId The card ID for which to get the SCA handle.
   /// \param linkId The link ID to set the channel to (optional).
   Sca(std::string cardId, int linkId = -1);
-
-  /// Sets the SCA channel
-  /// \param gbtChannel The channel to set
-  void setChannel(int gbtChannel);
-
-  /// Executes a global SC reset
-  void scReset();
 
   /// Executes an SCA reset
   void svlReset();
@@ -124,15 +118,6 @@ class Sca
   static Sca::Operation StringToScaOperation(std::string op);
 
  private:
-  void init(const roc::Parameters::CardIdType& cardId, int linkId);
-
-  /// Checks if an SCA channel has been selected
-  /// \throws o2::alf::ScaException if no SCA channel selected
-  void checkChannelSet();
-
-  uint32_t barRead(uint32_t index);
-  void barWrite(uint32_t index, uint32_t data);
-
   /// Performs an SCA read
   /// \return CommandData An SCA command, data pair
   /// \throws o2::alf::ScaException on SCA error
@@ -155,11 +140,6 @@ class Sca
   void checkError(uint32_t command);
   bool isChannelBusy(uint32_t command);
   void waitOnBusyClear();
-
-  /// Interface for BAR 2
-  std::shared_ptr<roc::BarInterface> mBar2;
-  AlfLink mLink;
-  std::unique_ptr<LlaSession> mLlaSession;
 
   static constexpr int DEFAULT_SCA_WAIT_TIME_MS = 3;
 };
