@@ -12,6 +12,7 @@
 /// \brief Implementation of DIM service names
 ///
 /// \author Pascal Boeschoten (pascal.boeschoten@cern.ch)
+/// \author Kostas Alexopoulos (kostas.alexopoulos@cern.ch))
 
 #include <boost/format.hpp>
 
@@ -41,6 +42,7 @@ DEFCARDSERVICENAME(registerRead, "REGISTER_READ")
 DEFCARDSERVICENAME(registerWrite, "REGISTER_WRITE")
 
 DEFLINKSERVICENAME(scaSequence, "SCA_SEQUENCE")
+DEFLINKSERVICENAME(scaMftPsuSequence, "SCA_MFT_PSU_SEQUENCE")
 DEFLINKSERVICENAME(swtSequence, "SWT_SEQUENCE")
 DEFLINKSERVICENAME(icSequence, "IC_SEQUENCE")
 DEFLINKSERVICENAME(icGbtI2cWrite, "IC_GBT_I2C_WRITE")

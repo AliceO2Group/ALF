@@ -54,8 +54,8 @@ class ScBase
   /// Executes a global SC reset
   void scReset();
 
-    /// Checks if an SCA channel has been selected
-  /// \throws o2::alf::ScaException if no SCA channel selected
+  /// Checks if an SC channel has been selected
+  /// \throws o2::alf::ScException if no SC channel selected
   void checkChannelSet();
 
  protected:
@@ -69,7 +69,7 @@ class ScBase
   /// Does the necessary initializations after an object creating
   void init(const roc::Parameters::CardIdType& cardId, int linkId);
 
-/// Interface for BAR 2
+  /// Interface for BAR 2
   std::shared_ptr<roc::BarInterface> mBar2;
 };
 
