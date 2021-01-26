@@ -52,82 +52,31 @@ static constexpr roc::Register IC_WR_CMD(IC_BASE.address + 0x28);
 static constexpr roc::Register IC_RD_DATA(IC_BASE.address + 0x30);
 } // namespace ic_regs
 
-Ic::Ic(AlfLink link, std::shared_ptr<lla::Session> llaSession) : mBar2(link.bar), mLink(link)
+Ic::Ic(AlfLink link, std::shared_ptr<lla::Session> llaSession)
+  : ScBase(link, llaSession)
 {
   Logger::setFacility("ALF/IC");
-  scReset();
 
   // Set CFG to 0x3 by default
   barWrite(ic_regs::IC_WR_CFG.index, 0x3);
-
-  mLlaSession = std::make_unique<LlaSession>(llaSession);
 }
 
 Ic::Ic(const roc::Parameters::CardIdType& cardId, int linkId)
-{
-  init(cardId, linkId);
-}
-
-Ic::Ic(std::string cardId, int linkId)
-{
-  init(roc::Parameters::cardIdFromString(cardId), linkId);
-}
-
-void Ic::init(const roc::Parameters::CardIdType& cardId, int linkId)
+  : ScBase(cardId, linkId)
 {
   Logger::setFacility("ALF/IC");
-  if (linkId >= CRU_NUM_LINKS) {
-    BOOST_THROW_EXCEPTION(
-      IcException() << ErrorInfo::Message("Maximum link number exceeded"));
-  }
-
-  auto card = roc::findCard(cardId);
-  mBar2 = roc::ChannelFactory().getBar(cardId, 2);
-
-  mLink = AlfLink{
-    "DDT", //TODO: From session?
-    card.serialId,
-    linkId,
-    card.serialId.getEndpoint() * 12 + linkId,
-    mBar2,
-    roc::CardType::Cru
-  };
-
-  mLlaSession = std::make_unique<LlaSession>("DDT", card.serialId);
 
   // Set CFG to 0x3 by default
   barWrite(ic_regs::IC_WR_CFG.index, 0x3);
 }
 
-void Ic::setChannel(int gbtChannel)
+Ic::Ic(std::string cardId, int linkId)
+  : ScBase(cardId, linkId)
 {
-  if (gbtChannel >= CRU_NUM_LINKS) {
-    BOOST_THROW_EXCEPTION(
-      IcException() << ErrorInfo::Message("Maximum link number exceeded"));
-  }
+  Logger::setFacility("ALF/IC");
 
-  mLink.linkId = gbtChannel;
-  mLink.rawLinkId = mLink.serialId.getEndpoint() * 12 + gbtChannel;
-  barWrite(sc_regs::SC_LINK.index, mLink.rawLinkId);
-}
-
-void Ic::checkChannelSet()
-{
-  if (mLink.linkId == -1) {
-    BOOST_THROW_EXCEPTION(IcException() << ErrorInfo::Message("No IC channel selected"));
-  }
-
-  int channel = (barRead(sc_regs::SWT_MON.index) >> 8) & 0xff;
-
-  if (channel != mLink.rawLinkId) {
-    setChannel(mLink.linkId);
-  }
-}
-
-void Ic::scReset()
-{
-  barWrite(sc_regs::SC_RESET.index, 0x1);
-  barWrite(sc_regs::SC_RESET.index, 0x0); //void cmd to sync clocks
+  // Set CFG to 0x3 by default
+  barWrite(ic_regs::IC_WR_CFG.index, 0x3);
 }
 
 uint32_t Ic::read(uint32_t address)
@@ -199,17 +148,6 @@ uint32_t Ic::write(uint32_t address, uint32_t data)
 void Ic::writeGbtI2c(uint32_t data)
 {
   barWrite(ic_regs::IC_WR_CFG.index, data);
-}
-
-void Ic::barWrite(uint32_t index, uint32_t data)
-{
-  mBar2->writeRegister(index, data);
-}
-
-uint32_t Ic::barRead(uint32_t index)
-{
-  uint32_t read = mBar2->readRegister(index);
-  return read;
 }
 
 std::vector<std::pair<Ic::Operation, Ic::Data>> Ic::executeSequence(std::vector<std::pair<Operation, Data>> ops, bool lock)

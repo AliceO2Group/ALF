@@ -28,8 +28,8 @@ namespace alf
 
 namespace roc = AliceO2::roc;
 
-static constexpr int CRU_NUM_LINKS(12);
-static constexpr int CRORC_NUM_LINKS(6);
+static constexpr int kCruNumLinks(12);
+static constexpr int kCrorcNumLinks(6);
 
 static constexpr auto BUSY_TIMEOUT = std::chrono::milliseconds(10);
 static constexpr auto CHANNEL_BUSY_TIMEOUT = std::chrono::milliseconds(10);

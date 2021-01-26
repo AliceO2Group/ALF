@@ -39,74 +39,21 @@ namespace alf
 {
 
 Sca::Sca(AlfLink link, std::shared_ptr<lla::Session> llaSession)
-  : mBar2(link.bar), mLink(link)
+  : ScBase(link, llaSession)
 {
   Logger::setFacility("ALF/SCA");
-  mLlaSession = std::make_unique<LlaSession>(llaSession);
 }
 
 Sca::Sca(const roc::Parameters::CardIdType& cardId, int linkId)
+  : ScBase(cardId, linkId)
 {
-  init(cardId, linkId);
+  Logger::setFacility("ALF/SCA");
 }
 
 Sca::Sca(std::string cardId, int linkId)
-{
-  init(roc::Parameters::cardIdFromString(cardId), linkId);
-}
-
-void Sca::init(const roc::Parameters::CardIdType& cardId, int linkId)
+  : ScBase(cardId, linkId)
 {
   Logger::setFacility("ALF/SCA");
-  if (linkId >= CRU_NUM_LINKS) {
-    BOOST_THROW_EXCEPTION(
-      ScaException() << ErrorInfo::Message("Maximum link number exceeded"));
-  }
-
-  auto card = roc::findCard(cardId);
-  mBar2 = roc::ChannelFactory().getBar(cardId, 2);
-
-  mLink = AlfLink{
-    "DDT",
-    card.serialId,
-    linkId,
-    card.serialId.getEndpoint() * 12 + linkId,
-    mBar2,
-    roc::CardType::Cru
-  };
-
-  mLlaSession = std::make_unique<LlaSession>("DDT", card.serialId);
-}
-
-void Sca::setChannel(int gbtChannel)
-{
-  if (gbtChannel >= CRU_NUM_LINKS) {
-    BOOST_THROW_EXCEPTION(
-      ScaException() << ErrorInfo::Message("Maximum link number exceeded"));
-  }
-
-  mLink.linkId = gbtChannel;
-  mLink.rawLinkId = mLink.serialId.getEndpoint() * 12 + gbtChannel;
-  barWrite(sc_regs::SC_LINK.index, mLink.rawLinkId);
-}
-
-void Sca::checkChannelSet()
-{
-  if (mLink.linkId == -1) {
-    BOOST_THROW_EXCEPTION(ScaException() << ErrorInfo::Message("No SCA channel selected"));
-  }
-
-  int channel = (barRead(sc_regs::SWT_MON.index) >> 8) & 0xff;
-
-  if (channel != mLink.rawLinkId) {
-    setChannel(mLink.linkId);
-  }
-}
-
-void Sca::scReset()
-{
-  barWrite(sc_regs::SC_RESET.index, 0x1);
-  barWrite(sc_regs::SC_RESET.index, 0x0); //void cmd to sync clocks
 }
 
 void Sca::svlReset()
@@ -242,16 +189,6 @@ void Sca::checkError(uint32_t command)
     BOOST_THROW_EXCEPTION(ScaException() << ErrorInfo::Message(
                             stream.str()));
   }
-}
-
-void Sca::barWrite(uint32_t index, uint32_t data)
-{
-  mBar2->writeRegister(index, data);
-}
-
-uint32_t Sca::barRead(uint32_t index)
-{
-  return mBar2->readRegister(index);
 }
 
 void Sca::execute()
