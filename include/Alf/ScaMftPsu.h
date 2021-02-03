@@ -127,8 +127,8 @@ class ScaMftPsu
   void waitOnBusyClear();
 
   /// Interface for BAR 2
-  std::shared_ptr<roc::BarInterface> mBar2;
   AlfLink mLink;
+  std::shared_ptr<roc::BarInterface> mBar2;
   std::unique_ptr<LlaSession> mLlaSession;
 
   static constexpr int DEFAULT_SCA_WAIT_TIME_MS = 3;
