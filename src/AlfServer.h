@@ -80,7 +80,7 @@ class AlfServer
   std::map<roc::SerialId, std::map<int, std::vector<std::unique_ptr<StringRpcServer>>>, serialIdComparator> mRpcServers;
   std::map<roc::SerialId, std::shared_ptr<lla::Session>, serialIdComparator> mSessions;
 
-  const std::unordered_set<int> kMftPsuSerials = { 0000, 0553 };
+  const std::unordered_set<int> kMftPsuSerials = { 0, 553 };
 };
 
 } // namespace alf

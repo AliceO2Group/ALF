@@ -39,10 +39,11 @@ namespace alf
 {
 
 ScaMftPsu::ScaMftPsu(AlfLink link, std::shared_ptr<lla::Session> llaSession)
-  : mLink(link)
+  : mLink(link), mBar2(mLink.bar)
 {
   Logger::setFacility("ALF/SCA_MFT_PSU");
   mLlaSession = std::make_unique<LlaSession>(llaSession);
+  mLink.rawLinkId = mLink.serialId.getEndpoint() * kCruNumLinks + mLink.linkId;
 }
 
 void ScaMftPsu::scReset()
