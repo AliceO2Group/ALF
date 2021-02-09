@@ -170,7 +170,7 @@ std::vector<std::pair<Ic::Operation, Ic::Data>> Ic::executeSequence(std::vector<
     Data data = it.second;
     try {
       if (operation == Operation::Read) {
-        auto out = read(boost::get<uint32_t>(data));
+        auto out = read(boost::get<IcData>(data));
         ret.push_back({ operation, out });
       } else if (operation == Operation::Write) {
         write(boost::get<IcData>(data));
@@ -204,8 +204,10 @@ std::string Ic::writeSequence(std::vector<std::pair<Operation, Data>> ops, bool 
   for (const auto& it : out) {
     Operation operation = it.first;
     Data data = it.second;
-    if (operation == Operation::Read || operation == Operation::Write) {
+    if (operation == Operation::Read) {
       resultBuffer << Util::formatValue(boost::get<IcOut>(data)) << "\n";
+    } else if (operation == Operation::Write) {
+      resultBuffer << Util::formatValue(boost::get<IcData>(data).data) << "\n";
     } else if (operation == Operation::Error) {
       std::string errMessage = boost::get<std::string>(data);
       resultBuffer << errMessage;
