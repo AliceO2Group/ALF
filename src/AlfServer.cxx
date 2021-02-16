@@ -544,10 +544,12 @@ std::vector<std::pair<Ic::Operation, Ic::Data>> AlfServer::parseStringToIcPairs(
 void AlfServer::makeRpcServers(std::vector<AlfLink> links)
 {
   for (auto& link : links) {
+    // Set a unique parallel dim rpc bank for every link
+    int parallelDimRpcBank = (link.serialId.getSerial() * 100) + link.rawLinkId;
 
     // Function to create RPC server
     auto makeServer = [&](std::string name, auto callback) {
-      return std::make_unique<StringRpcServer>(name, callback);
+      return std::make_unique<StringRpcServer>(name, callback, parallelDimRpcBank);
     };
 
     // Object for generating DNS names for the AlfLink
