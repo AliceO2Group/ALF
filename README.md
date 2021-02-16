@@ -61,25 +61,28 @@ The services are DIM RPC services. Every RPC is called with a string and expects
 * Lines prefixed with `#` are disregarded as comments.
 
 #### CRU
-##### REGISTER_READ
-* Parameter:
-  * Register address
+##### REGISTER_SEQUENCE
+* Parameters:
+   * Operations may be:
+     * `write` with address and value (e.g. `0x0000f00d,0x0000beef`)
+     * `read` with address (e.g `0x0000cafe`)
+
 * Returns:
-  * Register value
-
+   * `write` always retuns `0`
+   * `read` returns the value read from the register
+    
 * Example:
-  * DIM input: `0x0000f00d`
-  * DIM output: `0x0000beef`
-
+  * DIM input `0xc00004\n0x00c00008, 0x0000beef\n0x00c00008`
+  * DIM output `0xcafe\n0\n0xbeef\n`
 ##### REGISTER_WRITE
 * Parameters:
-  * Register address
+  * Register address (within the range [`0x00c00000-0x00cfffff`])
   * Register value
 * Returns:
   * empty
   
 * Example:
-  * DIM input: `0x0000f00d,0x0000beef`
+  * DIM input: `0x00c0f00d,0x0000beef`
   * DIM output: ` `
 
 ##### SCA_SEQUENCE

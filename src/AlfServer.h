@@ -49,15 +49,13 @@ class AlfServer
   void makeRpcServers(std::vector<AlfLink> links);
 
  private:
-  static std::string registerRead(const std::string& parameter, std::shared_ptr<roc::BarInterface>);
-  static std::string registerWrite(const std::string& parameter, std::shared_ptr<roc::BarInterface>);
   std::string scaBlobWrite(const std::string& parameter, AlfLink link);
   std::string scaMftPsuBlobWrite(const std::string& parameter, AlfLink link);
   std::string swtBlobWrite(const std::string& parameter, AlfLink link);
   std::string icBlobWrite(const std::string& parameter, AlfLink link);
   std::string icGbtI2cWrite(const std::string& parameter, AlfLink link);
   static std::string patternPlayer(const std::string& parameter, std::shared_ptr<roc::BarInterface>);
-  static std::string registerBlobWrite(const std::string& parameter, AlfLink link);
+  static std::string registerBlobWrite(const std::string& parameter, AlfLink link, bool isCru = false);
   std::string llaSessionStart(const std::string& parameter, roc::SerialId serialId);
   std::string llaSessionStop(const std::string& parameter, roc::SerialId serialId);
 

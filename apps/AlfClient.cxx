@@ -138,8 +138,7 @@ class AlfClient : public AliceO2::Common::Program
     }
 
     // Only CRU from this point forward
-    RegisterReadRpc registerReadRpc(names.registerRead());
-    RegisterWriteRpc registerWriteRpc(names.registerWrite());
+    RegisterSequenceRpc registerSequence(names.registerSequence());
     PatternPlayerRpc patternPlayerRpc(names.patternPlayer());
     LlaSessionStartRpc llaSessionStartRpc(names.llaSessionStart());
     LlaSessionStopRpc llaSessionStopRpc(names.llaSessionStop());
@@ -149,13 +148,15 @@ class AlfClient : public AliceO2::Common::Program
     IcSequenceRpc icSequence(names.icSequence());
     IcGbtI2cWriteRpc icGbtI2cWriteRpc(names.icGbtI2cWrite());
 
-    // Test register write and read
-    uint32_t wAddress = 0x00f00078;
-    uint32_t wValue = 0x4;
-    uint32_t rAddress = 0x00f0005c;
-    registerWriteRpc.writeRegister(wAddress, wValue);
-    uint32_t rValue = registerReadRpc.readRegister(rAddress);
-    std::cout << "[REGISTER] Wrote: " << Util::formatValue(wValue) << " Read: " << Util::formatValue(rValue) << std::endl;
+    // Test register sequence
+    auto regOut = registerSequence.write({ std::make_pair("0x00c00000", ""),
+                                           std::make_pair("0x00c00004", ""),
+                                           std::make_pair("0x00c00008", ""),
+                                           std::make_pair("0x00cfffff", "0x00080000"),
+                                           std::make_pair("0x00c00004", "0x00080000"),
+                                           std::make_pair("0x00c00004", ""),
+                                           std::make_pair("0x0badadd7", "") });
+    std::cout << "[REGISTER SEQUENCE] output: " << regOut << std::endl;
 
     if (mOptions.swt) {
       auto swtOut = swtSequence.write({ std::make_pair("", "lock"),
