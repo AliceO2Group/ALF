@@ -32,32 +32,7 @@ AlfServer::AlfServer() : mRpcServers()
 {
 }
 
-std::string AlfServer::registerRead(const std::string& parameter, std::shared_ptr<roc::BarInterface> bar)
-{
-  uint32_t address = Util::stringToHex(parameter); // Error from here will get picked up by the StringRpcServer try clause
-  //Util::checkAddress(address);
-
-  uint32_t value = bar->readRegister(address / 4);
-  return Util::formatValue(value);
-}
-
-std::string AlfServer::registerWrite(const std::string& parameter, std::shared_ptr<roc::BarInterface> bar)
-{
-  std::vector<std::string> params = Util::split(parameter, pairSeparator());
-
-  if (params.size() != 2) {
-    BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("Wrong number of parameters for RPC write call"));
-  }
-
-  uint32_t address = Util::stringToHex(params[0]);
-  //Util::checkAddress(address);
-  uint32_t value = Util::stringToHex(params[1]);
-
-  bar->writeRegister(address / 4, value);
-  return "";
-}
-
-std::string AlfServer::registerBlobWrite(const std::string& parameter, AlfLink link)
+std::string AlfServer::registerBlobWrite(const std::string& parameter, AlfLink link, bool isCru)
 {
   std::vector<std::string> stringPairs = Util::split(parameter, argumentSeparator());
   std::vector<std::vector<uint32_t>> registerPairs = parseStringToRegisterPairs(stringPairs);
@@ -66,6 +41,14 @@ std::string AlfServer::registerBlobWrite(const std::string& parameter, AlfLink l
   uint32_t address;
   for (const auto& registerPair : registerPairs) {
     address = registerPair.at(0);
+    // If it's a CRU, check address range
+    if (isCru && (address < 0x00c00000 || address > 0x00cfffff)) {
+      resultBuffer << "Illegal address 0x" << std::hex << address
+                   << ", allowed: [0x00c0_0000-0x00cf_ffff]"
+                   << "\n";
+      BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message(resultBuffer.str()));
+    }
+
     if (registerPair.size() == 1) {
       value = link.bar->readRegister(address / 4);
       resultBuffer << Util::formatValue(value) << "\n";
@@ -588,13 +571,10 @@ void AlfServer::makeRpcServers(std::vector<AlfLink> links)
       }
 
       if (link.linkId == 0 && link.serialId.getEndpoint() == 0) { // Services per card
-        // Register Read
-        servers.push_back(makeServer(names.registerRead(),
-                                     [bar](auto parameter) { return registerRead(parameter, bar); }));
-        // Register Write
-        servers.push_back(makeServer(names.registerWrite(),
-                                     [bar](auto parameter) { return registerWrite(parameter, bar); }));
 
+        // Register Sequence
+        servers.push_back(makeServer(names.registerSequence(),
+                                     [link](auto parameter) { return registerBlobWrite(parameter, link, true); }));
         // Pattern Player
         servers.push_back(makeServer(names.patternPlayer(),
                                      [bar](auto parameter) { return patternPlayer(parameter, bar); }));
