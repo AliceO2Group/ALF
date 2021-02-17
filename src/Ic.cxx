@@ -43,22 +43,13 @@ namespace o2
 namespace alf
 {
 
-namespace ic_regs
-{
-static constexpr roc::Register IC_BASE(0x00f00000);
-static constexpr roc::Register IC_WR_DATA(IC_BASE.address + 0x20);
-static constexpr roc::Register IC_WR_CFG(IC_BASE.address + 0x24);
-static constexpr roc::Register IC_WR_CMD(IC_BASE.address + 0x28);
-static constexpr roc::Register IC_RD_DATA(IC_BASE.address + 0x30);
-} // namespace ic_regs
-
 Ic::Ic(AlfLink link, std::shared_ptr<lla::Session> llaSession)
   : ScBase(link, llaSession)
 {
   Logger::setFacility("ALF/IC");
 
   // Set CFG to 0x3 by default
-  barWrite(ic_regs::IC_WR_CFG.index, 0x3);
+  barWrite(sc_regs::IC_CFG.index, 0x3);
 }
 
 Ic::Ic(const roc::Parameters::CardIdType& cardId, int linkId)
@@ -67,7 +58,7 @@ Ic::Ic(const roc::Parameters::CardIdType& cardId, int linkId)
   Logger::setFacility("ALF/IC");
 
   // Set CFG to 0x3 by default
-  barWrite(ic_regs::IC_WR_CFG.index, 0x3);
+  barWrite(sc_regs::IC_CFG.index, 0x3);
 }
 
 Ic::Ic(std::string cardId, int linkId)
@@ -76,7 +67,7 @@ Ic::Ic(std::string cardId, int linkId)
   Logger::setFacility("ALF/IC");
 
   // Set CFG to 0x3 by default
-  barWrite(ic_regs::IC_WR_CFG.index, 0x3);
+  barWrite(sc_regs::IC_CFG.index, 0x3);
 }
 
 uint32_t Ic::read(uint32_t address)
@@ -89,20 +80,20 @@ uint32_t Ic::read(uint32_t address)
   data = data + address;
 
   // Write to the FIFO
-  barWrite(ic_regs::IC_WR_DATA.index, data);
-  barWrite(ic_regs::IC_WR_CMD.index, 0x1);
-  barWrite(ic_regs::IC_WR_CMD.index, 0x0);
+  barWrite(sc_regs::IC_DATA.index, data);
+  barWrite(sc_regs::IC_CMD.index, 0x1);
+  barWrite(sc_regs::IC_CMD.index, 0x0);
 
   // Execute the RD State Machine
-  barWrite(ic_regs::IC_WR_CMD.index, 0x8);
-  barWrite(ic_regs::IC_WR_CMD.index, 0x0);
+  barWrite(sc_regs::IC_CMD.index, 0x8);
+  barWrite(sc_regs::IC_CMD.index, 0x0);
 
   // Pulse the READ
-  barWrite(ic_regs::IC_WR_CMD.index, 0x2);
-  barWrite(ic_regs::IC_WR_CMD.index, 0x0);
+  barWrite(sc_regs::IC_CMD.index, 0x2);
+  barWrite(sc_regs::IC_CMD.index, 0x0);
 
   // Read the status of the FIFO
-  uint32_t ret = barRead(ic_regs::IC_RD_DATA.index);
+  uint32_t ret = barRead(sc_regs::IC_DATA.index);
   //uint32_t gbtAddress = (ret >> 8) & 0xff;
   uint32_t retData = ret & 0xff;
   //uint32_t empty = (ret >> 16) & 0x1;
@@ -122,18 +113,18 @@ uint32_t Ic::write(uint32_t address, uint32_t data)
   data += address;
 
   // Write to the FIFO
-  barWrite(ic_regs::IC_WR_DATA.index, data);
-  barWrite(ic_regs::IC_WR_CMD.index, 0x1);
-  barWrite(ic_regs::IC_WR_CMD.index, 0x0);
+  barWrite(sc_regs::IC_DATA.index, data);
+  barWrite(sc_regs::IC_CMD.index, 0x1);
+  barWrite(sc_regs::IC_CMD.index, 0x0);
 
   // Execute the WR State Machine
-  barWrite(ic_regs::IC_WR_CMD.index, 0x4);
-  barWrite(ic_regs::IC_WR_CMD.index, 0x0);
+  barWrite(sc_regs::IC_CMD.index, 0x4);
+  barWrite(sc_regs::IC_CMD.index, 0x0);
 
   std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
   // Read the status of the FIFO
-  uint32_t ret = barRead(ic_regs::IC_RD_DATA.index);
+  uint32_t ret = barRead(sc_regs::IC_DATA.index);
   //uint32_t gbtAddress = (ret >> 8) & 0xff;
   //uint32_t retData = ret & 0xff;
   uint32_t empty = (ret >> 16) & 0x1;
@@ -147,7 +138,7 @@ uint32_t Ic::write(uint32_t address, uint32_t data)
 
 void Ic::writeGbtI2c(uint32_t data)
 {
-  barWrite(ic_regs::IC_WR_CFG.index, data);
+  barWrite(sc_regs::IC_CFG.index, data);
 }
 
 std::vector<std::pair<Ic::Operation, Ic::Data>> Ic::executeSequence(std::vector<std::pair<Operation, Data>> ops, bool lock)
@@ -182,7 +173,7 @@ std::vector<std::pair<Ic::Operation, Ic::Data>> Ic::executeSequence(std::vector<
       // If an IC error occurs, we stop executing the sequence of commands and return the results as far as we got them, plus
       // the error message.
       IcData icData = boost::get<IcData>(data);
-      std::string meaningfulMessage = (boost::format("ic_regs::IC_SEQUENCE address=0x%08x data=0x%08x serialId=%s link=%d, error='%s'") % icData.address % icData.data % mLink.serialId % mLink.linkId % e.what()).str();
+      std::string meaningfulMessage = (boost::format("sc_regs::IC_SEQUENCE address=0x%08x data=0x%08x serialId=%s link=%d, error='%s'") % icData.address % icData.data % mLink.serialId % mLink.linkId % e.what()).str();
       //Logger::get().err() << meaningfulMessage << endm;
 
       ret.push_back({ Operation::Error, meaningfulMessage });

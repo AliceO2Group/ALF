@@ -79,17 +79,14 @@ std::vector<SwtWord> Swt::read(SwtWord::Size wordSize, TimeOut msTimeOut)
   for (int i = 0; i < (int)numWords; i++) {
     SwtWord tempWord;
 
-    barWrite(sc_regs::SWT_CMD.index, 0x2);
-    barWrite(sc_regs::SWT_CMD.index, 0x0); // void cmd to sync clocks
-
-    tempWord.setLow(barRead(sc_regs::SWT_RD_WORD_L.index));
+    tempWord.setLow(barRead(sc_regs::SWT_WORD_L.index));
 
     if (wordSize == SwtWord::Size::Medium || wordSize == SwtWord::Size::High) {
-      tempWord.setMed(barRead(sc_regs::SWT_RD_WORD_M.index));
+      tempWord.setMed(barRead(sc_regs::SWT_WORD_M.index));
     }
 
     if (wordSize == SwtWord::Size::High) {
-      tempWord.setHigh(barRead(sc_regs::SWT_RD_WORD_H.index));
+      tempWord.setHigh(barRead(sc_regs::SWT_WORD_H.index));
     }
 
     //wordMonPairs.push_back(std::make_pair(tempWord, barRead(sc_regs::SWT_MON.index)));
@@ -105,12 +102,12 @@ void Swt::write(const SwtWord& swtWord)
 
   // prep the swt word
   if (swtWord.getSize() == SwtWord::Size::High) {
-    barWrite(sc_regs::SWT_WR_WORD_H.index, swtWord.getHigh());
+    barWrite(sc_regs::SWT_WORD_H.index, swtWord.getHigh());
   }
   if (swtWord.getSize() == SwtWord::Size::High || swtWord.getSize() == SwtWord::Size::Medium) {
-    barWrite(sc_regs::SWT_WR_WORD_M.index, swtWord.getMed());
+    barWrite(sc_regs::SWT_WORD_M.index, swtWord.getMed());
   }
-  barWrite(sc_regs::SWT_WR_WORD_L.index, swtWord.getLow()); // The LOW bar write, triggers the write operation
+  barWrite(sc_regs::SWT_WORD_L.index, swtWord.getLow()); // The LOW bar write, triggers the write operation
 
   //return barRead(sc_regs::SWT_MON.index);
 }

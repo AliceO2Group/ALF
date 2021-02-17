@@ -84,7 +84,6 @@ void ScBase::setChannel(int gbtChannel)
 
   mLink.linkId = gbtChannel;
   mLink.rawLinkId = mLink.serialId.getEndpoint() * kCruNumLinks + gbtChannel;
-  barWrite(sc_regs::SC_LINK.index, mLink.rawLinkId);
 }
 
 void ScBase::checkChannelSet()
@@ -93,11 +92,7 @@ void ScBase::checkChannelSet()
     BOOST_THROW_EXCEPTION(ScException() << ErrorInfo::Message("No channel selected"));
   }
 
-  int channel = (barRead(sc_regs::SWT_MON.index) >> 8) & 0xff;
-
-  if (channel != mLink.rawLinkId) {
-    setChannel(mLink.linkId);
-  }
+  setChannel(mLink.linkId);
 }
 
 void ScBase::scReset()
@@ -108,12 +103,14 @@ void ScBase::scReset()
 
 void ScBase::barWrite(uint32_t index, uint32_t data)
 {
-  mBar2->writeRegister(index, data);
+  uint32_t linkIndex = (mLink.rawLinkId * 0x100) / 4 + index;
+  mBar2->writeRegister(linkIndex, data);
 }
 
 uint32_t ScBase::barRead(uint32_t index)
 {
-  return mBar2->readRegister(index);
+  uint32_t linkIndex = (mLink.rawLinkId * 0x100) / 4 + index;
+  return mBar2->readRegister(linkIndex);
 }
 
 } // namespace alf
