@@ -46,7 +46,7 @@ class AlfServer
 {
  public:
   AlfServer();
-  void makeRpcServers(std::vector<AlfLink> links);
+  void makeRpcServers(std::vector<AlfLink> links, bool sequentialRpcs = false);
 
  private:
   std::string scaBlobWrite(const std::string& parameter, AlfLink link);
