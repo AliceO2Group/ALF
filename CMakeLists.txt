@@ -56,7 +56,6 @@ find_package(Common REQUIRED)
 find_package(ReadoutCard REQUIRED)
 find_package(LLA REQUIRED)
 find_package(DIM REQUIRED)
-find_package(DimRpcParallel REQUIRED)
 
 if(NOT APPLE)
   find_package(Python3 3.6 COMPONENTS Interpreter Development)
@@ -117,7 +116,6 @@ target_link_libraries(ALF
     ${LINK_LIBS}
   PRIVATE
     dim::dim
-    DimRpcParallel 
 )
 
 set_target_properties(ALF
@@ -167,7 +165,6 @@ foreach(i RANGE ${count})
     PRIVATE
       ALF
       dim::dim
-      DimRpcParallel
   )
 endforeach()
 

@@ -56,9 +56,6 @@ class Alf : public AliceO2::Common::Program
     options.add_options()("no-fw-check",
                           po::bool_switch(&mOptions.noFirmwareCheck)->default_value(false),
                           "Disable firmware compatibility check");
-    options.add_options()("sequential",
-                          po::bool_switch(&mOptions.sequentialRpcs)->default_value(false),
-                          "Switch to force DIM RPCs to be executed sequentially");
   }
 
   virtual void run(const po::variables_map&) override
@@ -127,7 +124,7 @@ class Alf : public AliceO2::Common::Program
           Logger::get() << link.alfId << " " << link.serialId << " " << link.linkId << LogDebugDevel << endm;
         }
       }
-      alfServer.makeRpcServers(links, mOptions.sequentialRpcs);
+      alfServer.makeRpcServers(links);
     }
 
     // main thread
@@ -140,7 +137,6 @@ class Alf : public AliceO2::Common::Program
   struct OptionsStruct {
     std::string dimDnsNode = "";
     bool noFirmwareCheck = false;
-    bool sequentialRpcs = false;
   } mOptions;
 };
 

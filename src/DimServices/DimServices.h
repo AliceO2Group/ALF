@@ -24,8 +24,6 @@
 #include <dim/dis.hxx>
 #include <string>
 
-#include <DimRpcParallel/dimrpcparallel.h>
-
 #include "Alf/Exception.h"
 #include "Alf/Common.h"
 #include "ReadoutCard/Register.h"
@@ -64,13 +62,13 @@ bool isSuccess(const std::string& str);
 bool isFailure(const std::string& str);
 std::string stripPrefix(const std::string& str);
 
-class StringRpcServer : public DimRpcParallel
+class StringRpcServer : public DimRpc
 {
  public:
   using Callback = std::function<std::string(const std::string&)>;
 
-  StringRpcServer(const std::string& serviceName, Callback callback, int bank)
-    : DimRpcParallel(serviceName.c_str(), "C", "C", bank), mCallback(callback), mServiceName(serviceName)
+  StringRpcServer(const std::string& serviceName, Callback callback)
+    : DimRpc(serviceName.c_str(), "C", "C"), mCallback(callback), mServiceName(serviceName)
   {
   }
 

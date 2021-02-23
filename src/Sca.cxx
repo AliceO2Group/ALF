@@ -58,14 +58,14 @@ Sca::Sca(std::string cardId, int linkId)
 
 void Sca::svlReset()
 {
-  barWrite(sc_regs::SCA_CTRL.index, 0x1);
-  barWrite(sc_regs::SCA_CTRL.index, 0x0);
+  barWrite(sc_regs::SCA_WR_CTRL.index, 0x1);
+  barWrite(sc_regs::SCA_WR_CTRL.index, 0x0);
 }
 
 void Sca::svlConnect()
 {
-  barWrite(sc_regs::SCA_CTRL.index, 0x2);
-  barWrite(sc_regs::SCA_CTRL.index, 0x0);
+  barWrite(sc_regs::SCA_WR_CTRL.index, 0x2);
+  barWrite(sc_regs::SCA_WR_CTRL.index, 0x0);
 }
 
 Sca::CommandData Sca::executeCommand(uint32_t command, uint32_t data, bool lock)
@@ -97,8 +97,8 @@ Sca::CommandData Sca::executeCommand(uint32_t command, uint32_t data, bool lock)
 void Sca::write(uint32_t command, uint32_t data)
 {
   waitOnBusyClear();
-  barWrite(sc_regs::SCA_DATA.index, data);
-  barWrite(sc_regs::SCA_CMD.index, command);
+  barWrite(sc_regs::SCA_WR_DATA.index, data);
+  barWrite(sc_regs::SCA_WR_CMD.index, command);
   auto transactionId = (command >> 16) & 0xff;
   if (transactionId == 0x0 || transactionId == 0xff) {
     BOOST_THROW_EXCEPTION(ScaException()
@@ -115,8 +115,8 @@ void Sca::write(uint32_t command, uint32_t data)
 Sca::CommandData Sca::read()
 {
   waitOnBusyClear();
-  auto data = barRead(sc_regs::SCA_DATA.index);
-  auto command = barRead(sc_regs::SCA_CMD.index);
+  auto data = barRead(sc_regs::SCA_RD_DATA.index);
+  auto command = barRead(sc_regs::SCA_RD_CMD.index);
   /* printf("Sca::read   DATA=0x%x   CH=0x%x   TR=0x%x   CMD=0x%x\n", data,
    command >> 24, (command >> 16) & 0xff, command & 0xff);*/
 
@@ -126,8 +126,8 @@ Sca::CommandData Sca::read()
       checkError(command);
       return { command, data };
     }
-    data = barRead(sc_regs::SCA_DATA.index);
-    command = barRead(sc_regs::SCA_CMD.index);
+    data = barRead(sc_regs::SCA_RD_DATA.index);
+    command = barRead(sc_regs::SCA_RD_CMD.index);
   }
 
   std::stringstream ss;
@@ -193,8 +193,8 @@ void Sca::checkError(uint32_t command)
 
 void Sca::execute()
 {
-  barWrite(sc_regs::SCA_CTRL.index, 0x4);
-  barWrite(sc_regs::SCA_CTRL.index, 0x0);
+  barWrite(sc_regs::SCA_WR_CTRL.index, 0x4);
+  barWrite(sc_regs::SCA_WR_CTRL.index, 0x0);
   waitOnBusyClear();
 }
 
@@ -202,7 +202,7 @@ void Sca::waitOnBusyClear()
 {
   auto endTime = std::chrono::steady_clock::now() + BUSY_TIMEOUT;
   while (std::chrono::steady_clock::now() < endTime) {
-    if ((((barRead(sc_regs::SCA_CTRL.index)) >> 31) & 0x1) == 0) {
+    if ((((barRead(sc_regs::SCA_RD_CTRL.index)) >> 31) & 0x1) == 0) {
       return;
     }
   }
