@@ -79,9 +79,6 @@ std::vector<SwtWord> Swt::read(SwtWord::Size wordSize, TimeOut msTimeOut)
   for (int i = 0; i < (int)numWords; i++) {
     SwtWord tempWord;
 
-    barWrite(sc_regs::SWT_CMD.index, 0x2);
-    barWrite(sc_regs::SWT_CMD.index, 0x0); // void cmd to sync clocks
-
     tempWord.setLow(barRead(sc_regs::SWT_RD_WORD_L.index));
 
     if (wordSize == SwtWord::Size::Medium || wordSize == SwtWord::Size::High) {
