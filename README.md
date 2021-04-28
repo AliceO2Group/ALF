@@ -74,16 +74,6 @@ The services are DIM RPC services. Every RPC is called with a string and expects
 * Example:
   * DIM input `0xc00004\n0x00c00008, 0x0000beef\n0x00c00008`
   * DIM output `0xcafe\n0\n0xbeef\n`
-##### REGISTER_WRITE
-* Parameters:
-  * Register address (within the range [`0x00c00000-0x00cfffff`])
-  * Register value
-* Returns:
-  * empty
-  
-* Example:
-  * DIM input: `0x00c0f00d,0x0000beef`
-  * DIM output: ` `
 
 ##### SCA_SEQUENCE
 * Parameters:
