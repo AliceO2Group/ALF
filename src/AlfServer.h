@@ -55,7 +55,7 @@ class AlfServer
   std::string icBlobWrite(const std::string& parameter, AlfLink link);
   std::string icGbtI2cWrite(const std::string& parameter, AlfLink link);
   static std::string patternPlayer(const std::string& parameter, std::shared_ptr<roc::BarInterface>);
-  static std::string registerBlobWrite(const std::string& parameter, AlfLink link, bool isCru = false);
+  static std::string registerBlobWrite(const std::string& parameter, std::shared_ptr<roc::BarInterface>, bool isCru = false);
   std::string llaSessionStart(const std::string& parameter, roc::SerialId serialId);
   std::string llaSessionStop(const std::string& parameter, roc::SerialId serialId);
 

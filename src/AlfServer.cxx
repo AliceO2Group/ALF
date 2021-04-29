@@ -32,7 +32,7 @@ AlfServer::AlfServer() : mRpcServers()
 {
 }
 
-std::string AlfServer::registerBlobWrite(const std::string& parameter, AlfLink link, bool isCru)
+std::string AlfServer::registerBlobWrite(const std::string& parameter, std::shared_ptr<roc::BarInterface> bar, bool isCru)
 {
   std::vector<std::string> stringPairs = Util::split(parameter, argumentSeparator());
   std::vector<std::vector<uint32_t>> registerPairs = parseStringToRegisterPairs(stringPairs);
@@ -50,11 +50,11 @@ std::string AlfServer::registerBlobWrite(const std::string& parameter, AlfLink l
     }
 
     if (registerPair.size() == 1) {
-      value = link.bar->readRegister(address / 4);
+      value = bar->readRegister(address / 4);
       resultBuffer << Util::formatValue(value) << "\n";
     } else if (registerPair.size() == 2) {
       value = registerPair.at(1);
-      link.bar->writeRegister(address / 4, value);
+      bar->writeRegister(address / 4, value);
       resultBuffer << "0"
                    << "\n";
     }
@@ -574,7 +574,7 @@ void AlfServer::makeRpcServers(std::vector<AlfLink> links)
 
         // Register Sequence
         servers.push_back(makeServer(names.registerSequence(),
-                                     [link](auto parameter) { return registerBlobWrite(parameter, link, true); }));
+                                     [bar](auto parameter) { return registerBlobWrite(parameter, bar, true); }));
         // Pattern Player
         servers.push_back(makeServer(names.patternPlayer(),
                                      [bar](auto parameter) { return patternPlayer(parameter, bar); }));
@@ -604,8 +604,8 @@ void AlfServer::makeRpcServers(std::vector<AlfLink> links)
 
     } else if (link.cardType == roc::CardType::Crorc) {
       // Register Sequence
-      servers.push_back(makeServer(names.registerSequence(),
-                                   [link](auto parameter) { return registerBlobWrite(parameter, link); }));
+      servers.push_back(makeServer(names.registerSequenceLink(),
+                                   [bar](auto parameter) { return registerBlobWrite(parameter, bar); }));
     }
   }
 }
