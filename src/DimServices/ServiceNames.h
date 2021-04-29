@@ -40,6 +40,7 @@ class ServiceNames
   std::string icGbtI2cWrite() const;
   std::string patternPlayer() const;
   std::string registerSequence() const;
+  std::string registerSequenceLink() const;
   std::string llaSessionStart() const;
   std::string llaSessionStop() const;
 
