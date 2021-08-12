@@ -99,6 +99,11 @@ class ScaMftPsu
   ///         o2::alf::ScaMftPsuException on invalid operation or error
   std::string writeSequence(const std::vector<std::pair<Operation, Data>>& operations, bool lock = false);
 
+  /// Checks if the link should be used for the MFT PSU service
+  /// \param link The AlfLink to check
+  /// \return A bool if the link should be used for the MFT PSU service
+  static bool isAnMftPsuLink(AlfLink link);
+
  private:
   uint32_t barRead(uint32_t index);
   void barWrite(uint32_t index, uint32_t data);
