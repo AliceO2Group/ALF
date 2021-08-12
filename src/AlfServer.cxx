@@ -563,7 +563,7 @@ void AlfServer::makeRpcServers(std::vector<AlfLink> links)
                                         .setCardId(link.serialId);
       mSessions[link.serialId] = std::make_shared<lla::Session>(params);
 
-      if (kMftPsuSerials.find(link.serialId.getSerial()) != kMftPsuSerials.end()) {
+      if (ScaMftPsu::isAnMftPsuLink(link)) {
         // SCA MFT PSU Sequence
         servers.push_back(makeServer(names.scaMftPsuSequence(),
                                      [link, this](auto parameter) { return scaMftPsuBlobWrite(parameter, link); }));

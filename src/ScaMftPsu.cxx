@@ -333,5 +333,10 @@ std::string ScaMftPsu::writeSequence(const std::vector<std::pair<Operation, Data
   return resultBuffer.str();
 }
 
+// static
+bool ScaMftPsu::isAnMftPsuLink(AlfLink link) {
+  return link.bar->readRegister(sc_regs::SCA_MFT_PSU_ID.index) == 0x1;
+}
+
 } // namespace alf
 } // namespace o2
