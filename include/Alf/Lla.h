@@ -32,6 +32,7 @@ class LlaSession
  public:
   LlaSession(std::shared_ptr<lla::Session> llaSession);
   LlaSession(std::string sessionName, roc::SerialId serialId);
+  ~LlaSession();
   void start();
   void stop();
 

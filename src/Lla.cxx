@@ -33,6 +33,14 @@ LlaSession::LlaSession(std::string sessionName, roc::SerialId serialId)
 {
 }
 
+/* The LlaSession object goes out of scope when the last shared_ptr instance is destroyed (See AlfServer.h).
+   Since said destruction may follow an erroneous event and the session might not be explicitly stopped
+   it is forcefully stopped it in the destructor */
+LlaSession::~LlaSession()
+{
+  stop();
+}
+
 void LlaSession::start()
 {
   if (!mSession) {
