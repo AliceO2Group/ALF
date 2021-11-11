@@ -65,7 +65,7 @@ class ScBase
   void barWrite(uint32_t index, uint32_t data);
 
   AlfLink mLink;
-  std::unique_ptr<LlaSession> mLlaSession;
+  std::shared_ptr<LlaSession> mLlaSession;
 
  private:
   /// Does the necessary initializations after an object creating

@@ -61,6 +61,9 @@ class AlfClient : public AliceO2::Common::Program
     options.add_options()("link",
                           po::value<int>(&mOptions.link),
                           "Link number");
+    options.add_options()("link2",
+                          po::value<int>(&mOptions.link2),
+                          "Link2 number");
     options.add_options()("alf-id",
                           po::value<std::string>(&mOptions.alfId)->default_value(""),
                           "Hostname of node running the ALF server(required)");
@@ -85,6 +88,9 @@ class AlfClient : public AliceO2::Common::Program
     options.add_options()("swt-stress",
                           po::bool_switch(&mOptions.swtStress)->default_value(false),
                           "Flag enabling the swt-stress tests");
+    options.add_options()("parallel-sc",
+                          po::bool_switch(&mOptions.parallelSc)->default_value(false),
+                          "Flag enabling the parallel SC tests");
     options.add_options()("swt-stress-cycles",
                           po::value<int>(&mOptions.swtStressCycles)->default_value(2),
                           "Number of cycles for which to run the SWT stress test");
@@ -123,8 +129,10 @@ class AlfClient : public AliceO2::Common::Program
     std::cout << "Starting the DIM Client using ALF ID=" << alfId << ", card=" << mOptions.serial << ":" << mOptions.endpoint << " and link=" << mOptions.link << std::endl;
 
     AlfLink link = AlfLink{ alfId, roc::SerialId(mOptions.serial, mOptions.endpoint), mOptions.link, mOptions.endpoint * 12 + mOptions.link, nullptr, roc::CardType::Cru };
+    AlfLink link2 = AlfLink{ alfId, roc::SerialId(mOptions.serial, mOptions.endpoint), mOptions.link2, mOptions.endpoint * 12 + mOptions.link2, nullptr, roc::CardType::Cru };
 
     ServiceNames names(link);
+    ServiceNames names2(link2);
 
     if (mOptions.crorc) {
       link.cardType = roc::CardType::Crorc;
@@ -146,6 +154,7 @@ class AlfClient : public AliceO2::Common::Program
     LlaSessionStopRpc llaSessionStopRpc(names.llaSessionStop());
 
     SwtSequenceRpc swtSequence(names.swtSequence());
+    SwtSequenceRpc swtSequence2(names2.swtSequence());
     ScaSequenceRpc scaSequence(names.scaSequence());
     IcSequenceRpc icSequence(names.icSequence());
     IcGbtI2cWriteRpc icGbtI2cWriteRpc(names.icGbtI2cWrite());
@@ -261,6 +270,27 @@ class AlfClient : public AliceO2::Common::Program
       }
     }
 
+    if (mOptions.parallelSc) {
+      std::thread t1(
+          [&] {auto swtOut = swtSequence.write({ std::make_pair("", "lock"),
+                                        std::make_pair("0x00000000000deadbeef", "write"),
+                                        std::make_pair("4", "read") });
+      std::cout << "[SWT_SEQUENCE L" << mOptions.link << "] output: " << swtOut << std::endl; }
+      );
+
+      std::thread t2(
+          [&] {auto swtOut2 = swtSequence2.write({ std::make_pair("", "lock"),
+                                        std::make_pair("0x000000000000badcafe", "write"),
+                                        std::make_pair("4", "read") });
+      std::cout << "[SWT_SEQUENCE L" << mOptions.link2 << "] output: " << swtOut2 << std::endl; }
+      );
+
+      t1.join();
+      t2.join();
+
+
+    }
+
     std::cout << "See ya!" << std::endl;
   }
 
@@ -270,6 +300,7 @@ class AlfClient : public AliceO2::Common::Program
     int serial = -1;
     int endpoint = 0;
     int link = -1;
+    int link2 = -1;
     std::string alfId = "";
     bool crorc = false;
     bool ic = false;
@@ -278,6 +309,7 @@ class AlfClient : public AliceO2::Common::Program
     bool swt = false;
     bool patternPlayer = false;
     bool swtStress = false;
+    bool parallelSc = false;
     int swtStressCycles = 2;
     int swtStressWords = 1000;
   } mOptions;
