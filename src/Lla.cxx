@@ -58,7 +58,9 @@ void LlaSession::start()
 
 void LlaSession::stop()
 {
-  mSession->stop();
+  if (mSession) {
+    mSession->stop();
+  }
 }
 
 } // namespace alf
