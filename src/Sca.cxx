@@ -43,19 +43,25 @@ namespace alf
 Sca::Sca(AlfLink link, std::shared_ptr<lla::Session> llaSession)
   : ScBase(link, llaSession)
 {
-  Logger::setFacility("ALF/SCA");
+  if (kDebugLogging) {
+    Logger::setFacility("ALF/SCA");
+  }
 }
 
 Sca::Sca(const roc::Parameters::CardIdType& cardId, int linkId)
   : ScBase(cardId, linkId)
 {
-  Logger::setFacility("ALF/SCA");
+  if (kDebugLogging) {
+    Logger::setFacility("ALF/SCA");
+  }
 }
 
 Sca::Sca(std::string cardId, int linkId)
   : ScBase(cardId, linkId)
 {
-  Logger::setFacility("ALF/SCA");
+  if (kDebugLogging) {
+    Logger::setFacility("ALF/SCA");
+  }
 }
 
 void Sca::svlReset()
@@ -304,7 +310,9 @@ std::string Sca::writeSequence(const std::vector<std::pair<Operation, Data>>& op
       resultBuffer << "svl_connect\n"; // echo
     } else if (operation == Operation::Error) {
       resultBuffer << data; // "[error_msg]"
-      Logger::get() << data << LogErrorDevel << endm;
+      if (kDebugLogging) {
+        Logger::get() << data << LogErrorDevel << endm;
+      }
       BOOST_THROW_EXCEPTION(ScaException() << ErrorInfo::Message(resultBuffer.str()));
       break;
     }

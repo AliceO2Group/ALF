@@ -32,6 +32,9 @@
 #include "Logger.h"
 #include "Util.h"
 
+// hijacking this file to define an extern variable for the Logger
+bool kDebugLogging;
+
 namespace sc_regs = AliceO2::roc::Cru::ScRegisters;
 
 namespace o2

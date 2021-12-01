@@ -43,7 +43,9 @@ namespace alf
 ScaMftPsu::ScaMftPsu(AlfLink link, std::shared_ptr<lla::Session> llaSession)
   : mLink(link), mBar2(mLink.bar)
 {
-  Logger::setFacility("ALF/SCA_MFT_PSU");
+  if (kDebugLogging) {
+    Logger::setFacility("ALF/SCA_MFT_PSU");
+  }
   mLlaSession = std::make_unique<LlaSession>(llaSession);
   mLink.rawLinkId = mLink.serialId.getEndpoint() * kCruNumLinks + mLink.linkId;
 }
@@ -326,7 +328,9 @@ std::string ScaMftPsu::writeSequence(const std::vector<std::pair<Operation, Data
       resultBuffer << "slave\n"; // echo
     } else if (operation == Operation::Error) {
       resultBuffer << data; // "[error_msg]"
-      Logger::get() << data << LogErrorDevel << endm;
+      if (kDebugLogging) {
+        Logger::get() << data << LogErrorDevel << endm;
+      }
       BOOST_THROW_EXCEPTION(ScaMftPsuException() << ErrorInfo::Message(resultBuffer.str()));
       break;
     }

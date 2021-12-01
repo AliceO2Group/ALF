@@ -23,4 +23,6 @@
 typedef AliceO2::roc::Logger Logger;
 constexpr auto endm = AliceO2::roc::endm;
 
+extern bool kDebugLogging;
+
 #endif // O2_ALF_LOGGER_H_

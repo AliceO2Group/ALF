@@ -48,7 +48,9 @@ namespace alf
 Ic::Ic(AlfLink link, std::shared_ptr<lla::Session> llaSession)
   : ScBase(link, llaSession)
 {
-  Logger::setFacility("ALF/IC");
+  if (kDebugLogging) {
+    Logger::setFacility("ALF/IC");
+  }
 
   // Set CFG to 0x3 by default
   barWrite(sc_regs::IC_WR_CFG.index, 0x3);
@@ -57,7 +59,9 @@ Ic::Ic(AlfLink link, std::shared_ptr<lla::Session> llaSession)
 Ic::Ic(const roc::Parameters::CardIdType& cardId, int linkId)
   : ScBase(cardId, linkId)
 {
-  Logger::setFacility("ALF/IC");
+  if (kDebugLogging) {
+    Logger::setFacility("ALF/IC");
+  }
 
   // Set CFG to 0x3 by default
   barWrite(sc_regs::IC_WR_CFG.index, 0x3);
@@ -66,7 +70,9 @@ Ic::Ic(const roc::Parameters::CardIdType& cardId, int linkId)
 Ic::Ic(std::string cardId, int linkId)
   : ScBase(cardId, linkId)
 {
-  Logger::setFacility("ALF/IC");
+  if (kDebugLogging) {
+    Logger::setFacility("ALF/IC");
+  }
 
   // Set CFG to 0x3 by default
   barWrite(sc_regs::IC_WR_CFG.index, 0x3);
@@ -204,7 +210,9 @@ std::string Ic::writeSequence(std::vector<std::pair<Operation, Data>> ops, bool 
     } else if (operation == Operation::Error) {
       std::string errMessage = boost::get<std::string>(data);
       resultBuffer << errMessage;
-      Logger::get() << errMessage << LogErrorDevel << endm;
+      if (kDebugLogging) {
+        Logger::get() << errMessage << LogErrorDevel << endm;
+      }
       BOOST_THROW_EXCEPTION(IcException() << ErrorInfo::Message(resultBuffer.str()));
     }
   }

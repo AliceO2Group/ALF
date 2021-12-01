@@ -94,7 +94,9 @@ void StringRpcServer::rpcHandler()
     auto returnValue = mCallback(std::string(getString()));
     setDataString(makeSuccessString(returnValue), *this);
   } catch (const std::exception& e) {
-    Logger::get() << mServiceName << ": " << e.what() << LogErrorDevel << endm;
+    if (kDebugLogging) {
+      Logger::get() << mServiceName << ": " << e.what() << LogErrorDevel << endm;
+    }
     setDataString(makeFailureString(e.what()), *this);
   }
 }

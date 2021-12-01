@@ -65,6 +65,8 @@ class AlfLibClient : public AliceO2::Common::Program
 
   virtual void run(const po::variables_map&) override
   {
+    kDebugLogging = isVerbose();
+
     Logger::enableInfoLogger(false);
     Logger::setFacility("ALF/LibClient");
     if (mOptions.sca) {

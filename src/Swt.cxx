@@ -47,19 +47,25 @@ namespace sc_regs = AliceO2::roc::Cru::ScRegisters;
 Swt::Swt(AlfLink link, std::shared_ptr<lla::Session> llaSession)
   : ScBase(link, llaSession)
 {
-  Logger::setFacility("ALF/SWT");
+  if (kDebugLogging) {
+    Logger::setFacility("ALF/SWT");
+  }
 }
 
 Swt::Swt(const roc::Parameters::CardIdType& cardId, int linkId)
   : ScBase(cardId, linkId)
 {
-  Logger::setFacility("ALF/SWT");
+  if (kDebugLogging) {
+    Logger::setFacility("ALF/SWT");
+  }
 }
 
 Swt::Swt(std::string cardId, int linkId)
   : ScBase(cardId, linkId)
 {
-  Logger::setFacility("ALF/SWT");
+  if (kDebugLogging) {
+    Logger::setFacility("ALF/SWT");
+  }
 }
 
 std::vector<SwtWord> Swt::read(SwtWord::Size wordSize, TimeOut msTimeOut)
@@ -210,7 +216,9 @@ std::string Swt::writeSequence(std::vector<std::pair<Operation, Data>> sequence,
       resultBuffer << std::dec << data << "\n";
     } else if (operation == Operation::Error) {
       resultBuffer << data;
-      Logger::get() << data << LogErrorDevel << endm;
+      if (kDebugLogging) {
+        Logger::get() << data << LogErrorDevel << endm;
+      }
       BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message(resultBuffer.str()));
       break;
     }
