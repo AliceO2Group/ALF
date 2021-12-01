@@ -52,7 +52,9 @@ class RegisterReadRpc : DimRpcInfoWrapper
       toConvert = stripPrefix(getString());
       converted = Util::stringToHex(toConvert);
     } catch (const AlfException& e) {
-      Logger::get() << "RegisterReadRpc: " << boost::diagnostic_information(e, true) << LogErrorDevel << endm;
+      if (kDebugLogging) {
+        Logger::get() << "RegisterReadRpc: " << boost::diagnostic_information(e, true) << LogErrorDevel << endm;
+      }
       return errHex;
     }
 
@@ -74,7 +76,9 @@ class RegisterWriteRpc : DimRpcInfoWrapper
     try {
       getString();
     } catch (const AlfException& e) {
-      Logger::get() << "RegisterWriteRpc: " << boost::diagnostic_information(e, true) << LogErrorDevel << endm;
+      if (kDebugLogging) {
+        Logger::get() << "RegisterWriteRpc: " << boost::diagnostic_information(e, true) << LogErrorDevel << endm;
+      }
     }
   }
 };
@@ -93,7 +97,9 @@ class PatternPlayerRpc : DimRpcInfoWrapper
     try {
       ret = getString();
     } catch (const AlfException& e) {
-      Logger::get() << "PatternPlayerRpc: " << boost::diagnostic_information(e, true) << LogErrorDevel << endm;
+      if (kDebugLogging) {
+        Logger::get() << "PatternPlayerRpc: " << boost::diagnostic_information(e, true) << LogErrorDevel << endm;
+      }
       return errString;
     }
     return ret;
@@ -127,7 +133,9 @@ class ScaSequenceRpc : DimRpcInfoWrapper
     try {
       ret = getString();
     } catch (const AlfException& e) {
-      Logger::get() << "ScaSequence: " << boost::diagnostic_information(e, true) << LogErrorDevel << endm;
+      if (kDebugLogging) {
+        Logger::get() << "ScaSequence: " << boost::diagnostic_information(e, true) << LogErrorDevel << endm;
+      }
       return errString;
     }
     return ret;
@@ -165,7 +173,9 @@ class RegisterSequenceRpc : DimRpcInfoWrapper
     try {
       ret = getString();
     } catch (const AlfException& e) {
-      Logger::get() << "RegisterSequence: " << boost::diagnostic_information(e, true) << LogErrorDevel << endm;
+      if (kDebugLogging) {
+        Logger::get() << "RegisterSequence: " << boost::diagnostic_information(e, true) << LogErrorDevel << endm;
+      }
       return errString;
     }
     return ret;
@@ -203,7 +213,9 @@ class SwtSequenceRpc : DimRpcInfoWrapper
     try {
       ret = getString();
     } catch (const AlfException& e) {
-      Logger::get() << "SwtSequence: " << boost::diagnostic_information(e, true) << LogErrorDevel << endm;
+      if (kDebugLogging) {
+        Logger::get() << "SwtSequence: " << boost::diagnostic_information(e, true) << LogErrorDevel << endm;
+      }
       return errString;
     }
     return ret;
@@ -241,7 +253,9 @@ class IcSequenceRpc : DimRpcInfoWrapper
     try {
       ret = getString();
     } catch (const AlfException& e) {
-      Logger::get() << "IcSequence: " << boost::diagnostic_information(e, true) << LogErrorDevel << endm;
+      if (kDebugLogging) {
+        Logger::get() << "IcSequence: " << boost::diagnostic_information(e, true) << LogErrorDevel << endm;
+      }
       return errString;
     }
     return ret;
@@ -278,7 +292,9 @@ class IcGbtI2cWriteRpc : DimRpcInfoWrapper
     try {
       getString();
     } catch (const AlfException& e) {
-      Logger::get() << "IcGbtI2cWriteRpc: " << boost::diagnostic_information(e, true) << LogErrorDevel << endm;
+      if (kDebugLogging) {
+        Logger::get() << "IcGbtI2cWriteRpc: " << boost::diagnostic_information(e, true) << LogErrorDevel << endm;
+      }
     }
   }
 };
@@ -298,7 +314,9 @@ class LlaSessionStartRpc : DimRpcInfoWrapper
     try {
       ret = getString();
     } catch (const AlfException& e) {
-      Logger::get() << "LlaSessionStart: " << boost::diagnostic_information(e, true) << LogErrorDevel << endm;
+      if (kDebugLogging) {
+        Logger::get() << "LlaSessionStart: " << boost::diagnostic_information(e, true) << LogErrorDevel << endm;
+      }
       return errString;
     }
     return ret;
@@ -331,7 +349,9 @@ class LlaSessionStopRpc : DimRpcInfoWrapper
     try {
       ret = getString();
     } catch (const AlfException& e) {
-      Logger::get() << "LlaSessionStop: " << boost::diagnostic_information(e, true) << LogErrorDevel << endm;
+      if (kDebugLogging) {
+        Logger::get() << "LlaSessionStop: " << boost::diagnostic_information(e, true) << LogErrorDevel << endm;
+      }
       return errString;
     }
     return ret;

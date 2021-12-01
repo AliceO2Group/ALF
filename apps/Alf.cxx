@@ -65,7 +65,7 @@ class Alf : public AliceO2::Common::Program
 
   virtual void run(const po::variables_map&) override
   {
-    //verbose = isVerbose();
+    kDebugLogging = isVerbose();
 
     Logger::setFacility("ALF");
     Logger::get() << "ALF server starting..." << LogInfoOps << endm;

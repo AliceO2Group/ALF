@@ -102,7 +102,7 @@ class DimRpcInfoWrapper
   std::string getString()
   {
     auto str = std::string(mRpcInfo->getString());
-    if (isFailure(str)) {
+    if (isFailure(str) && kDebugLogging) {
       Logger::get() << "ALF server failure: " << str << LogErrorDevel << endm;
     }
     return str;
