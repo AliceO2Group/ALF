@@ -69,7 +69,7 @@ class AlfClient : public AliceO2::Common::Program
                           "Hostname of node running the ALF server(required)");
     options.add_options()("crorc",
                           po::bool_switch(&mOptions.crorc)->default_value(false),
-                          "Flag enabling the test of the crorc (exclusive)");
+                          "Flag enabling the test of the crorc (exclusive - includes card reset!)");
     options.add_options()("ic",
                           po::bool_switch(&mOptions.ic)->default_value(false),
                           "Flag enabling the ic tests");
@@ -139,12 +139,15 @@ class AlfClient : public AliceO2::Common::Program
     if (mOptions.crorc) {
       link.cardType = roc::CardType::Crorc;
       RegisterSequenceRpc registerSequence(names.registerSequence());
+      ResetCardRpc resetCard(names.resetCard());
       auto regOut = registerSequence.write({ std::make_pair("0x19c", ""),
                                              std::make_pair("0xa0", ""),
                                              std::make_pair("0x1f0", ""),
                                              std::make_pair("0x1f0", "0x00080000"),
                                              std::make_pair("0x1f0", "") });
       std::cout << "[REGISTER SEQUENCE] output: " << regOut << std::endl;
+      auto resetCardOut = resetCard.write("alf_client_test");
+      std::cout << "[RESET CARD] output: " << resetCardOut << std::endl;
 
       return;
     }

@@ -358,6 +358,30 @@ class LlaSessionStopRpc : DimRpcInfoWrapper
   }
 };
 
+class ResetCardRpc : DimRpcInfoWrapper
+{
+ public:
+  ResetCardRpc(const std::string& serviceName)
+    : DimRpcInfoWrapper(serviceName)
+  {
+  }
+
+  std::string write(const std::string& buffer)
+  {
+    setString(buffer);
+    std::string ret;
+    try {
+      ret = getString();
+    } catch (const AlfException& e) {
+      if (kDebugLogging) {
+        Logger::get() << "ResetCard: " << boost::diagnostic_information(e, true) << LogErrorDevel << endm;
+      }
+      return errString;
+    }
+    return ret;
+  }
+};
+
 } // namespace alf
 } // namespace o2
 

@@ -25,6 +25,9 @@
 #include "Logger.h"
 #include "Util.h"
 
+#include "ReadoutCard/ChannelFactory.h"
+#include "ReadoutCard/Exception.h"
+
 namespace o2
 {
 namespace alf
@@ -187,6 +190,24 @@ std::string AlfServer::llaSessionStop(const std::string& /*parameter*/, roc::Ser
   }
 
   mSessions[serialId]->stop();
+  return "";
+}
+
+std::string AlfServer::resetCard(const std::string& /*parameter*/, AlfLink link)
+{
+  // Reset the CRORC DMA channel
+  auto params = roc::Parameters::makeParameters(link.serialId, link.linkId);
+  params.setBufferParameters(o2::roc::buffer_parameters::Null());
+  params.setFirmwareCheckEnabled(false);
+  std::shared_ptr<roc::DmaChannelInterface> dmaChannel;
+  try {
+    dmaChannel = roc::ChannelFactory().getDmaChannel(params);
+  } catch (const roc::LockException& e) {
+    BOOST_THROW_EXCEPTION(
+        AlfException() << ErrorInfo::Message("Another process is holding the channel lock (cannot reset)"));
+  }
+  dmaChannel->resetChannel(roc::ResetLevel::InternalSiu);
+
   return "";
 }
 
@@ -610,6 +631,8 @@ void AlfServer::makeRpcServers(std::vector<AlfLink> links, bool sequentialRpcs)
       // Register Sequence
       servers.push_back(makeServer(names.registerSequenceLink(),
                                    [bar](auto parameter) { return registerBlobWrite(parameter, bar); }));
+      servers.push_back(makeServer(names.resetCard(),
+                                   [link, this](auto parameter) { return resetCard(parameter, link); }));
     }
   }
 }

@@ -48,6 +48,7 @@ DEFLINKSERVICENAME(scaMftPsuSequence, "SCA_MFT_PSU_SEQUENCE")
 DEFLINKSERVICENAME(swtSequence, "SWT_SEQUENCE")
 DEFLINKSERVICENAME(icSequence, "IC_SEQUENCE")
 DEFLINKSERVICENAME(icGbtI2cWrite, "IC_GBT_I2C_WRITE")
+DEFLINKSERVICENAME(resetCard, "RESET_CARD")
 
 std::string ServiceNames::formatLink(std::string name) const
 {

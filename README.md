@@ -226,6 +226,17 @@ It extends the `SCA_SEQUENCE` to add the following functionality:
   * DIM input `0xf00d\n0x0000f00d, 0x0000beef\n0x0000f00d`
   * DIM output `0xcafe\n0\n0xbeef\n`
 
+##### RESET_CARD
+* Parameters:
+   * empty
+
+* Returns:
+   * empty
+
+* Example:
+  * DIM input ` `
+  * DIM output ` `
+
 ## Slow Control library
 ALF can also be used as a C++ library to access the Slow Control interface of the CRU. The three available interfaces (IC, SCA & SWT) can be accessed through single operations, or sequences of operations.
 
