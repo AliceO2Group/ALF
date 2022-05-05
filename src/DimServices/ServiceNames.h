@@ -45,6 +45,7 @@ class ServiceNames
   std::string registerSequenceLink() const;
   std::string llaSessionStart() const;
   std::string llaSessionStop() const;
+  std::string resetCard() const;
 
  private:
   std::string formatLink(std::string name) const;

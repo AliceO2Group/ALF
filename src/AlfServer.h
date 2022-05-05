@@ -60,6 +60,7 @@ class AlfServer
   static std::string registerBlobWrite(const std::string& parameter, std::shared_ptr<roc::BarInterface>, bool isCru = false);
   std::string llaSessionStart(const std::string& parameter, roc::SerialId serialId);
   std::string llaSessionStop(const std::string& parameter, roc::SerialId serialId);
+  std::string resetCard(const std::string& parameter, AlfLink link);
 
   static std::vector<uint32_t> stringToRegisterPair(const std::string stringPair);
   static std::pair<Sca::Operation, Sca::Data> stringToScaPair(const std::string stringPair);
