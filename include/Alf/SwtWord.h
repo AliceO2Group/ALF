@@ -58,6 +58,8 @@ class SwtWord
   uint16_t getHigh() const;
   Size getSize() const;
 
+  static SwtWord::Size sizeFromString(std::string swtWord);
+
  private:
   uint32_t mLow;
   uint32_t mMed;

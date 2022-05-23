@@ -61,6 +61,9 @@ class Alf : public AliceO2::Common::Program
     options.add_options()("sequential",
                           po::bool_switch(&mOptions.sequentialRpcs)->default_value(false),
                           "Switch to force DIM RPCs to be executed sequentially");
+    options.add_options()("swt-word-size",
+                          po::value<std::string>(&mOptions.swtWordSize)->default_value("low"),
+                          "Sets the size of SWT word operations (low, medium, high)");
   }
 
   virtual void run(const po::variables_map&) override
@@ -81,6 +84,15 @@ class Alf : public AliceO2::Common::Program
       BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("DIM_DNS_NODE env variable not set, and no relevant argument provided.")); // InfoLogger and errors?
     }
 
+    // Parse the default SWT word size
+    SwtWord::Size swtWordSize;
+    try {
+      swtWordSize = SwtWord::sizeFromString(mOptions.swtWordSize);
+    } catch (const ParseException& e) {
+      Logger::get() << e.what() << LogWarningOps << endm;
+      Logger::get() << "SWT word size defaulting to low" << LogWarningOps << endm;
+    }
+
     std::string alfId = ip::host_name();
     boost::to_upper(alfId);
 
@@ -88,7 +100,7 @@ class Alf : public AliceO2::Common::Program
     DimServer::setDnsNode(mOptions.dimDnsNode.c_str(), 2505);
     DimServer::start(("ALF_" + alfId).c_str());
 
-    AlfServer alfServer = AlfServer();
+    AlfServer alfServer = AlfServer(swtWordSize);
 
     std::vector<roc::CardDescriptor> cardsFound = roc::findCards();
     for (auto const& card : cardsFound) {
@@ -143,6 +155,7 @@ class Alf : public AliceO2::Common::Program
     std::string dimDnsNode = "";
     bool noFirmwareCheck = false;
     bool sequentialRpcs = false;
+    std::string swtWordSize = "low";
   } mOptions;
 };
 

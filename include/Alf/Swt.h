@@ -67,7 +67,7 @@ class Swt : public ScBase
 
   /// Internal constructor for the ALF server
   /// \param link AlfLink holding useful information coming from the AlfServer class
-  Swt(AlfLink link, std::shared_ptr<lla::Session> llaSession);
+  Swt(AlfLink link, std::shared_ptr<lla::Session> llaSession, SwtWord::Size = SwtWord::Size::Low);
 
   /// External constructor
   /// \param cardId The card ID for which to get the SWT handle.
@@ -81,7 +81,6 @@ class Swt : public ScBase
 
   /// Writes an SWT word
   /// \param swtWord The SWT word to write
-  /// \param wordSize The size of the SWT word to be written
   void write(const SwtWord& swtWord);
 
   /// Reads SWT words
@@ -115,6 +114,7 @@ class Swt : public ScBase
 
  private:
   static constexpr int DEFAULT_SWT_WAIT_TIME_MS = 3;
+  SwtWord::Size mSwtWordSize = SwtWord::Size::Low;
 };
 
 } // namespace alf

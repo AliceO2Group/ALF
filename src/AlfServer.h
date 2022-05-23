@@ -47,7 +47,7 @@ namespace alf
 class AlfServer
 {
  public:
-  AlfServer();
+  AlfServer(SwtWord::Size swtWordSize = SwtWord::Size::Low);
   void makeRpcServers(std::vector<AlfLink> links, bool sequentialRpcs = false);
 
  private:
@@ -64,11 +64,11 @@ class AlfServer
 
   static std::vector<uint32_t> stringToRegisterPair(const std::string stringPair);
   static std::pair<Sca::Operation, Sca::Data> stringToScaPair(const std::string stringPair);
-  static std::pair<Swt::Operation, Swt::Data> stringToSwtPair(const std::string stringPair);
+  static std::pair<Swt::Operation, Swt::Data> stringToSwtPair(const std::string stringPair, const SwtWord::Size swtWordSize);
   static std::pair<Ic::Operation, Ic::Data> stringToIcPair(const std::string stringPair);
   static std::vector<std::vector<uint32_t>> parseStringToRegisterPairs(std::vector<std::string> stringPairs);
   static std::vector<std::pair<Sca::Operation, Sca::Data>> parseStringToScaPairs(std::vector<std::string> stringPairs);
-  static std::vector<std::pair<Swt::Operation, Swt::Data>> parseStringToSwtPairs(std::vector<std::string> stringPairs);
+  static std::vector<std::pair<Swt::Operation, Swt::Data>> parseStringToSwtPairs(std::vector<std::string> stringPairs, const SwtWord::Size swtWordSize);
   static std::vector<std::pair<Ic::Operation, Ic::Data>> parseStringToIcPairs(std::vector<std::string> stringPairs);
   static roc::PatternPlayer::Info parseStringToPatternPlayerInfo(const std::vector<std::string> sringsPairs);
 
@@ -80,6 +80,9 @@ class AlfServer
   /// serialId -> link -> vector of RPC servers
   std::map<roc::SerialId, std::map<int, std::vector<std::unique_ptr<StringRpcServer>>>, serialIdComparator> mRpcServers;
   std::map<roc::SerialId, std::shared_ptr<lla::Session>, serialIdComparator> mSessions;
+
+  // default size for SWT read operations
+  SwtWord::Size mSwtWordSize;
 };
 
 } // namespace alf
