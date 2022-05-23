@@ -28,8 +28,11 @@
 #include <cstdint>
 #include <cstddef>
 #include <iomanip>
+#include <string>
+#include <boost/algorithm/string.hpp>
 
 #include "Alf/SwtWord.h"
+#include "Alf/Exception.h"
 
 namespace o2
 {
@@ -106,6 +109,20 @@ uint16_t SwtWord::getHigh() const
 SwtWord::Size SwtWord::getSize() const
 {
   return mSize;
+}
+
+SwtWord::Size SwtWord::sizeFromString(std::string swtWord)
+{
+  boost::to_lower(swtWord);
+  if (swtWord == "low") {
+    return SwtWord::Size::Low;
+  } else if (swtWord == "med" || swtWord == "medium") {
+    return SwtWord::Size::Medium;
+  } else if (swtWord == "high") {
+    return SwtWord::Size::High;
+  }
+
+  BOOST_THROW_EXCEPTION(ParseException() << ErrorInfo::Message("Cannot parse swt word size from: \"" + swtWord + "\". Can be \"low\", \"med\", \"medium\", or \"high\""));
 }
 
 std::ostream& operator<<(std::ostream& output, const SwtWord& swtWord)

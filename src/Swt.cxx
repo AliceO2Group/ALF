@@ -44,8 +44,8 @@ namespace alf
 
 namespace sc_regs = AliceO2::roc::Cru::ScRegisters;
 
-Swt::Swt(AlfLink link, std::shared_ptr<lla::Session> llaSession)
-  : ScBase(link, llaSession)
+Swt::Swt(AlfLink link, std::shared_ptr<lla::Session> llaSession, SwtWord::Size swtWordSize)
+  : ScBase(link, llaSession), mSwtWordSize(swtWordSize)
 {
   if (kDebugLogging) {
     Logger::setFacility("ALF/SWT");
@@ -146,7 +146,7 @@ std::vector<std::pair<Swt::Operation, Swt::Data>> Swt::executeSequence(std::vect
           data = DEFAULT_SWT_TIMEOUT_MS;
           timeOut = boost::get<TimeOut>(data);
         }
-        auto results = read(SwtWord::Size::Low, timeOut);
+        auto results = read(mSwtWordSize, timeOut);
 
         for (const auto& result : results) {
           ret.push_back({ Operation::Read, result });

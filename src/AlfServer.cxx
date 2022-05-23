@@ -33,7 +33,7 @@ namespace o2
 namespace alf
 {
 
-AlfServer::AlfServer() : mRpcServers()
+AlfServer::AlfServer(SwtWord::Size swtWordSize) : mRpcServers(), mSwtWordSize(swtWordSize)
 {
 }
 
@@ -101,8 +101,8 @@ std::string AlfServer::swtBlobWrite(const std::string& parameter, AlfLink link)
 {
 
   std::vector<std::string> stringPairs = Util::split(parameter, argumentSeparator());
-  std::vector<std::pair<Swt::Operation, Swt::Data>> swtPairs = parseStringToSwtPairs(stringPairs);
-  Swt swt = Swt(link, mSessions[link.serialId]);
+  std::vector<std::pair<Swt::Operation, Swt::Data>> swtPairs = parseStringToSwtPairs(stringPairs, mSwtWordSize);
+  Swt swt = Swt(link, mSessions[link.serialId], mSwtWordSize);
 
   bool lock = false;
   // Check if the operation should be locked
@@ -360,7 +360,7 @@ std::pair<Sca::Operation, Sca::Data> AlfServer::stringToScaPair(const std::strin
 }
 
 /// Converts a 76-bit hex number string
-std::pair<Swt::Operation, Swt::Data> AlfServer::stringToSwtPair(const std::string stringPair)
+std::pair<Swt::Operation, Swt::Data> AlfServer::stringToSwtPair(const std::string stringPair, const SwtWord::Size swtWordSize)
 {
   std::vector<std::string> swtPair = Util::split(stringPair, pairSeparator());
   if (swtPair.size() < 1 || swtPair.size() > 2) {
@@ -400,6 +400,7 @@ std::pair<Swt::Operation, Swt::Data> AlfServer::stringToSwtPair(const std::strin
 
   if (operation == Swt::Operation::Write) {
     SwtWord word;
+    word.setSize(swtWordSize);
     std::string hexString = swtPair[0];
     std::string leadingHex = "0x";
 
@@ -540,13 +541,13 @@ std::vector<std::pair<Sca::Operation, Sca::Data>> AlfServer::parseStringToScaPai
   return pairs;
 }
 
-std::vector<std::pair<Swt::Operation, Swt::Data>> AlfServer::parseStringToSwtPairs(std::vector<std::string> stringPairs)
+std::vector<std::pair<Swt::Operation, Swt::Data>> AlfServer::parseStringToSwtPairs(std::vector<std::string> stringPairs, const SwtWord::Size swtWordSize)
 {
 
   std::vector<std::pair<Swt::Operation, Swt::Data>> pairs;
   for (const auto& stringPair : stringPairs) {
     if (stringPair.find('#') == std::string::npos) {
-      pairs.push_back(stringToSwtPair(stringPair));
+      pairs.push_back(stringToSwtPair(stringPair, swtWordSize));
     }
   }
   return pairs;

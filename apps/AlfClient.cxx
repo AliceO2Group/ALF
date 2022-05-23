@@ -184,7 +184,9 @@ class AlfClient : public AliceO2::Common::Program
                                         std::make_pair("200", "wait"),
                                         std::make_pair("0xdeadbeef", "write"),
                                         std::make_pair("1", "read"),
-                                        std::make_pair("0xbadc0ffee", "write"),
+                                        std::make_pair("0xabc1234567badc0ffee", "write"),
+                                        std::make_pair("0xdeadbeef9badcaffeee", "write"),
+                                        std::make_pair("200", "wait"),
                                         std::make_pair("4", "read") });
       std::cout << "[SWT_SEQUENCE] output: " << swtOut << std::endl;
     }
