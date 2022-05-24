@@ -85,7 +85,7 @@ class Alf : public AliceO2::Common::Program
     }
 
     // Parse the default SWT word size
-    SwtWord::Size swtWordSize;
+    SwtWord::Size swtWordSize = SwtWord::Size::Low;
     try {
       swtWordSize = SwtWord::sizeFromString(mOptions.swtWordSize);
     } catch (const ParseException& e) {
