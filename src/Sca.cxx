@@ -208,11 +208,13 @@ void Sca::execute()
 
 void Sca::waitOnBusyClear()
 {
-  auto endTime = std::chrono::steady_clock::now() + BUSY_TIMEOUT;
-  while (std::chrono::steady_clock::now() < endTime) {
+  int count = 10;
+  auto sleepSlice = BUSY_TIMEOUT / count;
+  while (count--) {
     if ((((barRead(sc_regs::SCA_RD_CTRL.index)) >> 31) & 0x1) == 0) {
       return;
     }
+    std::this_thread::sleep_for(sleepSlice);
   }
 
   BOOST_THROW_EXCEPTION(ScaException()
