@@ -213,7 +213,7 @@ std::string Ic::writeSequence(std::vector<std::pair<Operation, Data>> ops, bool 
       std::string errMessage = boost::get<std::string>(data);
       resultBuffer << errMessage;
       if (kDebugLogging) {
-        Logger::get() << errMessage << LogErrorDevel << endm;
+        Logger::get() << errMessage << LogErrorDevel_(5400) << endm;
       }
       BOOST_THROW_EXCEPTION(IcException() << ErrorInfo::Message(resultBuffer.str()));
     }

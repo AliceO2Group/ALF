@@ -217,7 +217,7 @@ std::string Swt::writeSequence(std::vector<std::pair<Operation, Data>> sequence,
     } else if (operation == Operation::Error) {
       resultBuffer << data;
       if (kDebugLogging) {
-        Logger::get() << data << LogErrorDevel << endm;
+        Logger::get() << data << LogErrorDevel_(5200) << endm;
       }
       BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message(resultBuffer.str()));
       break;
