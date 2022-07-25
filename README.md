@@ -262,10 +262,6 @@ Error codes in the range 5000-5999 are assigned to ALF. These are further partit
 | 4400 - 4499 | Full Range |
 | ----------- | ---------- |
 
-### LLA
-| 4400 - 4499 | Full Range |
-| ----------- | ---------- |
-
 ### Unassigned
 | Range |
 | ----- |
