@@ -251,21 +251,21 @@ Error codes in the range 5000-5999 are assigned to ALF. These are further partit
 | ----------- | ---------- |
 
 ### SWT
-| 4200 - 4299 | Full Range |
+| 5200 - 5299 | Full Range |
 | ----------- | ---------- |
 
 ### SCA
-| 4300 - 4399 | Full Range |
+| 5300 - 5399 | Full Range |
 | ----------- | ---------- |
 
 ### IC
-| 4400 - 4499 | Full Range |
+| 5400 - 5499 | Full Range |
 | ----------- | ---------- |
 
 ### Unassigned
 | Range |
 | ----- |
-| 4500 - 4999 |
+| 5500 - 5999 |
 
 
 
