@@ -66,6 +66,7 @@ bool isSuccess(const std::string& str);
 bool isFailure(const std::string& str);
 std::string stripPrefix(const std::string& str);
 
+// SERVER
 class StringRpcServer : public DimRpcParallel
 {
  public:
@@ -86,6 +87,7 @@ class StringRpcServer : public DimRpcParallel
   std::string mServiceName;
 };
 
+// CLIENT
 class DimRpcInfoWrapper
 {
  public:
@@ -103,7 +105,7 @@ class DimRpcInfoWrapper
   {
     auto str = std::string(mRpcInfo->getString());
     if (isFailure(str) && kDebugLogging) {
-      Logger::get() << "ALF server failure: " << str << LogErrorDevel << endm;
+      Logger::get() << "ALF server failure: " << str << LogErrorDevel_(5101) << endm;
     }
     return str;
   }

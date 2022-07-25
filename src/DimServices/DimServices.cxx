@@ -95,7 +95,7 @@ void StringRpcServer::rpcHandler()
     setDataString(makeSuccessString(returnValue), *this);
   } catch (const std::exception& e) {
     if (kDebugLogging) {
-      Logger::get() << mServiceName << ": " << e.what() << LogErrorDevel << endm;
+      Logger::get() << mServiceName << ": " << e.what() << LogErrorDevel_(5100) << endm;
     }
     setDataString(makeFailureString(e.what()), *this);
   }

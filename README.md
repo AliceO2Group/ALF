@@ -237,6 +237,42 @@ It extends the `SCA_SEQUENCE` to add the following functionality:
   * DIM input ` `
   * DIM output ` `
 
+## Logging
+Logging is achieved through the use of the [InfoLogger](https://github.com/AliceO2Group/InfoLogger) library.
+
+Error codes in the range 5000-5999 are assigned to ALF. These are further partitioned according to components:
+
+### General
+| 5000 - 5099 | Full Range |
+| ----------- | ---------- |
+
+### DIM
+| 5100 - 5199 | Full Range |
+| ----------- | ---------- |
+
+### SWT
+| 4200 - 4299 | Full Range |
+| ----------- | ---------- |
+
+### SCA
+| 4300 - 4399 | Full Range |
+| ----------- | ---------- |
+
+### IC
+| 4400 - 4499 | Full Range |
+| ----------- | ---------- |
+
+### LLA
+| 4400 - 4499 | Full Range |
+| ----------- | ---------- |
+
+### Unassigned
+| Range |
+| ----- |
+| 4500 - 4999 |
+
+
+
 ## Slow Control library
 ALF can also be used as a C++ library to access the Slow Control interface of the CRU. The three available interfaces (IC, SCA & SWT) can be accessed through single operations, or sequences of operations.
 

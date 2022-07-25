@@ -71,14 +71,14 @@ class Alf : public AliceO2::Common::Program
     kDebugLogging = isVerbose();
 
     Logger::setFacility("ALF");
-    Logger::get() << "ALF server starting..." << LogInfoOps << endm;
+    Logger::get() << "ALF server starting..." << LogInfoOps_(5000) << endm;
 
     if (mOptions.dimDnsNode != "") {
-      Logger::get() << "Setting DIM_DNS_NODE from argument." << LogDebugDevel << endm;
-      Logger::get() << "DIM_DNS_NODE=" << mOptions.dimDnsNode << LogDebugDevel << endm;
+      Logger::get() << "Setting DIM_DNS_NODE from argument." << LogDebugDevel_(5001) << endm;
+      Logger::get() << "DIM_DNS_NODE=" << mOptions.dimDnsNode << LogDebugDevel_(5001) << endm;
     } else if (const char* dimDnsNode = std::getenv("DIM_DNS_NODE")) {
-      Logger::get() << "Picked up DIM_DMS_NODE from the environment." << LogDebugDevel << endm;
-      Logger::get() << "DIM_DNS_NODE=" << dimDnsNode << LogDebugDevel << endm;
+      Logger::get() << "Picked up DIM_DMS_NODE from the environment." << LogDebugDevel_(5002) << endm;
+      Logger::get() << "DIM_DNS_NODE=" << dimDnsNode << LogDebugDevel_(5002) << endm;
       mOptions.dimDnsNode = dimDnsNode;
     } else {
       BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("DIM_DNS_NODE env variable not set, and no relevant argument provided.")); // InfoLogger and errors?
@@ -89,14 +89,14 @@ class Alf : public AliceO2::Common::Program
     try {
       swtWordSize = SwtWord::sizeFromString(mOptions.swtWordSize);
     } catch (const ParseException& e) {
-      Logger::get() << e.what() << LogWarningOps << endm;
-      Logger::get() << "SWT word size defaulting to low" << LogWarningOps << endm;
+      Logger::get() << e.what() << LogWarningOps_(5003) << endm;
+      Logger::get() << "SWT word size defaulting to low" << LogWarningOps_(5003) << endm;
     }
 
     std::string alfId = ip::host_name();
     boost::to_upper(alfId);
 
-    Logger::get() << "Starting the DIM Server" << LogInfoDevel << endm;
+    Logger::get() << "Starting the DIM Server" << LogInfoDevel_(5004) << endm;
     DimServer::setDnsNode(mOptions.dimDnsNode.c_str(), 2505);
     DimServer::start(("ALF_" + alfId).c_str());
 
@@ -113,32 +113,32 @@ class Alf : public AliceO2::Common::Program
         try {
           roc::FirmwareChecker().checkFirmwareCompatibility(card.pciAddress);
         } catch (const roc::Exception& e) {
-          Logger::get() << e.what() << LogWarningOps << endm;
+          Logger::get() << e.what() << LogWarningOps_(5005) << endm;
           continue;
         }
       }
 
       if (card.cardType == roc::CardType::Cru) {
 
-        Logger::get() << "CRU " << card.serialId << " registered" << LogInfoDevel << endm;
+        Logger::get() << "CRU " << card.serialId << " registered" << LogInfoDevel_(5006) << endm;
         bar = roc::ChannelFactory().getBar(card.serialId, 2);
         for (int linkId = 0; linkId < kCruNumLinks; linkId++) {
           links.push_back({ alfId, card.serialId, linkId, card.serialId.getEndpoint() * 12 + linkId, bar, roc::CardType::Cru });
         }
 
       } else if (card.cardType == roc::CardType::Crorc) {
-        Logger::get() << "CRORC " << card.serialId << " registered" << LogInfoDevel << endm;
+        Logger::get() << "CRORC " << card.serialId << " registered" << LogInfoDevel_(5007) << endm;
         for (int linkId = 0; linkId < kCrorcNumLinks; linkId++) {
           bar = roc::ChannelFactory().getBar(card.serialId, linkId);
           links.push_back({ alfId, card.serialId, linkId, -1, bar, roc::CardType::Crorc });
         }
       } else {
-        Logger::get() << card.serialId << " is not a CRU or a CRORC. Skipping..." << LogWarningDevel << endm;
+        Logger::get() << card.serialId << " is not a CRU or a CRORC. Skipping..." << LogWarningDevel_(5008) << endm;
       }
 
       if (isVerbose()) {
         for (auto const& link : links) {
-          Logger::get() << link.alfId << " " << link.serialId << " " << link.linkId << LogDebugDevel << endm;
+          Logger::get() << link.alfId << " " << link.serialId << " " << link.linkId << LogDebugDevel_(5009) << endm;
         }
       }
       alfServer.makeRpcServers(links, mOptions.sequentialRpcs);

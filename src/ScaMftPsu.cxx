@@ -329,7 +329,7 @@ std::string ScaMftPsu::writeSequence(const std::vector<std::pair<Operation, Data
     } else if (operation == Operation::Error) {
       resultBuffer << data; // "[error_msg]"
       if (kDebugLogging) {
-        Logger::get() << data << LogErrorDevel << endm;
+        Logger::get() << data << LogErrorDevel_(5301) << endm;
       }
       BOOST_THROW_EXCEPTION(ScaMftPsuException() << ErrorInfo::Message(resultBuffer.str()));
       break;

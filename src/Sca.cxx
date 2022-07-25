@@ -313,7 +313,7 @@ std::string Sca::writeSequence(const std::vector<std::pair<Operation, Data>>& op
     } else if (operation == Operation::Error) {
       resultBuffer << data; // "[error_msg]"
       if (kDebugLogging) {
-        Logger::get() << data << LogErrorDevel << endm;
+        Logger::get() << data << LogErrorDevel_(5300) << endm;
       }
       BOOST_THROW_EXCEPTION(ScaException() << ErrorInfo::Message(resultBuffer.str()));
       break;
