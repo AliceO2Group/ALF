@@ -121,7 +121,11 @@ class Alf : public AliceO2::Common::Program
       if (card.cardType == roc::CardType::Cru) {
 
         Logger::get() << "CRU " << card.serialId << " registered" << LogInfoDevel_(5006) << endm;
-        bar = roc::ChannelFactory().getBar(card.serialId, 2);
+        
+        // force endpoint 1
+	o2::roc::SerialId ii = o2::roc::SerialId::fromString(std::to_string(card.serialId.getSerial()) + ":1").get();
+        
+        bar = roc::ChannelFactory().getBar(ii, 2);
         for (int linkId = 0; linkId < kCruNumLinks; linkId++) {
           links.push_back({ alfId, card.serialId, linkId, card.serialId.getEndpoint() * 12 + linkId, bar, roc::CardType::Cru });
         }
