@@ -147,9 +147,6 @@ std::string AlfServer::icGbtI2cWrite(const std::string& parameter, AlfLink link)
 std::string AlfServer::patternPlayer(const std::string& parameter, std::shared_ptr<roc::BarInterface> bar2)
 {
   std::vector<std::string> parameters = Util::split(parameter, argumentSeparator());
-  if (parameters.size() < 11) { // Test that we have enough parameters
-    BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("Wrong number of parameters for the Pattern Player RPC call: " + std::to_string(parameters.size())));
-  }
 
   roc::PatternPlayer::Info info = parseStringToPatternPlayerInfo(parameters);
 
@@ -213,66 +210,7 @@ std::string AlfServer::resetCard(const std::string& /*parameter*/, AlfLink link)
 
 roc::PatternPlayer::Info AlfServer::parseStringToPatternPlayerInfo(const std::vector<std::string> parameters)
 {
-  roc::PatternPlayer::Info ppInfo;
-
-  int infoField = 0;
-  for (const auto& parameter : parameters) {
-    if (parameter.find('#') == std::string::npos) {
-      infoField++;
-    }
-  }
-
-  if (infoField != 11) { // Test that we have enough non-comment parameters
-    BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message("Wrong number of non-comment parameters for the Pattern Player RPC call: " + std::to_string(infoField)));
-  }
-
-  infoField = 0;
-  for (const auto& parameter : parameters) {
-    if (parameter.find('#') == std::string::npos) {
-      switch (infoField) {
-        bool boolValue;
-        case 0:
-          ppInfo.syncPattern = uint128_t(parameter);
-          break;
-        case 1:
-          ppInfo.resetPattern = uint128_t(parameter);
-          break;
-        case 2:
-          ppInfo.idlePattern = uint128_t(parameter);
-          break;
-        case 3:
-          ppInfo.syncLength = std::stoi(parameter);
-          break;
-        case 4:
-          ppInfo.syncDelay = std::stoi(parameter);
-          break;
-        case 5:
-          ppInfo.resetLength = std::stoi(parameter);
-          break;
-        case 6:
-          ppInfo.resetTriggerSelect = std::stoi(parameter);
-          break;
-        case 7:
-          ppInfo.syncTriggerSelect = std::stoi(parameter);
-          break;
-        case 8:
-          std::istringstream(parameter) >> std::boolalpha >> boolValue;
-          ppInfo.syncAtStart = boolValue;
-          break;
-        case 9:
-          std::istringstream(parameter) >> std::boolalpha >> boolValue;
-          ppInfo.triggerSync = boolValue;
-          break;
-        case 10:
-          std::istringstream(parameter) >> std::boolalpha >> boolValue;
-          ppInfo.triggerReset = boolValue;
-          break;
-      }
-      infoField++;
-    }
-  }
-
-  return ppInfo;
+  return roc::PatternPlayer::getInfoFromString(parameters);
 }
 
 std::vector<uint32_t> AlfServer::stringToRegisterPair(const std::string stringPair)
