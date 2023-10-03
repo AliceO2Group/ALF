@@ -165,23 +165,29 @@ It extends the `SCA_SEQUENCE` to add the following functionality:
 ##### PATTERN_PLAYER
 
 * Parameters
-  * Sync Pattern
-  * Reset Pattern
-  * Idle Pattern
-  * Sync Length
-  * Sync Delay
-  * Reset Length
-  * Reset Trigger Select
-  * Sync Trigger Select
-  * Sync At Start
-  * Trigger Sync
-  * Trigger Reset
+  * pat0 Pattern
+  * pat1 Pattern
+  * pat2 Pattern
+  * pat3 Pattern
+  * pat1 Length
+  * pat1 Delay
+  * pat2 Length
+  * pat3 Length
+  * pat1 Trigger Select
+  * pat2 Trigger Select
+  * pat3 Trigger Select
+  * pat2 TF[31:20] ORBIT[19:12] BC[11:0]
+  * execute pat1 at start
+  * execute pat1 now
+  * execute pat2 now
+
+  see [registers definition](https://gitlab.cern.ch/alice-cru/cru-fw/-/tree/pplayer/TTC#address-table)
 
 * Returns
   * empty
 
 * Example:
-  * DIM input `0x23456789abcdef123456\n0x5678\n0x9abc\n42\n0\n53\n30\n29\n#a comment\nfalse\ntrue\nfalse`
+  * DIM input `0x123\n123\n1024\n0xFFFFFFFFFFFFFFFFFFFF\n10\n11\n20\n30\n0xFF\n0xEE\n0xDDDe\n0xAAABBCCC\n#comment\nfalse\ntrue\ntrue`
   * DIM output ` `
 
 ##### LLA_SESSION_START
