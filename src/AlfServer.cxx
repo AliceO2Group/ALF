@@ -147,11 +147,19 @@ std::string AlfServer::icGbtI2cWrite(const std::string& parameter, AlfLink link)
 std::string AlfServer::patternPlayer(const std::string& parameter, std::shared_ptr<roc::BarInterface> bar2)
 {
   std::vector<std::string> parameters = Util::split(parameter, argumentSeparator());
-
-  roc::PatternPlayer::Info info = parseStringToPatternPlayerInfo(parameters);
-
-  roc::PatternPlayer pp = roc::PatternPlayer(bar2);
-  pp.play(info);
+  try {
+    roc::PatternPlayer::Info info = parseStringToPatternPlayerInfo(parameters);
+    roc::PatternPlayer pp = roc::PatternPlayer(bar2);
+    pp.play(info);
+  }
+  catch(boost::exception const& e) {
+    auto info = boost::get_error_info<ErrorInfo::Message>(e);
+    if (info) {
+      BOOST_THROW_EXCEPTION(AlfException() << ErrorInfo::Message(info->data()));
+    } else {
+      throw;
+    }
+  }
   return "";
 }
 
