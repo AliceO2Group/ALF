@@ -183,6 +183,12 @@ It extends the `SCA_SEQUENCE` to add the following functionality:
 
   see [registers definition](https://gitlab.cern.ch/alice-cru/cru-fw/-/tree/pplayer/TTC#address-table)
 
+  If not specified, the parameters are 32-bit integers.
+  The following parameters are 80-bit integers: pat0, pat1, pat2, pat3.
+  The following parameters are booleans: execute pat1 at start, execute pat1 now, execute pat2 now. They should be set with string values "true" or "false"
+  Integer values can be given in hexadecimal string (e.g. 0x1234) or decimal string (e.g. 4660). Exceeding the specified bit-width will raise an error.
+
+
 * Returns
   * empty
 
