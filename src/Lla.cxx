@@ -41,7 +41,7 @@ LlaSession::~LlaSession()
   stop();
 }
 
-void LlaSession::start()
+void LlaSession::start(int timeout)
 {
   if (!mSession) {
     mParams = lla::SessionParameters::makeParameters(mSessionName, mSerialId);
@@ -49,7 +49,8 @@ void LlaSession::start()
   }
 
   if (!mSession->isStarted()) {
-    if (!mSession->start()) {
+    bool started = (timeout==0) ? mSession->start() : mSession->timedStart(timeout);
+    if (!started) {
       BOOST_THROW_EXCEPTION(lla::LlaException()
                             << lla::ErrorInfo::Message("Couldn't start session")); // couldn't grab the lock
     }

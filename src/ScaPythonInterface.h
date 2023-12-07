@@ -88,6 +88,8 @@ Args:
 
   lock: boolean to execute the sequence within an LLA session
 
+  lockTimeout: maximum wait time to aquire the LLA session lock in ms
+
 Returns:
   sequence: A list of tuples made up of: 
     operation: The operation carried out (string, same as input)
@@ -188,14 +190,14 @@ class ScaInterface
     return mSca->executeCommand(cmd, data);
   }
 
-  std::vector<std::pair<Sca::Operation, Sca::Data>> sequence(std::vector<ScaArgsVariant> sequence, bool lock = false)
+  std::vector<std::pair<Sca::Operation, Sca::Data>> sequence(std::vector<ScaArgsVariant> sequence, bool lock = false, int lockTimeout = 0)
   {
     ScopedGILRelease s; // enable boost::python multi-threading
     std::vector<std::pair<Sca::Operation, Sca::Data>> scaSequence;
     for (const auto& v : sequence) {
       scaSequence.push_back(boost::apply_visitor(ScaArgsVariantVisitor(), v));
     }
-    return mSca->executeSequence(scaSequence, lock);
+    return mSca->executeSequence(scaSequence, lock, lockTimeout);
   }
 
   std::vector<std::pair<Sca::Operation, Sca::Data>> sequenceDefault(std::vector<ScaArgsVariant> scaSeq)

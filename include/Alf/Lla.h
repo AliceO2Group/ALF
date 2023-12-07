@@ -33,7 +33,7 @@ class LlaSession
   LlaSession(std::shared_ptr<lla::Session> llaSession);
   LlaSession(std::string sessionName, roc::SerialId serialId);
   ~LlaSession();
-  void start();
+  void start(int timeout=0);
   void stop();
 
  private:

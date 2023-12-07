@@ -120,10 +120,10 @@ void Swt::write(const SwtWord& swtWord)
   //return barRead(sc_regs::SWT_MON.index);
 }
 
-std::vector<std::pair<Swt::Operation, Swt::Data>> Swt::executeSequence(std::vector<std::pair<Operation, Data>> sequence, bool lock)
+std::vector<std::pair<Swt::Operation, Swt::Data>> Swt::executeSequence(std::vector<std::pair<Operation, Data>> sequence, bool lock, int lockTimeout)
 {
   if (lock) {
-    mLlaSession->start();
+    mLlaSession->start(lockTimeout);
   }
 
   try {
@@ -199,10 +199,10 @@ std::vector<std::pair<Swt::Operation, Swt::Data>> Swt::executeSequence(std::vect
   return ret;
 }
 
-std::string Swt::writeSequence(std::vector<std::pair<Operation, Data>> sequence, bool lock)
+std::string Swt::writeSequence(std::vector<std::pair<Operation, Data>> sequence, bool lock, int lockTimeout)
 {
   std::stringstream resultBuffer;
-  auto out = executeSequence(sequence, lock);
+  auto out = executeSequence(sequence, lock, lockTimeout);
   for (const auto& it : out) {
     Operation operation = it.first;
     Data data = it.second;

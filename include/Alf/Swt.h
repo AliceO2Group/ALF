@@ -92,20 +92,24 @@ class Swt : public ScBase
 
   /// Executes an SWT sequence
   /// \param sequence A vector of Operation and Data pairs
+  /// \param lock Boolean enabling implicit locking
+  /// \param lockTimeout timeout (in ms) for aquiring the lock
   /// \return A vector of Operation and resulting Data pairs
   ///         Write -> Echoes written data
   ///         Read  -> The SwtWord read
   ///         Reset -> Empty Data
   ///         Error -> Error message in std::string
   /// \throws o2:lla::LlaException on lock fail
-  std::vector<std::pair<Operation, Data>> executeSequence(std::vector<std::pair<Operation, Data>> sequence, bool lock = false);
+  std::vector<std::pair<Operation, Data>> executeSequence(std::vector<std::pair<Operation, Data>> sequence, bool lock = false, int lockTimeout = 0);
 
   /// Executes an SWT sequence for the ALF server
   /// \param sequence A vector of Data and Operation pairs
+  /// \param lock Boolean enabling implicit locking
+  /// \param lockTimeout timeout (in ms) for aquiring the lock
   /// \return A string of newline separated results;
   /// \throws o2:lla::LlaException on lock fail
   ///         o2::alf::SwtException on invalid operation or error
-  std::string writeSequence(std::vector<std::pair<Operation, Data>> sequence, bool lock = false);
+  std::string writeSequence(std::vector<std::pair<Operation, Data>> sequence, bool lock = false, int lockTimeout = 0);
 
   static std::string SwtOperationToString(Operation op);
   static Operation StringToSwtOperation(std::string op);
