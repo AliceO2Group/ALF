@@ -76,10 +76,10 @@ void Sca::svlConnect()
   barWrite(sc_regs::SCA_WR_CTRL.index, 0x0);
 }
 
-Sca::CommandData Sca::executeCommand(uint32_t command, uint32_t data, bool lock)
+Sca::CommandData Sca::executeCommand(uint32_t command, uint32_t data, bool lock, int lockTimeout)
 {
   if (lock) {
-    mLlaSession->start();
+    mLlaSession->start(lockTimeout);
   }
 
   checkChannelSet();
@@ -221,10 +221,10 @@ void Sca::waitOnBusyClear()
                         << ErrorInfo::Message("Exceeded timeout on busy wait"));
 }
 
-std::vector<std::pair<Sca::Operation, Sca::Data>> Sca::executeSequence(const std::vector<std::pair<Operation, Data>>& operations, bool lock)
+std::vector<std::pair<Sca::Operation, Sca::Data>> Sca::executeSequence(const std::vector<std::pair<Operation, Data>>& operations, bool lock, int lockTimeout)
 {
   if (lock) {
-    mLlaSession->start();
+    mLlaSession->start(lockTimeout);
   }
 
   try {
@@ -295,10 +295,10 @@ std::vector<std::pair<Sca::Operation, Sca::Data>> Sca::executeSequence(const std
   return ret;
 }
 
-std::string Sca::writeSequence(const std::vector<std::pair<Operation, Data>>& operations, bool lock)
+std::string Sca::writeSequence(const std::vector<std::pair<Operation, Data>>& operations, bool lock, int lockTimeout)
 {
   std::stringstream resultBuffer;
-  auto out = executeSequence(operations, lock);
+  auto out = executeSequence(operations, lock, lockTimeout);
   for (const auto& it : out) {
     Operation operation = it.first;
     Data data = it.second;

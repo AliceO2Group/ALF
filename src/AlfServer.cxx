@@ -245,9 +245,14 @@ std::pair<Sca::Operation, Sca::Data> AlfServer::stringToScaPair(const std::strin
 
   if (scaPair[scaPair.size() - 1] == "lock") {
     operation = Sca::Operation::Lock;
-    if (scaPair.size() != 1) {
-      BOOST_THROW_EXCEPTION(
-        AlfException() << ErrorInfo::Message("Too many arguments for LOCK operation"));
+    if (scaPair.size() == 2) {
+      try {
+        data = std::stoi(scaPair[0]);
+      } catch (const std::exception& e) {
+        BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("SCA lock WaitTime provided cannot be converted to int"));
+      }
+    } else {
+      data = 0;
     }
   } else if (scaPair[scaPair.size() - 1] == "wait") {
     operation = Sca::Operation::Wait;
@@ -315,12 +320,18 @@ std::pair<Swt::Operation, Swt::Data> AlfServer::stringToSwtPair(const std::strin
   }
 
   Swt::Operation operation;
+  Swt::Data data;
 
   if (swtPair[swtPair.size() - 1] == "lock") {
     operation = Swt::Operation::Lock;
     if (swtPair.size() == 2) {
-      BOOST_THROW_EXCEPTION(
-        AlfException() << ErrorInfo::Message("Too many arguments for LOCK operation"));
+      try {
+        data = std::stoi(swtPair[0]);
+      } catch (const std::exception& e) {
+        BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("SWT lock WaitTime provided cannot be converted to int"));
+      }
+    } else {
+      data = 0;
     }
   } else if (swtPair[swtPair.size() - 1] == "read") {
     operation = Swt::Operation::Read;
@@ -341,8 +352,6 @@ std::pair<Swt::Operation, Swt::Data> AlfServer::stringToSwtPair(const std::strin
   } else {
     BOOST_THROW_EXCEPTION(std::out_of_range("Parameter for SWT operation unkown"));
   }
-
-  Swt::Data data;
 
   if (operation == Swt::Operation::Write) {
     SwtWord word;

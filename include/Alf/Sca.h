@@ -86,19 +86,21 @@ class Sca : public ScBase
   /// Executes an SCA command
   /// \param commandData SCA command, data pair
   /// \param lock Boolean enabling implicit locking
+  /// \param lockTimeout timeout (in ms) for aquiring the lock
   /// \throws o2::lla::LlaException on lock fail,
   ///         o2::alf::ScaException on SCA error
-  CommandData executeCommand(CommandData commandData, bool lock = false)
+  CommandData executeCommand(CommandData commandData, bool lock = false, int lockTimeout = 0)
   {
-    return executeCommand(commandData.command, commandData.data, lock);
+    return executeCommand(commandData.command, commandData.data, lock, lockTimeout);
   }
   /// Executes an SCA command
   /// \param command SCA command
   /// \param data SCA data
   /// \param lock Boolean enabling implicit locking
+  /// \param lockTimeout timeout (in ms) for aquiring the lock
   /// \throws  o2::lla::LlaException on lock fail
   ///          o2::alf::ScaException on SCA error
-  CommandData executeCommand(uint32_t command, uint32_t data, bool lock = false);
+  CommandData executeCommand(uint32_t command, uint32_t data, bool lock = false, int lockTimeout = 0);
 
   /// Executes an SCA sequence
   /// \param operations A vector of Operation and Data pairs
@@ -108,7 +110,7 @@ class Sca : public ScBase
   ///         WaitTime for Waits
   ///         std::string for Errors
   /// \throws o2::lla::LlaException on lock fail
-  std::vector<std::pair<Operation, Data>> executeSequence(const std::vector<std::pair<Operation, Data>>& operations, bool lock = false);
+  std::vector<std::pair<Operation, Data>> executeSequence(const std::vector<std::pair<Operation, Data>>& operations, bool lock = false, int lockTimeout = 0);
 
   /// Executes an SCA sequence for the ALF Server
   /// \param operations A vector of Data and Operation pairs
@@ -116,7 +118,7 @@ class Sca : public ScBase
   /// \return A string of newline separated results;
   /// \throws o2::lla::LlaException on lock fail
   ///         o2::alf::ScaException on invalid operation or error
-  std::string writeSequence(const std::vector<std::pair<Operation, Data>>& operations, bool lock = false);
+  std::string writeSequence(const std::vector<std::pair<Operation, Data>>& operations, bool lock = false, int lockTimeout = 0);
 
   static std::string ScaOperationToString(Operation op);
   static Sca::Operation StringToScaOperation(std::string op);

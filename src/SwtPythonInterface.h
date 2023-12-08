@@ -87,6 +87,8 @@ Args:
 
   lock: boolean to execute the sequence within an LLA session
 
+  lockTimeout: maximum wait time to aquire the LLA session lock in ms
+
 Returns:
   sequence: A list of tuples made up of: 
     operation: The operation carried out (string, same as input)
@@ -178,7 +180,7 @@ class SwtInterface
     return readDefault();
   }
 
-  std::vector<std::pair<Swt::Operation, Swt::Data>> sequence(std::vector<SwtArgsVariant> sequence, bool lock = false)
+  std::vector<std::pair<Swt::Operation, Swt::Data>> sequence(std::vector<SwtArgsVariant> sequence, bool lock = false, int lockTimeout = 0)
   {
     ScopedGILRelease s; // enable boost::python multi-threading
     std::vector<std::pair<Swt::Operation, Swt::Data>> swtSequence;
@@ -186,7 +188,7 @@ class SwtInterface
       swtSequence.push_back(boost::apply_visitor(SwtArgsVariantVisitor(), v));
     }
 
-    auto out = mSwt->executeSequence(swtSequence, lock);
+    auto out = mSwt->executeSequence(swtSequence, lock, lockTimeout);
     return out;
   }
 
