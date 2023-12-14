@@ -74,12 +74,14 @@ std::string AlfServer::scaBlobWrite(const std::string& parameter, AlfLink link)
   Sca sca = Sca(link, mSessions[link.serialId]);
 
   bool lock = false;
+  int lockTimeout = 0;
   // Check if the operation should be locked
   if (scaPairs[0].first == Sca::Operation::Lock) {
+    lockTimeout = boost::get<int>(scaPairs[0].second);
     scaPairs.erase(scaPairs.begin());
     lock = true;
   }
-  return sca.writeSequence(scaPairs, lock);
+  return sca.writeSequence(scaPairs, lock, lockTimeout);
 }
 
 std::string AlfServer::scaMftPsuBlobWrite(const std::string& parameter, AlfLink link)
@@ -105,12 +107,14 @@ std::string AlfServer::swtBlobWrite(const std::string& parameter, AlfLink link)
   Swt swt = Swt(link, mSessions[link.serialId], mSwtWordSize);
 
   bool lock = false;
+  int lockTimeout = 0;
   // Check if the operation should be locked
   if (swtPairs[0].first == Swt::Operation::Lock) {
-    swtPairs.erase(swtPairs.begin());
+    lockTimeout = boost::get<int>(swtPairs[0].second);
     lock = true;
+    swtPairs.erase(swtPairs.begin());
   }
-  return swt.writeSequence(swtPairs, lock);
+  return swt.writeSequence(swtPairs, lock, lockTimeout);
 }
 
 std::string AlfServer::icBlobWrite(const std::string& parameter, AlfLink link)
