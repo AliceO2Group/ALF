@@ -23,8 +23,16 @@ DIM_DNS_NODE=thedimdns.cern.ch
 o2-alf-client is the binary of an ALF client used solely for testing purposes. On top of the DIM Nameserver it expects the hostname of the node hosting the ALF server, the card's serial and endpoint, and the link number as command-line arguments. Different arguments to test different types of services are available (run with `--help`).
 
 `
-o2-alf-client --dim-dns-node thedimdns.cern.ch --alf-id thealfserver --serial 1041 --endpoint 1 --link 4
+o2-alf-client --dim-dns-node thedimdns.cern.ch --alf-id thealfserver --serial 1041 --endpoint 1 --link 4 ...
 `
+
+By default, no operations are done. One should add the corresponding action(s) on the command line.
+
+For example, to read a register:
+`
+o2-alf-client --dim-dns-node=localhost --alf-id=flpdev1 --serial=0239 --endpoint=0 --reg-read=0x00C19020
+`
+
 
 ### o2-alf-lib-client
 o2-alf-lib-client is the binary of an ALF SC library client used solely for testing purposes. It expects parameters for the SC modules to test, the card and link ID (run with `--help` for the different options).
