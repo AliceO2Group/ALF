@@ -97,6 +97,12 @@ class AlfClient : public AliceO2::Common::Program
     options.add_options()("swt-stress-words",
                           po::value<int>(&mOptions.swtStressWords)->default_value(1000),
                           "Number of SWT words to write and read in one go");
+    options.add_options()("reg-seq-write",
+                          po::bool_switch(&mOptions.registerSequenceWrite)->default_value(false),
+                          "test register write sequence");
+    options.add_options()("reg-read",
+                          po::value<std::string>(&mOptions.registerRead)->default_value(""),
+                          "read given register");
   }
 
   virtual void run(const po::variables_map&) override
@@ -164,15 +170,22 @@ class AlfClient : public AliceO2::Common::Program
     IcSequenceRpc icSequence(names.icSequence());
     IcGbtI2cWriteRpc icGbtI2cWriteRpc(names.icGbtI2cWrite());
 
-    // Test register sequence
-    auto regOut = registerSequence.write({ std::make_pair("0x00c00000", ""),
-                                           std::make_pair("0x00c00004", ""),
-                                           std::make_pair("0x00c00008", ""),
-                                           std::make_pair("0x00cfffff", "0x00080000"),
-                                           std::make_pair("0x00c00004", "0x00080000"),
-                                           std::make_pair("0x00c00004", ""),
-                                           std::make_pair("0x0badadd7", "") });
-    std::cout << "[REGISTER SEQUENCE] output: " << regOut << std::endl;
+    if (mOptions.registerRead != "") {
+      auto regOut = registerSequence.write({ std::make_pair(mOptions.registerRead, "") });
+      std::cout << "[READ REGISTER] output: " << regOut << std::endl;
+    }
+
+    if (mOptions.registerSequenceWrite) {
+      // Test register sequence
+      auto regOut = registerSequence.write({ std::make_pair("0x00c00000", ""),
+                                             std::make_pair("0x00c00004", ""),
+                                             std::make_pair("0x00c00008", ""),
+                                             std::make_pair("0x00cfffff", "0x00080000"),
+                                             std::make_pair("0x00c00004", "0x00080000"),
+                                             std::make_pair("0x00c00004", ""),
+                                             std::make_pair("0x0badadd7", "") });
+      std::cout << "[REGISTER SEQUENCE] output: " << regOut << std::endl;
+    }
 
     if (mOptions.swt) {
       auto swtOut = swtSequence.write({ std::make_pair("", "lock"),
@@ -298,7 +311,7 @@ class AlfClient : public AliceO2::Common::Program
 
     }
 
-    std::cout << "See ya!" << std::endl;
+    std::cout << "Operations completed" << std::endl;
   }
 
  private:
@@ -319,6 +332,8 @@ class AlfClient : public AliceO2::Common::Program
     bool parallelSc = false;
     int swtStressCycles = 2;
     int swtStressWords = 1000;
+    bool registerSequenceWrite = false;
+    std::string registerRead = "";
   } mOptions;
 };
 
