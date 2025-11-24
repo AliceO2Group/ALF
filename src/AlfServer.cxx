@@ -326,37 +326,65 @@ std::pair<Swt::Operation, Swt::Data> AlfServer::stringToSwtPair(const std::strin
   Swt::Operation operation;
   Swt::Data data;
 
-  if (swtPair[swtPair.size() - 1] == "lock") {
-    operation = Swt::Operation::Lock;
+  bool getIntParam = false;
+  int numberOfMandatoryParams = -1; // do not care about number of parameters
+
+  try {
+    operation = Swt::StringToSwtOperation(swtPair[swtPair.size() - 1]);
+  } catch(...) {
+    BOOST_THROW_EXCEPTION(std::out_of_range("SWT unkown operation " + swtPair[swtPair.size() - 1]));
+  }
+
+  switch(operation) {
+    case Swt::Operation::Lock:
+      data = 0;
+      getIntParam = true;
+      break;
+    case Swt::Operation::SetReadTimeout:
+      data = Swt::DEFAULT_SWT_TIMEOUT_MS;
+      getIntParam = true;
+      break;
+    case Swt::Operation::Read:
+      getIntParam = true;
+      break;
+    case Swt::Operation::ReadMultiple:
+      getIntParam = true;
+      numberOfMandatoryParams = 1;
+      break;
+    case Swt::Operation::Write:
+      numberOfMandatoryParams = 1;
+      break;
+    case Swt::Operation::SCReset:
+      numberOfMandatoryParams = 0;
+      break;
+    case Swt::Operation::Wait:
+      data = Swt::DEFAULT_SWT_WAIT_TIME_MS;
+      getIntParam = true;
+      break;
+    default:
+      BOOST_THROW_EXCEPTION(std::out_of_range("Parameter for SWT operation unkown"));
+  }
+
+  // check number of mandatory parameters, if set
+  if (numberOfMandatoryParams >= 0) {
+      if (((int)swtPair.size() - 1) != numberOfMandatoryParams) {
+      BOOST_THROW_EXCEPTION(
+        AlfException() << ErrorInfo::Message("SWT wrong number of arguments for " + Swt::SwtOperationToString(operation) + " operation"));
+    }
+  }
+
+  // get int parameter if needed, and available
+  if (getIntParam) {
     if (swtPair.size() == 2) {
       try {
         data = std::stoi(swtPair[0]);
       } catch (const std::exception& e) {
-        BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("SWT lock WaitTime provided cannot be converted to int"));
+        BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("SWT " + Swt::SwtOperationToString(operation) + " argument provided cannot be converted to int"));
       }
-    } else {
-      data = 0;
     }
-  } else if (swtPair[swtPair.size() - 1] == "read") {
-    operation = Swt::Operation::Read;
-  } else if (swtPair[swtPair.size() - 1] == "write") {
-    operation = Swt::Operation::Write;
-    if (swtPair.size() == 1) {
-      BOOST_THROW_EXCEPTION(
-        AlfException() << ErrorInfo::Message("Too few arguments for WRITE operation"));
-    }
-  } else if (swtPair[swtPair.size() - 1] == "sc_reset") {
-    operation = Swt::Operation::SCReset;
-    if (swtPair.size() == 2) {
-      BOOST_THROW_EXCEPTION(
-        AlfException() << ErrorInfo::Message("Too many arguments for SC RESET operation"));
-    }
-  } else if (swtPair[swtPair.size() - 1] == "wait") {
-    operation = Swt::Operation::Wait;
-  } else {
-    BOOST_THROW_EXCEPTION(std::out_of_range("Parameter for SWT operation unkown"));
   }
 
+  // special handling of the write parameter
   if (operation == Swt::Operation::Write) {
     SwtWord word;
     word.setSize(swtWordSize);
@@ -369,7 +397,7 @@ std::pair<Swt::Operation, Swt::Data> AlfServer::stringToSwtPair(const std::strin
     }
 
     if (hexString.length() > 19) {
-      BOOST_THROW_EXCEPTION(std::out_of_range("Parameter does not fit in 76-bit unsigned int"));
+      BOOST_THROW_EXCEPTION(std::out_of_range("SWT write argument does not fit in 76-bit unsigned int"));
     }
 
     std::stringstream ss;
@@ -380,18 +408,6 @@ std::pair<Swt::Operation, Swt::Data> AlfServer::stringToSwtPair(const std::strin
     word.setLow(std::stoul(ss.str().substr(11, 8), NULL, 16));
 
     data = word;
-  } else if (operation == Swt::Operation::Read && swtPair.size() == 2) {
-    try {
-      data = std::stoi(swtPair[0]);
-    } catch (const std::exception& e) {
-      BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("SWT Read Timeout provided cannot be converted to int"));
-    }
-  } else if (operation == Swt::Operation::Wait && swtPair.size() == 2) {
-    try {
-      data = std::stoi(swtPair[0]);
-    } catch (const std::exception& e) {
-      BOOST_THROW_EXCEPTION(SwtException() << ErrorInfo::Message("SWT WaitTime provided cannot be converted to int"));
-    }
   }
 
   return std::make_pair(operation, data);
