@@ -126,6 +126,9 @@ It extends the `SCA_SEQUENCE` to add the following functionality:
     * `read` with optional TimeOut prefix (e.g. `2,read`)
     * `wait` with optional WaitTime prefix in ms (e.g. `5,wait`), defaults to 3
     * `lock` which instructs ALF to execute the sequence atomically (needs to lead the sequence)
+    * `read_multiple` with count prefix (e.g. `2,read_multiple`): read a number of words
+    * `set_read_timeout` to define default read TimeOut in milliseconds (for read and read_multiple operations). (e.g. `10,set_read_timeout`). Timeout argument is optional, in which case the default value is reset.
+
 * Returns:
   * Sequence of SWT output as follows:
     * `write` always retuns `0`
@@ -133,11 +136,15 @@ It extends the `SCA_SEQUENCE` to add the following functionality:
     * `sc_reset` returns nothing
     * `wait` returns time waited
     * `lock` returns nothing
-    
+    * `read_multiple` returns the SWT words present in the CRU SWT FIFO (for the number of read requested)
+    * `set_read_timeout` returns the new timeout
+
 * Example:
   * DIM input `sc_reset\n0x0000000000badc0ffee,write\nread\n0xbadf00d,write\n4,read`
   * DIM input (atomic) `lock\nsc_reset\n0x0000000000badc0ffee,write\nread\n0xbadf00d,write\n4,read`
   * DIM output `0\n0x0000000000badc0ffee\n0\n0x000000000000badf00d\n`
+
+  NB: when calling the service from DIM did client for testing, use double quotes around the full query string.
 
 ##### IC_SEQUENCE
 

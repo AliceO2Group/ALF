@@ -104,6 +104,52 @@ std::vector<SwtWord> Swt::read(SwtWord::Size wordSize, TimeOut msTimeOut)
   return words;
 }
 
+std::vector<SwtWord> Swt::readMultiple(SwtWord::Size wordSize, unsigned int wordsToRead, TimeOut msTimeOut)
+{
+ checkChannelSet();
+
+ std::vector<SwtWord> words;
+ unsigned int readWords = 0x0;
+
+ while (readWords < wordsToRead) {
+   uint32_t numWords = 0x0;
+
+   auto timeOut = std::chrono::steady_clock::now() + std::chrono::milliseconds(msTimeOut);
+   bool isTimeout = false;
+   while (!isTimeout && (numWords < 1)) {
+     numWords = (barRead(sc_regs::SWT_MON.index) >> 16);
+     isTimeout = std::chrono::steady_clock::now() > timeOut;
+   }
+   if(isTimeout){
+     break;
+   }
+
+   for (int i = 0; i < (int)numWords; i++) {
+     SwtWord tempWord;
+
+     tempWord.setLow(barRead(sc_regs::SWT_RD_WORD_L.index));
+
+     if (wordSize == SwtWord::Size::Medium || wordSize == SwtWord::Size::High) {
+       tempWord.setMed(barRead(sc_regs::SWT_RD_WORD_M.index));
+     }
+
+     if (wordSize == SwtWord::Size::High) {
+       tempWord.setHigh(barRead(sc_regs::SWT_RD_WORD_H.index));
+     }
+
+     words.push_back(tempWord);
+   }
+   readWords += numWords;
+ }
+
+ if (readWords != wordsToRead) {
+     BOOST_THROW_EXCEPTION(SwtException() <<
+       ErrorInfo::Message("ReadMultiple different number of words than expected: " + std::to_string(readWords) + " (expected " + std::to_string(wordsToRead) + ")"));
+ }
+
+ return words;
+}
+
 void Swt::write(const SwtWord& swtWord)
 {
   checkChannelSet();
@@ -122,6 +168,7 @@ void Swt::write(const SwtWord& swtWord)
 
 std::vector<std::pair<Swt::Operation, Swt::Data>> Swt::executeSequence(std::vector<std::pair<Operation, Data>> sequence, bool lock, int lockTimeout)
 {
+
   if (lock) {
     mLlaSession->start(lockTimeout);
   }
@@ -143,22 +190,32 @@ std::vector<std::pair<Swt::Operation, Swt::Data>> Swt::executeSequence(std::vect
         try {
           timeOut = boost::get<TimeOut>(data);
         } catch (...) { // no timeout was provided
-          data = DEFAULT_SWT_TIMEOUT_MS;
+          data = readTimeout;
           timeOut = boost::get<TimeOut>(data);
         }
         auto results = read(mSwtWordSize, timeOut);
 
         for (const auto& result : results) {
-          ret.push_back({ Operation::Read, result });
+          ret.push_back({ operation, result });
         }
+      } else if (operation == Operation::ReadMultiple) {
+        int count;
+        count = boost::get<int>(data);
+        auto results = readMultiple(mSwtWordSize, count, readTimeout);
+        for (const auto& result : results) {
+          ret.push_back({ operation, result });
+        }
+      } else if (operation == Operation::SetReadTimeout) {
+        readTimeout = boost::get<TimeOut>(data);
+        ret.push_back({ operation, readTimeout });
       } else if (operation == Operation::Write) {
         SwtWord word = boost::get<SwtWord>(data);
         write(word);
-        ret.push_back({ Operation::Write, word });
+        ret.push_back({ operation, word });
         //ret.push_back({ Operation::Write, {} }); // TODO: Is it better to return {} ?
       } else if (operation == Operation::SCReset) {
         scReset();
-        ret.push_back({ Operation::SCReset, {} });
+        ret.push_back({ operation, {} });
       } else if (operation == Operation::Wait) {
         int waitTime;
         try {
@@ -208,6 +265,10 @@ std::string Swt::writeSequence(std::vector<std::pair<Operation, Data>> sequence,
     Data data = it.second;
     if (operation == Operation::Read) {
       resultBuffer << data << "\n";
+    } else if (operation == Operation::ReadMultiple) {
+      resultBuffer << data << "\n";
+    } else if (operation == Operation::SetReadTimeout) {
+      resultBuffer << std::dec << data << "\n";
     } else if (operation == Operation::Write) {
       resultBuffer << "0\n";
     } else if (operation == Operation::SCReset) {
@@ -231,6 +292,10 @@ std::string Swt::SwtOperationToString(Swt::Operation op)
 {
   if (op == Swt::Operation::Read) {
     return "read";
+  } else if (op == Swt::Operation::ReadMultiple) {
+    return "read_multiple";
+  } else if (op == Swt::Operation::SetReadTimeout) {
+    return "set_read_timeout";
   } else if (op == Swt::Operation::Write) {
     return "write";
   } else if (op == Swt::Operation::SCReset) {
@@ -250,6 +315,10 @@ Swt::Operation Swt::StringToSwtOperation(std::string op)
 {
   if (op == "read") {
     return Swt::Operation::Read;
+  } else if (op == "read_multiple") {
+    return Swt::Operation::ReadMultiple;
+  } else if (op == "set_read_timeout") {
+    return Swt::Operation::SetReadTimeout;
   } else if (op == "write") {
     return Swt::Operation::Write;
   } else if (op == "sc_reset") {

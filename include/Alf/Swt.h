@@ -59,6 +59,8 @@ class Swt : public ScBase
 
   /// Enum for the different SWT operation types
   enum Operation { Read,
+                   ReadMultiple,
+                   SetReadTimeout,
                    Write,
                    SCReset,
                    Wait,
@@ -90,6 +92,14 @@ class Swt : public ScBase
   /// \throws o2::alf::SwtException in case of no SWT words in FIFO, or timeout exceeded
   std::vector<SwtWord> read(SwtWord::Size wordSize = SwtWord::Size::Low, TimeOut msTimeOut = DEFAULT_SWT_TIMEOUT_MS);
 
+  /// Reads multiple SWT words
+  /// \param wordSize The size of the SWT words to be read
+  /// \param numberOfWords The number of SWT words to be read
+  /// \param msTimeOut Timeout of the read operation in ms
+  /// \return A vector of SWT words read
+  /// \throws o2::alf::SwtException in case of no SWT words in FIFO, or timeout exceeded
+  std::vector<SwtWord> readMultiple(SwtWord::Size wordSize = SwtWord::Size::Low, unsigned int numberOfWords = 1, TimeOut msTimeOut = DEFAULT_SWT_TIMEOUT_MS);
+
   /// Executes an SWT sequence
   /// \param sequence A vector of Operation and Data pairs
   /// \param lock Boolean enabling implicit locking
@@ -115,10 +125,11 @@ class Swt : public ScBase
   static Operation StringToSwtOperation(std::string op);
 
   static constexpr int DEFAULT_SWT_TIMEOUT_MS = 10;
+  static constexpr int DEFAULT_SWT_WAIT_TIME_MS = 3;
 
  private:
-  static constexpr int DEFAULT_SWT_WAIT_TIME_MS = 3;
   SwtWord::Size mSwtWordSize = SwtWord::Size::Low;
+  TimeOut readTimeout = DEFAULT_SWT_TIMEOUT_MS;
 };
 
 } // namespace alf
