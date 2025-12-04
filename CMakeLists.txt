@@ -26,7 +26,7 @@ endif()
 
 # Define project
 project(ALF
-  VERSION 0.20.0
+  VERSION 0.21.0
   DESCRIPTION "O2 ALF"
   LANGUAGES CXX
 )

@@ -23,6 +23,10 @@
 #include "DimServices/DimServices.h"
 #include "Logger.h"
 
+#include <Common/SimpleLog.h>
+SimpleLog alfDebugLog;
+
+
 namespace o2
 {
 namespace alf
@@ -88,16 +92,27 @@ std::string stripPrefix(const std::string& str)
   return str.substr(PREFIX_LENGTH);
 }
 
+// trim a string in place
+inline void rtrim(std::string &s) {
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }).base(), s.end());
+}
+
 void StringRpcServer::rpcHandler()
 {
+  alfDebugLog.info("Request received on %s : %s",mServiceName.c_str(),getString());
   try {
     auto returnValue = mCallback(std::string(getString()));
     setDataString(makeSuccessString(returnValue), *this);
+    rtrim(returnValue);
+    alfDebugLog.info("Request completed: %s", returnValue.c_str());
   } catch (const std::exception& e) {
     if (kDebugLogging) {
       Logger::get() << mServiceName << ": " << e.what() << LogErrorDevel_(5100) << endm;
     }
     setDataString(makeFailureString(e.what()), *this);
+    alfDebugLog.error("Request failure: %s", e.what());
   }
 }
 
