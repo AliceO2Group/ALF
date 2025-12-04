@@ -30,6 +30,9 @@
 #include "ReadoutCard/Exception.h"
 #include "ReadoutCard/FirmwareChecker.h"
 
+#include <Common/SimpleLog.h>
+extern SimpleLog alfDebugLog;
+
 namespace ip = boost::asio::ip;
 namespace po = boost::program_options;
 
@@ -55,6 +58,9 @@ class Alf : public AliceO2::Common::Program
     options.add_options()("dim-dns-node",
                           po::value<std::string>(&mOptions.dimDnsNode)->default_value(""),
                           "The DIM DNS node to set the env var if not already set");
+    options.add_options()("dim-log-file",
+                          po::value<std::string>(&mOptions.dimLogFileConfig)->default_value(""),
+                          "Sets the log file to track DIM callbacks: filePath,maxSize,rotateCount");
     options.add_options()("no-fw-check",
                           po::bool_switch(&mOptions.noFirmwareCheck)->default_value(false),
                           "Disable firmware compatibility check");
@@ -72,6 +78,42 @@ class Alf : public AliceO2::Common::Program
 
     Logger::setFacility("ALF");
     Logger::get() << "ALF server starting..." << LogInfoOps_(5000) << endm;
+
+    if (mOptions.dimLogFileConfig!="") {
+      std::string path;
+      unsigned long maxBytes = 0;    // default if missing
+      unsigned int  maxFiles = 0;   // default if missing
+
+      size_t start = 0;
+      size_t comma = mOptions.dimLogFileConfig.find(',');
+
+      // ---- first (mandatory): path ----
+      if (comma == std::string::npos) {
+        path = mOptions.dimLogFileConfig;
+      } else {
+	path = mOptions.dimLogFileConfig.substr(0, comma);
+	start = comma + 1;
+
+	// ---- second (optional): maxBytes ----
+	comma = mOptions.dimLogFileConfig.find(',', start);
+	if (comma == std::string::npos) {
+	  if (start < mOptions.dimLogFileConfig.size())
+	    maxBytes = std::stoul(mOptions.dimLogFileConfig.substr(start));
+	} else {
+	  maxBytes = std::stoul(mOptions.dimLogFileConfig.substr(start, comma - start));
+	  start = comma + 1;
+
+	  // ---- third (optional): maxFiles ----
+	  if (start < mOptions.dimLogFileConfig.size())
+	    maxFiles = static_cast<unsigned int>(std::stoul(mOptions.dimLogFileConfig.substr(start)));
+	}
+      }
+      alfDebugLog.setLogFile(path.c_str(), maxBytes, maxFiles, 1);
+      alfDebugLog.setOutputFormat(SimpleLog::FormatOption::ShowTimeStamp | SimpleLog::FormatOption::ShowSeveritySymbol | SimpleLog::FormatOption::ShowMessage );
+      alfDebugLog.info("ALF starting");
+    } else {
+      alfDebugLog.setLogFile("/dev/null");
+    }
 
     if (mOptions.dimDnsNode != "") {
       Logger::get() << "Setting DIM_DNS_NODE from argument." << LogDebugDevel_(5001) << endm;
@@ -144,6 +186,8 @@ class Alf : public AliceO2::Common::Program
       alfServer.makeRpcServers(links, mOptions.sequentialRpcs);
     }
 
+    alfDebugLog.info("Ready on DIM DNS %s with ALF id %s", mOptions.dimDnsNode.c_str(), alfId.c_str());
+
     // main thread
     while (!isSigInt()) {
       std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -156,6 +200,7 @@ class Alf : public AliceO2::Common::Program
     bool noFirmwareCheck = false;
     bool sequentialRpcs = false;
     std::string swtWordSize = "low";
+    std::string dimLogFileConfig = "";
   } mOptions;
 };
 

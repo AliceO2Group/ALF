@@ -19,6 +19,11 @@ o2-alf --dim-dns-node thedimdns.cern.ch
 DIM_DNS_NODE=thedimdns.cern.ch
 `
 
+Some extra parameters can be given on the command line (see `o2-alf --help`).
+In particular, the --dim-log-file parameter allows to define a local log file to keep track of all RPC calls received by ALF. A max file size and number of files to rotate can optionnaly be specified (comma-separated list, eg `--dim-log-file=/tmp/alf.log,1000000,4` would limit to max 4 logs file of 1000000 bytes each).
+
+
+
 ### o2-alf-client
 o2-alf-client is the binary of an ALF client used solely for testing purposes. On top of the DIM Nameserver it expects the hostname of the node hosting the ALF server, the card's serial and endpoint, and the link number as command-line arguments. Different arguments to test different types of services are available (run with `--help`).
 
