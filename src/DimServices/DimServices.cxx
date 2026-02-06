@@ -101,9 +101,15 @@ inline void rtrim(std::string &s) {
 
 void StringRpcServer::rpcHandler()
 {
-  alfDebugLog.info("Request received on %s : %s",mServiceName.c_str(),getString());
+  // build a safe string from DIM input. Parent method getString() is unsafe, not guarateed to be nul-terminated
+  std::string inputString;
+  if (auto data = getString(); data && getSize() > 0) {
+      inputString.assign(data, getSize());
+  }
+
+  alfDebugLog.info("Request received on %s : %s",mServiceName.c_str(),inputString.c_str());
   try {
-    auto returnValue = mCallback(std::string(getString()));
+    auto returnValue = mCallback(inputString);
     setDataString(makeSuccessString(returnValue), *this);
     rtrim(returnValue);
     alfDebugLog.info("Request completed: %s", returnValue.c_str());
