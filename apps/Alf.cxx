@@ -108,7 +108,9 @@ class Alf : public AliceO2::Common::Program
 	    maxFiles = static_cast<unsigned int>(std::stoul(mOptions.dimLogFileConfig.substr(start)));
 	}
       }
-      alfDebugLog.setLogFile(path.c_str(), maxBytes, maxFiles, 1);
+      const char* debugLogFile = path.c_str();
+      if (path == "stdout") debugLogFile = NULL; // handle special string to set logs go to stdout
+      alfDebugLog.setLogFile(debugLogFile, maxBytes, maxFiles, 1);
       alfDebugLog.setOutputFormat(SimpleLog::FormatOption::ShowTimeStamp | SimpleLog::FormatOption::ShowSeveritySymbol | SimpleLog::FormatOption::ShowMessage );
       alfDebugLog.info("ALF starting");
     } else {
