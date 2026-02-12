@@ -103,11 +103,15 @@ void StringRpcServer::rpcHandler()
 {
   // build a safe string from DIM input. Parent method getString() is unsafe, not guarateed to be nul-terminated
   std::string inputString;
-  if (auto data = getString(); data && getSize() > 0) {
-      inputString.assign(data, getSize());
+  {
+    auto data = getString();
+    auto size = getSize();
+    if (data && (size > 0)) {
+      inputString.assign(data, strnlen(data, size));
+    }
   }
 
-  alfDebugLog.info("Request received on %s : %s",mServiceName.c_str(),inputString.c_str());
+  alfDebugLog.info("Request received on %s (%d bytes) :\n%s",mServiceName.c_str(), (int)getSize(), inputString.c_str());
   try {
     auto returnValue = mCallback(inputString);
     setDataString(makeSuccessString(returnValue), *this);
