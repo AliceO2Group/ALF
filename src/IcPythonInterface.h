@@ -131,6 +131,12 @@ struct IcArgsVariantConverter {
 
     IcArgsVariant ret;
 
+    // GCC 15 emits a false-positive -Wmaybe-uninitialized when the std::string
+    // materialized from boost::python::extract<> is copied into the variant/pair.
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
     bp::extract<std::string> s(obj);
     if (s.check()) {
       ret = s();
@@ -144,6 +150,9 @@ struct IcArgsVariantConverter {
         ret = bp::extract<std::pair<std::string, uint32_t>>(tuple);
       }
     }
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 
     new (storage) IcArgsVariant(ret);
     data->convertible = storage;

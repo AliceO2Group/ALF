@@ -57,7 +57,16 @@ struct pairConverter {
   {
     bp::tuple tuple(bp::borrowed(obj));
     void* storage = ((bp::converter::rvalue_from_python_storage<std::pair<T1, T2>>*)data)->storage.bytes;
+    // GCC 15 emits a false-positive -Wmaybe-uninitialized when the std::string
+    // materialized from boost::python::extract<> is copied into the std::pair.
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
     new (storage) std::pair<T1, T2>(bp::extract<T1>(tuple[0]), bp::extract<T2>(tuple[1]));
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
     data->convertible = storage;
   }
 };

@@ -132,6 +132,19 @@ set_target_properties(ALF
 # Use C++17
 target_compile_features(ALF PUBLIC cxx_std_17)
 
+# GCC 15 emits a false-positive -Wmaybe-uninitialized when it deeply inlines
+# Boost.Python's extract<std::string> rvalue converters (used in
+# PythonInterface.cxx and the Swt/Ic Python interface headers) into
+# std::pair/boost::variant construction. The warning points into libstdc++'s
+# bits/basic_string.h (_M_string_length) but is triggered by ALF's converters;
+# the code is correct. The aliBuild recipe compiles with -Werror, so this
+# false positive would otherwise be a hard failure. Keep the warning visible
+# but non-fatal. GCC-only: the flag is not understood by Clang/AppleClang, and
+# the Python interface is only built on non-APPLE (Python3_FOUND) anyway.
+target_compile_options(ALF PRIVATE
+  $<$<CXX_COMPILER_ID:GNU>:-Wno-error=maybe-uninitialized>
+)
+
 
 ####################################
 # Executables
