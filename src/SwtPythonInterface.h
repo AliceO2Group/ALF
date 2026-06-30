@@ -132,6 +132,12 @@ struct SwtArgsVariantConverter {
 
     SwtArgsVariant ret;
 
+    // GCC 15 emits a false-positive -Wmaybe-uninitialized when the std::string
+    // materialized from boost::python::extract<> is copied into the variant/pair.
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
     bp::extract<std::string> s(obj);
     if (s.check()) {
       ret = s();
@@ -139,6 +145,9 @@ struct SwtArgsVariantConverter {
       bp::tuple tuple(bp::borrowed(obj));
       ret = std::pair<std::string, uint32_t>(bp::extract<std::string>(tuple[0]), bp::extract<uint32_t>(tuple[1]));
     }
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 
     new (storage) SwtArgsVariant(ret);
     data->convertible = storage;
